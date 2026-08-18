@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ordre de fabrication</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #145a1f;
+            --primary-dark: #0d4015;
+            --primary-light: #eaf5ec;
+
+            --bg: #f4f6f8;
+            --card: #ffffff;
+
+            --text: #1f2937;
+            --muted: #6b7280;
+
+            --border: #dfe4e8;
+
+            --success: #198754;
+            --warning: #f59e0b;
+            --danger: #dc3545;
+
+            --shadow: 0 4px 15px rgba(0,0,0,.06);
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .page {
+            width: 100%;
+            padding: 18px;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .page-header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            box-shadow: var(--shadow);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .header-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 8px;
+
+            background: var(--primary-light);
+            color: var(--primary);
+
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 21px;
+            color: var(--primary);
+        }
+
+        .header-title p {
+            margin: 4px 0 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* =====================================================
+           BUTTONS
+        ===================================================== */
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn {
+            min-height: 36px;
+            padding: 0 14px;
+
+            border-radius: 6px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #eef1f3;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e6e9;
+        }
+
+        .btn-danger {
+            background: #fdecec;
+            color: var(--danger);
+        }
+
+        /* =====================================================
+           CARD
+        ===================================================== */
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+
+            margin-bottom: 16px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            padding: 13px 16px;
+
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        /* =====================================================
+           FORM
+        ===================================================== */
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(180px, 1fr));
+
+            gap: 14px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4b5563;
+        }
+
+        .field label span {
+            color: var(--danger);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+
+            min-height: 36px;
+
+            padding: 8px 10px;
+
+            border: 1px solid #cfd6dc;
+            border-radius: 6px;
+
+            background: white;
+
+            color: var(--text);
+
+            font-family: inherit;
+            font-size: 12px;
+
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(20,90,31,.08);
+        }
+
+        input[readonly] {
+            background: #f3f5f6;
+            color: #555;
+        }
+
+        textarea {
+            min-height: 75px;
+            resize: vertical;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        /* =====================================================
+           STATUS
+        ===================================================== */
+
+        .status-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 6px 11px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-brouillon {
+            background: #eef1f3;
+            color: #5b6470;
+        }
+
+        .status-planifie {
+            background: #fff4d8;
+            color: #9a6700;
+        }
+
+        .status-lance {
+            background: #e5f2ff;
+            color: #1261a0;
+        }
+
+        .status-termine {
+            background: #e6f6ec;
+            color: #18763b;
+        }
+
+        .status-annule {
+            background: #fdeaea;
+            color: #b42318;
+        }
+
+        /* =====================================================
+           LIGNES FABRICATION
+        ===================================================== */
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+
+            font-size: 12px;
+        }
+
+        thead th {
+            background: #f5f7f8;
+            color: #4b5563;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            padding: 10px 8px;
+
+            border-bottom: 1px solid var(--border);
+
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 9px 8px;
+
+            border-bottom: 1px solid #edf0f2;
+
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #fafcfb;
+        }
+
+        .table-input {
+            min-height: 32px;
+            padding: 6px 8px;
+        }
+
+        .btn-delete {
+            width: 30px;
+            height: 30px;
+
+            border-radius: 5px;
+
+            background: #fdecec;
+            color: var(--danger);
+
+            font-size: 14px;
+        }
+
+        .btn-delete:hover {
+            background: #f9d4d4;
+        }
+
+        /* =====================================================
+           FOOTER ACTIONS
+        ===================================================== */
+
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+
+            padding: 15px 0 3px;
+        }
+
+        /* =====================================================
+           INFO
+        ===================================================== */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(180px, 1fr));
+
+            gap: 12px;
+        }
+
+        .info-box {
+            border: 1px solid var(--border);
+            background: #fafbfc;
+
+            border-radius: 7px;
+
+            padding: 12px;
+        }
+
+        .info-label {
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .form-grid,
+            .info-grid {
+                grid-template-columns:
+                    repeat(2, minmax(180px, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .page {
+                padding: 10px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .form-grid,
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                width: 100%;
+            }
+
+            .actions .btn {
+                flex: 1;
+            }
+        }
+
+        /* =====================================================
+           PRINT
+        ===================================================== */
+
+        @media print {
+
+            body {
+                background: white;
+            }
+
+            .page {
+                padding: 0;
+            }
+
+            .actions,
+            .footer-actions,
+            .btn-delete,
+            .no-print {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
+    <div class="page-header">
+
+        <div class="header-left">
+
+            <div class="header-icon">
+                🏭
+            </div>
+
+            <div class="header-title">
+
+                <h1>Ordre de fabrication</h1>
+
+                <p>
+                    Gestion et suivi des ordres de fabrication
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="btnNouveau"
+            >
+                + Nouveau
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="btnImprimer"
+            >
+                🖨 Imprimer
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="btnEnregistrer"
+            >
+                💾 Enregistrer
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMATIONS OF
+    ===================================================== -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <h2>Informations générales</h2>
+
+            <div class="status-box">
+
+                <span class="status status-brouillon">
+                    BROUILLON
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="form-grid">
+
+                <div class="field">
+
+                    <label>
+                        N° Ordre de fabrication
+                    </label>
+
+                    <input
+                        type="text"
+                        id="numeroOF"
+                        readonly
+                        placeholder="Automatique"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Date OF <span>*</span>
+                    </label>
+
+                    <input
+                        type="date"
+                        id="dateOF"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Date prévue production
+                    </label>
+
+                    <input
+                        type="date"
+                        id="dateProduction"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Priorité
+                    </label>
+
+                    <select id="priorite">
+
+                        <option value="NORMALE">
+                            Normale
+                        </option>
+
+                        <option value="URGENTE">
+                            Urgente
+                        </option>
+
+                        <option value="TRES_URGENTE">
+                            Très urgente
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Service
+                    </label>
+
+                    <input
+                        type="text"
+                        value="Production"
+                        readonly
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Responsable
+                    </label>
+
+                    <input
+                        type="text"
+                        id="responsable"
+                        placeholder="Responsable production"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Poste / Ligne
+                    </label>
+
+                    <input
+                        type="text"
+                        id="ligneProduction"
+                        placeholder="Ligne de production"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Statut
+                    </label>
+
+                    <select id="statut">
+
+                        <option value="BROUILLON">
+                            BROUILLON
+                        </option>
+
+                        <option value="PLANIFIE">
+                            PLANIFIÉ
+                        </option>
+
+                        <option value="LANCE">
+                            LANCÉ
+                        </option>
+
+                        <option value="TERMINE">
+                            TERMINÉ
+                        </option>
+
+                        <option value="ANNULE">
+                            ANNULÉ
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PRODUIT A FABRIQUER
+    ===================================================== -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <h2>Produit à fabriquer</h2>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="form-grid">
+
+                <div class="field">
+
+                    <label>
+                        Article <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="article"
+                        placeholder="Code article"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Désignation <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="designation"
+                        placeholder="Désignation produit"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Groupe
+                    </label>
+
+                    <input
+                        type="text"
+                        id="groupe"
+                        placeholder="Groupe produit"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Type produit
+                    </label>
+
+                    <input
+                        type="text"
+                        id="typeProduit"
+                        placeholder="Type produit"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Quantité prévue <span>*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        id="quantitePrevue"
+                        min="0"
+                        step="0.001"
+                        placeholder="0.000"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Unité
+                    </label>
+
+                    <select id="unite">
+
+                        <option value="KG">
+                            KG
+                        </option>
+
+                        <option value="PCE">
+                            PCE
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Lot prévu
+                    </label>
+
+                    <input
+                        type="text"
+                        id="lot"
+                        placeholder="Lot"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Magasin destination
+                    </label>
+
+                    <input
+                        type="text"
+                        id="magasin"
+                        placeholder="Magasin"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         COMPOSITION / MATIERES
+    ===================================================== -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <h2>
+                Matières / composants nécessaires
+            </h2>
+
+            <button
+                type="button"
+                class="btn btn-primary no-print"
+                id="btnAjouterLigne"
+            >
+                + Ajouter
+            </button>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width:50px;">
+                                #
+                            </th>
+
+                            <th>
+                                Article
+                            </th>
+
+                            <th>
+                                Désignation
+                            </th>
+
+                            <th>
+                                Lot
+                            </th>
+
+                            <th>
+                                Quantité prévue
+                            </th>
+
+                            <th>
+                                Unité
+                            </th>
+
+                            <th>
+                                Observation
+                            </th>
+
+                            <th
+                                class="no-print"
+                                style="width:45px;"
+                            >
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="composantsBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESUME
+    ===================================================== -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <h2>Résumé</h2>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="info-grid">
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Quantité à fabriquer
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="resumeQuantite"
+                    >
+                        0.000 KG
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Nombre de composants
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="resumeComposants"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Date prévue
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="resumeDate"
+                    >
+                        -
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Statut
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="resumeStatut"
+                    >
+                        BROUILLON
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         OBSERVATIONS
+    ===================================================== -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <h2>Observations</h2>
+
+        </div>
+
+        <div class="card-body">
+
+            <textarea
+                id="observations"
+                placeholder="Observations concernant l'ordre de fabrication..."
+            ></textarea>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <div class="footer-actions no-print">
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="btnAnnuler"
+        >
+            Annuler
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            id="btnEnregistrerBas"
+        >
+            💾 Enregistrer l'ordre
+        </button>
+
+    </div>
+
+</div>
+
+
+<script type="module">
+
+    /*
+     * ============================================================
+     * ORDRE DE FABRICATION
+     * ============================================================
+     *
+     * Cette première version prépare uniquement l'interface.
+     *
+     * La connexion Supabase sera ajoutée après validation
+     * de la structure de l'OF.
+     *
+     * ============================================================
+     */
+
+
+    const $ = selector =>
+        document.querySelector(selector);
+
+
+    /* ============================================================
+       DATE DU JOUR
+       ============================================================ */
+
+    const today =
+        new Date().toISOString().split('T')[0];
+
+    $('#dateOF').value = today;
+
+
+    /* ============================================================
+       NUMERO OF TEMPORAIRE
+       ============================================================ */
+
+    function generateNumeroOF() {
+
+        const now = new Date();
+
+        const year =
+            now.getFullYear();
+
+        const month =
+            String(now.getMonth() + 1)
+                .padStart(2, '0');
+
+        const day =
+            String(now.getDate())
+                .padStart(2, '0');
+
+        const time =
+            String(now.getHours())
+                .padStart(2, '0') +
+            String(now.getMinutes())
+                .padStart(2, '0') +
+            String(now.getSeconds())
+                .padStart(2, '0');
+
+        return `OF-${year}${month}${day}-${time}`;
+
+    }
+
+
+    $('#numeroOF').value =
+        generateNumeroOF();
+
+
+    /* ============================================================
+       AJOUTER UNE LIGNE
+       ============================================================ */
+
+    let ligneIndex = 0;
+
+
+    function ajouterLigne() {
+
+        ligneIndex++;
+
+        const tbody =
+            $('#composantsBody');
+
+        const tr =
+            document.createElement('tr');
+
+        tr.dataset.index =
+            ligneIndex;
+
+        tr.innerHTML = `
+
+            <td>
+                ${ligneIndex}
+            </td>
+
+            <td>
+                <input
+                    class="table-input article-composant"
+                    type="text"
+                    placeholder="Article"
+                >
+            </td>
+
+            <td>
+                <input
+                    class="table-input designation-composant"
+                    type="text"
+                    placeholder="Désignation"
+                >
+            </td>
+
+            <td>
+                <input
+                    class="table-input lot-composant"
+                    type="text"
+                    placeholder="Lot"
+                >
+            </td>
+
+            <td>
+                <input
+                    class="table-input quantite-composant"
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    value="0"
+                >
+            </td>
+
+            <td>
+                <select class="table-input unite-composant">
+
+                    <option value="KG">
+                        KG
+                    </option>
+
+                    <option value="PCE">
+                        PCE
+                    </option>
+
+                </select>
+            </td>
+
+            <td>
+                <input
+                    class="table-input observation-composant"
+                    type="text"
+                    placeholder="Observation"
+                >
+            </td>
+
+            <td class="no-print">
+
+                <button
+                    type="button"
+                    class="btn-delete"
+                    title="Supprimer"
+                >
+                    ×
+                </button>
+
+            </td>
+
+        `;
+
+
+        tbody.appendChild(tr);
+
+
+        tr.querySelector('.btn-delete')
+            .addEventListener(
+                'click',
+                () => {
+
+                    tr.remove();
+
+                    renumeroterLignes();
+
+                    updateResume();
+
+                }
+            );
+
+
+        tr.querySelectorAll('input, select')
+            .forEach(input => {
+
+                input.addEventListener(
+                    'input',
+                    updateResume
+                );
+
+                input.addEventListener(
+                    'change',
+                    updateResume
+                );
+
+            });
+
+
+        updateResume();
+
+    }
+
+
+    /* ============================================================
+       RENUMEROTER
+       ============================================================ */
+
+    function renumeroterLignes() {
+
+        const rows =
+            document.querySelectorAll(
+                '#composantsBody tr'
+            );
+
+        rows.forEach(
+            (row, index) => {
+
+                row.children[0]
+                    .textContent =
+                    index + 1;
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       RESUME
+       ============================================================ */
+
+    function updateResume() {
+
+        const qte =
+            Number(
+                $('#quantitePrevue').value
+            ) || 0;
+
+
+        const unite =
+            $('#unite').value || 'KG';
+
+
+        $('#resumeQuantite')
+            .textContent =
+            `${qte.toLocaleString(
+                'fr-FR',
+                {
+                    minimumFractionDigits: 3,
+                    maximumFractionDigits: 3
+                }
+            )} ${unite}`;
+
+
+        const rows =
+            document.querySelectorAll(
+                '#composantsBody tr'
+            );
+
+
+        $('#resumeComposants')
+            .textContent =
+            rows.length;
+
+
+        const date =
+            $('#dateProduction').value;
+
+
+        if (date) {
+
+            const parts =
+                date.split('-');
+
+            $('#resumeDate')
+                .textContent =
+                `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+        } else {
+
+            $('#resumeDate')
+                .textContent = '-';
+
+        }
+
+
+        $('#resumeStatut')
+            .textContent =
+            $('#statut').value;
+
+    }
+
+
+    /* ============================================================
+       EVENTS
+       ============================================================ */
+
+    $('#btnAjouterLigne')
+        .addEventListener(
+            'click',
+            ajouterLigne
+        );
+
+
+    $('#quantitePrevue')
+        .addEventListener(
+            'input',
+            updateResume
+        );
+
+
+    $('#unite')
+        .addEventListener(
+            'change',
+            updateResume
+        );
+
+
+    $('#dateProduction')
+        .addEventListener(
+            'change',
+            updateResume
+        );
+
+
+    $('#statut')
+        .addEventListener(
+            'change',
+            updateResume
+        );
+
+
+    /* ============================================================
+       NOUVEAU
+       ============================================================ */
+
+    $('#btnNouveau')
+        .addEventListener(
+            'click',
+            () => {
+
+                if (
+                    confirm(
+                        'Créer un nouvel ordre de fabrication ?'
+                    )
+                ) {
+
+                    location.reload();
+
+                }
+
+            }
+        );
+
+
+    /* ============================================================
+       IMPRIMER
+       ============================================================ */
+
+    $('#btnImprimer')
+        .addEventListener(
+            'click',
+            () => {
+
+                window.print();
+
+            }
+        );
+
+
+    /* ============================================================
+       ENREGISTRER
+       ============================================================ */
+
+    function enregistrerOF() {
+
+        const article =
+            $('#article').value.trim();
+
+        const designation =
+            $('#designation').value.trim();
+
+        const quantite =
+            Number(
+                $('#quantitePrevue').value
+            ) || 0;
+
+
+        if (!article) {
+
+            alert(
+                'Veuillez renseigner l’article.'
+            );
+
+            $('#article').focus();
+
+            return;
+
+        }
+
+
+        if (!designation) {
+
+            alert(
+                'Veuillez renseigner la désignation.'
+            );
+
+            $('#designation').focus();
+
+            return;
+
+        }
+
+
+        if (quantite <= 0) {
+
+            alert(
+                'Veuillez renseigner une quantité prévue valide.'
+            );
+
+            $('#quantitePrevue').focus();
+
+            return;
+
+        }
+
+
+        const composants = [];
+
+
+        document
+            .querySelectorAll(
+                '#composantsBody tr'
+            )
+            .forEach(row => {
+
+                composants.push({
+
+                    article:
+                        row.querySelector(
+                            '.article-composant'
+                        )?.value.trim() || '',
+
+                    designation:
+                        row.querySelector(
+                            '.designation-composant'
+                        )?.value.trim() || '',
+
+                    lot:
+                        row.querySelector(
+                            '.lot-composant'
+                        )?.value.trim() || '',
+
+                    quantite:
+                        Number(
+                            row.querySelector(
+                                '.quantite-composant'
+                            )?.value
+                        ) || 0,
+
+                    unite:
+                        row.querySelector(
+                            '.unite-composant'
+                        )?.value || 'KG',
+
+                    observation:
+                        row.querySelector(
+                            '.observation-composant'
+                        )?.value.trim() || ''
+
+                });
+
+            });
+
+
+        const data = {
+
+            numero_of:
+                $('#numeroOF').value,
+
+            date_of:
+                $('#dateOF').value,
+
+            date_production:
+                $('#dateProduction').value,
+
+            priorite:
+                $('#priorite').value,
+
+            responsable:
+                $('#responsable').value.trim(),
+
+            ligne:
+                $('#ligneProduction').value.trim(),
+
+            statut:
+                $('#statut').value,
+
+            article,
+
+            designation,
+
+            groupe:
+                $('#groupe').value.trim(),
+
+            type_produit:
+                $('#typeProduit').value.trim(),
+
+            quantite_prevue:
+                quantite,
+
+            unite:
+                $('#unite').value,
+
+            lot:
+                $('#lot').value.trim(),
+
+            magasin:
+                $('#magasin').value.trim(),
+
+            composants,
+
+            observations:
+                $('#observations').value.trim()
+
+        };
+
+
+        console.log(
+            'ORDRE DE FABRICATION :',
+            data
+        );
+
+
+        /*
+         * Pour l’instant on ne fait AUCUN INSERT
+         * dans Supabase.
+         *
+         * On va d'abord définir ensemble les tables
+         * et la logique de production.
+         */
+
+
+        alert(
+            'OF préparé avec succès.\n\n' +
+            'N° OF : ' +
+            data.numero_of
+        );
+
+    }
+
+
+    $('#btnEnregistrer')
+        .addEventListener(
+            'click',
+            enregistrerOF
+        );
+
+
+    $('#btnEnregistrerBas')
+        .addEventListener(
+            'click',
+            enregistrerOF
+        );
+
+
+    /* ============================================================
+       ANNULER
+       ============================================================ */
+
+    $('#btnAnnuler')
+        .addEventListener(
+            'click',
+            () => {
+
+                if (
+                    confirm(
+                        'Annuler les modifications ?'
+                    )
+                ) {
+
+                    location.reload();
+
+                }
+
+            }
+        );
+
+
+    /* ============================================================
+       INITIAL
+       ============================================================ */
+
+    updateResume();
+
+
+</script>
+
+</body>
+</html>
