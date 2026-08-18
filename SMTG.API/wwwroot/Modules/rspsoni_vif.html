@@ -1,0 +1,4883 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Réception VIF</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    background:#0b1219;
+    color:#26372f;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:11px;
+}
+
+.page{
+    padding:14px;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #dce6e1;
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.header{
+    min-height:70px;
+    padding:14px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.icon{
+    width:38px;
+    height:38px;
+    border-radius:9px;
+    background:#e8f8f0;
+    color:#008f55;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+}
+
+h1{
+    margin:0;
+    color:#008c53;
+    font-size:18px;
+}
+
+.subtitle{
+    color:#8b9892;
+    font-size:9px;
+    margin-top:3px;
+}
+
+.actions{
+    display:flex;
+    gap:7px;
+}
+
+button{
+    border:1px solid #d5e2dc;
+    background:#fff;
+    color:#174d36;
+    border-radius:7px;
+    padding:8px 12px;
+    font-size:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#f1f8f4;
+}
+
+.btn-green{
+    background:#008f55;
+    border-color:#008f55;
+    color:#fff;
+}
+
+.btn-green:hover{
+    background:#007847;
+}
+
+.btn-blue{
+    background:#eef7ff;
+    border-color:#c9dfee;
+    color:#24658e;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:10px;
+}
+
+.list-header{
+    padding:13px;
+    border-bottom:1px solid #e3eae7;
+}
+
+.list-title{
+    color:#008c53;
+    font-weight:bold;
+    font-size:11px;
+}
+
+.list-sub{
+    color:#89958f;
+    font-size:9px;
+    margin-top:3px;
+}
+
+.search{
+    padding:10px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    border:1px solid #d5e0db;
+    border-radius:7px;
+    padding:8px 9px;
+    background:#fff;
+    color:#26372f;
+    outline:none;
+    font-family:inherit;
+    font-size:10px;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#00a968;
+    box-shadow:0 0 0 2px rgba(0,169,104,.08);
+}
+
+input[readonly],
+input:disabled,
+select:disabled{
+    background:#f1f5f3;
+    color:#697770;
+    cursor:not-allowed;
+}
+
+label{
+    display:block;
+    margin-bottom:4px;
+    color:#74827b;
+    font-size:8px;
+    font-weight:bold;
+    text-transform:uppercase;
+}
+
+.required{
+    color:#d9382d;
+}
+
+.mission-list{
+    padding:0 8px 8px;
+    max-height:650px;
+    overflow:auto;
+}
+
+.mission{
+    border:1px solid #dce6e1;
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:7px;
+    cursor:pointer;
+}
+
+.mission:hover{
+    background:#f5faf7;
+}
+
+.mission.active{
+    background:#eaf8f1;
+    border-color:#00a968;
+}
+
+.mission-number{
+    color:#008c53;
+    font-weight:bold;
+}
+
+.mission-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:7px;
+}
+
+.mission-row span{
+    color:#89958f;
+    font-size:8px;
+}
+
+.mission-row strong{
+    font-size:9px;
+}
+
+.status{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:15px;
+    font-size:8px;
+    font-weight:bold;
+}
+
+.prep{
+    background:#eef2f3;
+    color:#64727a;
+}
+
+.route{
+    background:#fff4d8;
+    color:#916700;
+}
+
+.return{
+    background:#eef5ff;
+    color:#2d6895;
+}
+
+.received{
+    background:#e6f8ef;
+    color:#087947;
+}
+
+.cancel{
+    background:#fff0ee;
+    color:#b43a30;
+}
+
+.empty{
+    text-align:center;
+    padding:50px 10px;
+    color:#9aa6a1;
+}
+
+.form-header{
+    padding:15px 18px;
+    border-bottom:1px solid #e2e9e6;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.form-header h2{
+    margin:0;
+    color:#008c53;
+    font-size:17px;
+}
+
+.form-header p{
+    margin:3px 0 0;
+    color:#89958f;
+    font-size:9px;
+}
+
+.content{
+    padding:15px 18px;
+}
+
+.steps{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border:1px solid #d7e3de;
+    border-radius:9px;
+    overflow:hidden;
+    margin-bottom:12px;
+}
+
+.step{
+    text-align:center;
+    padding:11px;
+    color:#87938e;
+    background:#f5f8f6;
+    border-right:1px solid #d7e3de;
+    font-weight:bold;
+}
+
+.step:last-child{
+    border-right:0;
+}
+
+.step.active{
+    color:#008c53;
+    background:#e9f8f1;
+}
+
+.step.done{
+    color:#fff;
+    background:#008f55;
+}
+
+.step i{
+    display:block;
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+.step small{
+    display:block;
+    font-size:8px;
+}
+
+.section{
+    margin-bottom:14px;
+}
+
+.section-title{
+    color:#008c53;
+    font-weight:bold;
+    font-size:10px;
+    padding-bottom:7px;
+    margin-bottom:9px;
+    border-bottom:1px solid #dfe8e4;
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+}
+
+.grid-4{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:9px;
+}
+
+.field{
+    min-width:0;
+}
+
+.readonly{
+    background:#f1f5f3;
+    border:1px solid #d8e3de;
+    border-radius:7px;
+    padding:8px 9px;
+    min-height:33px;
+    color:#65736c;
+}
+
+.weight{
+    border:1px solid #a8dec1;
+    background:#eaf8f1;
+    border-radius:9px;
+    padding:12px;
+}
+
+.weight-label{
+    color:#72817a;
+    font-size:8px;
+    font-weight:bold;
+    text-transform:uppercase;
+}
+
+.weight-value{
+    margin-top:5px;
+    color:#008c53;
+    font-size:22px;
+    font-weight:800;
+}
+
+.net{
+    border:1px solid #a8dec1;
+    background:#eaf8f1;
+    border-radius:9px;
+    padding:14px;
+}
+
+.net strong{
+    display:block;
+    margin-top:5px;
+    color:#008c53;
+    font-size:23px;
+}
+
+.compare{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+}
+
+.compare-box{
+    border:1px solid #dce6e1;
+    background:#f8faf9;
+    border-radius:8px;
+    padding:10px;
+}
+
+.compare-box span{
+    display:block;
+    color:#89958f;
+    font-size:8px;
+    text-transform:uppercase;
+}
+
+.compare-box strong{
+    display:block;
+    margin-top:5px;
+}
+
+.bottom{
+    border-top:1px solid #e2e9e6;
+    margin-top:15px;
+    padding-top:12px;
+    display:flex;
+    justify-content:flex-end;
+    gap:7px;
+}
+
+.notice{
+    display:none;
+    padding:9px 12px;
+    border-radius:8px;
+    margin-bottom:10px;
+    font-size:10px;
+}
+
+.notice.show{
+    display:block;
+}
+
+.success{
+    background:#e9f8f0;
+    color:#087745;
+    border:1px solid #b9e1ca;
+}
+
+.error{
+    background:#fff0ee;
+    color:#b2392f;
+    border:1px solid #efc1bb;
+}
+
+.warning{
+    background:#fff7df;
+    color:#8d6700;
+    border:1px solid #ead69e;
+}
+
+.hidden{
+    display:none!important;
+}
+
+.locked{
+    position:relative;
+}
+
+@media(max-width:1000px){
+    .layout{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:700px){
+    .grid-4,
+    .grid-3,
+    .grid-2,
+    .compare{
+        grid-template-columns:1fr;
+    }
+
+    .header,
+    .form-header{
+        flex-direction:column;
+        gap:10px;
+    }
+}
+
+.btn-red{
+    background:#c62828;
+    color:#fff;
+    border:0;
+}
+
+.btn-red:hover{
+    opacity:.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="card header">
+
+        <div class="header-left">
+
+            <div class="icon">
+                <i class="fa-solid fa-truck-fast"></i>
+            </div>
+
+            <div>
+                <h1>Réception VIF</h1>
+                <div class="subtitle">
+                    Sortie camion et entrée / réception VIF
+                </div>
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button id="refreshBtn">
+                <i class="fa-solid fa-rotate"></i>
+                Actualiser
+            </button>
+
+            <button class="btn-green" id="newBtn">
+                <i class="fa-solid fa-plus"></i>
+                Nouvelle mission
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="notice" class="notice"></div>
+
+    <div class="layout">
+
+        <!-- LISTE -->
+
+        <div class="card">
+
+            <div class="list-header">
+
+                <div class="list-title">
+                    <i class="fa-solid fa-list"></i>
+                    Missions VIF
+                </div>
+
+                <div class="list-sub">
+                    Sorties et entrées
+                </div>
+
+            </div>
+
+            <div class="search">
+
+                <input
+                    id="search"
+                    placeholder="Rechercher mission, camion, fournisseur..."
+                >
+
+            </div>
+
+            <div id="missionList" class="mission-list">
+
+                <div class="empty">
+                    Chargement...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <div class="card">
+
+            <div id="emptyState" class="empty"
+                 style="height:650px">
+
+                <i class="fa-solid fa-truck"
+                   style="font-size:35px;margin-bottom:12px">
+                </i>
+
+                <div>
+                    Sélectionnez une mission
+                </div>
+
+                <small>
+                    ou cliquez sur Nouvelle mission
+                </small>
+
+            </div>
+
+
+            <div id="form" class="hidden">
+
+                <div class="form-header">
+
+                    <div>
+
+                        <h2 id="formTitle">
+                            Nouvelle mission
+                        </h2>
+
+                        <p id="formSubtitle">
+                            Préparation du camion avant sortie
+                        </p>
+
+                    </div>
+
+                    <span id="statusBadge"
+                          class="status prep">
+                        PRÉPARÉ
+                    </span>
+
+                </div>
+
+
+                <div class="content">
+
+                    <!-- ETAPES -->
+
+                    <div class="steps">
+
+                        <div id="stepSortie"
+                             class="step active">
+
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+                            SORTIE CAMION
+
+                            <small>
+                                Préparation + pesée sortie
+                            </small>
+
+                        </div>
+
+                        <div id="stepEntree"
+                             class="step">
+
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+
+                            ENTRÉE / RÉCEPTION
+
+                            <small>
+                                Retour + pesée
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         SORTIE
+                    ================================================= -->
+
+                    <div id="sortiePanel">
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-file-lines"></i>
+                                Informations générales
+                            </div>
+
+                            <div id="retourInfoHint"
+                                 class="notice show warning hidden"
+                                 style="margin-bottom:10px">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                Informations à compléter au retour du camion.
+                            </div>
+
+                            <div class="grid-3">
+
+                                <div class="field">
+
+                                    <label>N° Mission <span class="required">*</span></label>
+
+                                    <input
+                                        id="numeroMission"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>
+                                        Firma
+                                    </label>
+
+                                    <select id="firmaId">
+                                        <option value="">
+                                            Sélectionner une firma
+                                        </option>
+                                    </select>
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>
+                                        Fournisseur
+                                    </label>
+
+                                    <select id="fournisseurId"
+                                            disabled>
+
+                                        <option value="">
+                                            Sélectionner d'abord une firma
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="grid-3"
+                                 style="margin-top:9px">
+
+                                <div class="field">
+
+                                    <label>N° Commande <span class="required">*</span></label>
+
+                                    <input
+                                        id="numeroCommande"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Référence fournisseur</label>
+
+                                    <input
+                                        id="referenceFournisseur"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>N° VIF / BL <span class="required">*</span></label>
+
+                                    <input
+                                        id="numeroVifBl"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CAMION -->
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-truck"></i>
+                                Camion & transport
+                            </div>
+
+                            <div class="grid-4">
+
+                                <div class="field">
+
+                                    <label>
+                                        Immatriculation camion
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select id="camionId">
+
+                                        <option value="">
+                                            Sélectionner un camion
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>N° transporteur <span class="required">*</span></label>
+
+                                    <input
+                                        id="numeroTransporteur"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Nom transporteur <span class="required">*</span></label>
+
+                                    <input
+                                        id="nomTransporteur"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>
+                                        Chauffeur
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select id="chauffeurId">
+
+                                        <option value="">
+                                            Sélectionner un chauffeur
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="grid-4"
+                                 style="margin-top:9px">
+
+                                <div class="field">
+
+                                    <label>
+                                        Téléphone chauffeur <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        id="telephoneChauffeur"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Date départ <span class="required">*</span></label>
+
+                                    <input
+                                        id="dateDepart"
+                                        type="date"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Heure départ <span class="required">*</span></label>
+
+                                    <input
+                                        id="heureDepart"
+                                        type="time"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Statut <span class="required">*</span></label>
+
+                                    <div
+                                        id="statut"
+                                        class="readonly">
+                                        PRÉPARÉ
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- MARCHANDISE -->
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                                Marchandise prévue
+                            </div>
+
+                            <div class="grid-4">
+
+                                <div class="field">
+
+                                    <label>
+                                        Désignation <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        id="designation"
+                                        placeholder="DINDE VIF / POULET VIF..."
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>
+                                        Ferme / Origine <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        id="origineFerme"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Lot <span class="required">*</span></label>
+
+                                    <input
+                                        id="lot"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Sexe <span class="required">*</span></label>
+
+                                    <select id="sexeAnimal">
+
+                                        <option value="">
+                                            —
+                                        </option>
+
+                                        <option value="M">
+                                            M
+                                        </option>
+
+                                        <option value="F">
+                                            F
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="grid-4"
+                                 style="margin-top:9px">
+
+                                <div class="field">
+
+                                    <label>
+                                        Effectif prévu <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        id="effectifPrevu"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>
+                                        Calibre prévu <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        id="calibrePrevu"
+                                        type="number"
+                                        min="0"
+                                        step="0.001"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>
+                                        Quantité prévue KG <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        id="quantitePrevue"
+                                        type="number"
+                                        min="0"
+                                        step="0.001"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Unité <span class="required">*</span></label>
+
+                                    <input
+                                        id="unite"
+                                        value="KG"
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- POIDS SORTIE -->
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-weight-scale"></i>
+                                Pesée sortie
+                            </div>
+
+                            <div class="grid-3">
+
+                                <div class="field">
+
+                                    <label>N° Ticket pesée <span class="required">*</span></label>
+
+                                    <input
+                                        id="numeroTicket"
+                                        readonly
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Poste pesée</label>
+
+                                    <input
+                                        id="postePesee"
+                                        value="PB2"
+                                    >
+
+                                </div>
+
+                                <div class="weight">
+
+                                    <div class="weight-label">
+                                        Poids sortie réel
+                                    </div>
+
+                                    <div
+                                        id="poidsSortieDisplay"
+                                        class="weight-value">
+                                        0,000 KG
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div style="margin-top:9px">
+
+                                <label>
+                                    Poids sortie camion — P1 <span class="required">*</span>
+                                </label>
+
+                                <input
+                                    id="poidsP1"
+                                    type="number"
+                                    min="0"
+                                    step="0.001"
+                                    placeholder="Poids réel du camion à la sortie"
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-note-sticky"></i>
+                                Observations
+                            </div>
+
+                            <textarea
+                                id="observationsSortie"
+                                placeholder="Observation..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="bottom">
+
+                            <button id="closeBtn">
+                                <i class="fa-solid fa-xmark"></i>
+                                Fermer
+                            </button>
+
+                            <button
+                                id="printBtn"
+                                class="btn-blue hidden">
+
+                                <i class="fa-solid fa-print"></i>
+                                Imprimer bon sortie
+
+                            </button>
+
+                            <button
+                                id="saveSortieBtn"
+                                class="btn-green">
+
+                                <i class="fa-solid fa-truck-fast"></i>
+                                Enregistrer & Sortir
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         ENTREE
+                    ================================================= -->
+
+                    <div id="entreePanel"
+                         class="hidden">
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                                Retour camion
+                            </div>
+
+                            <div class="grid-3">
+
+                                <div class="field">
+
+                                    <label>Date entrée</label>
+
+                                    <input
+                                        id="dateEntree"
+                                        type="date"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Heure entrée</label>
+
+                                    <input
+                                        id="heureEntree"
+                                        type="time"
+                                    >
+
+                                </div>
+
+                                <div class="field">
+
+                                    <label>Durée trajet</label>
+
+                                    <div
+                                        id="dureeTrajet"
+                                        class="readonly">
+                                        —
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-weight-scale"></i>
+                                Pesée retour
+                            </div>
+
+                            <div class="grid-3">
+
+                                <div class="weight">
+
+                                    <div class="weight-label">
+                                        P1 — Poids sortie
+                                    </div>
+
+                                    <div
+                                        id="p1Display"
+                                        class="weight-value">
+                                        0,000 KG
+                                    </div>
+
+                                </div>
+
+                                <div class="weight">
+
+                                    <div class="weight-label">
+                                        P2 — Poids entrée
+                                    </div>
+
+                                    <input
+                                        id="poidsP2"
+                                        type="number"
+                                        min="0"
+                                        step="0.001"
+                                        style="margin-top:7px"
+                                    >
+
+                                </div>
+
+                                <div class="net">
+
+                                    <div class="weight-label">
+                                        POIDS NET
+                                    </div>
+
+                                    <strong id="poidsNet">
+                                        0,000 KG
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-box-open"></i>
+                                Réception réelle — informations à compléter
+                            </div>
+
+                            <div class="grid-4">
+
+                                <div class="field">
+                                    <label>
+                                        Désignation <span class="required">*</span>
+                                    </label>
+
+                                    <select id="designationReelle">
+                                        <option value="">
+                                            Sélectionner une désignation VIF
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label>Ferme / Origine réelle</label>
+                                    <input
+                                        id="origineFermeReelle"
+                                        placeholder="Origine reçue..."
+                                    >
+                                </div>
+
+                                <div class="field">
+                                    <label>Lot réel</label>
+                                    <input
+                                        id="lotReel"
+                                        placeholder="Généré automatiquement..."
+                                        readonly
+                                    >
+                                </div>
+
+                                <div class="field">
+                                    <label>Sexe réel</label>
+                                    <select id="sexeAnimalReel">
+                                        <option value="">—</option>
+                                        <option value="M">M</option>
+                                        <option value="F">F</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="grid-4" style="margin-top:9px">
+
+                                <div class="field">
+                                    <label>Effectif réel</label>
+                                    <input
+                                        id="effectifReel"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        placeholder="Effectif reçu..."
+                                    >
+                                </div>
+
+                                <div class="field">
+                                    <label>Calibre réel</label>
+                                    <input
+                                        id="calibreReel"
+                                        type="number"
+                                        min="0"
+                                        step="0.001"
+                                        placeholder="Calibre reçu..."
+                                     readonly>
+                                </div>
+
+                                <div class="field">
+                                    <label>Quantité réelle KG</label>
+                                    <input
+                                        id="quantiteReelle"
+                                        readonly
+                                        placeholder="Calculée avec P1 / P2"
+                                    >
+                                </div>
+
+                                <div class="field">
+                                    <label>Unité</label>
+                                    <input
+                                        id="uniteReelle"
+                                        value="KG"
+                                    >
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-chart-column"></i>
+                                Prévu / Réel
+                            </div>
+
+                            <div class="compare">
+
+                                <div class="compare-box">
+                                    <span>Effectif prévu</span>
+                                    <strong id="cmpEffPrev">0</strong>
+                                </div>
+
+                                <div class="compare-box">
+                                    <span>Effectif réel</span>
+                                    <strong id="cmpEffReal">0</strong>
+                                </div>
+
+                                <div class="compare-box">
+                                    <span>Quantité prévue</span>
+                                    <strong id="cmpQtyPrev">
+                                        0,000 KG
+                                    </strong>
+                                </div>
+
+                                <div class="compare-box">
+                                    <span>Quantité réelle</span>
+                                    <strong id="cmpQtyReal">
+                                        0,000 KG
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="section">
+
+                            <div class="section-title">
+                                <i class="fa-solid fa-note-sticky"></i>
+                                Observations réception
+                            </div>
+
+                            <textarea
+                                id="observationsEntree"
+                                placeholder="Observation réception..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="bottom">
+
+                            <button id="backSortieBtn">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                Retour sortie
+                            </button>
+
+                            <button
+                                id="cancelMissionBtn"
+                                class="btn-red">
+                                <i class="fa-solid fa-ban"></i>
+                                Annuler la mission
+                            </button>
+
+                            <button
+                                id="saveEntreeBtn"
+                                class="btn-green">
+
+                                <i class="fa-solid fa-circle-check"></i>
+                                Valider réception
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+(function(){
+
+"use strict";
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const db =
+    window.supabaseClient ||
+    window.supabase;
+
+if(!db || typeof db.from !== "function"){
+
+    console.error(
+        "Supabase client introuvable."
+    );
+}
+
+
+/* =========================================================
+   TABLES EXACTES
+========================================================= */
+
+const T_MISSION =
+    "camions_vif";
+
+const T_DETAIL =
+    "camions_vif_details";
+
+const T_PESEE =
+    "camions_vif_pesees";
+
+const T_FIRMA =
+    "firmas";
+
+const T_FOURNISSEUR =
+    "fournisseurs";
+
+const T_CHAUFFEUR =
+    "chauffeurs_vif";
+
+const T_CAMION =
+    "camions_transporteurs";
+
+const T_ARTICLES =
+    "articles";
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let missions=[];
+let current=null;
+let currentDetail=null;
+let currentPesee=null;
+let articlesVif=[];
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const $ = id =>
+    document.getElementById(id);
+
+function value(id){
+    return $(id)?.value || "";
+}
+
+function number(id){
+    const n =
+        parseFloat(value(id));
+
+    return Number.isFinite(n)
+        ? n
+        : 0;
+}
+
+function format(n,dec=3){
+
+    return Number(n || 0)
+        .toLocaleString("fr-FR",{
+            minimumFractionDigits:dec,
+            maximumFractionDigits:dec
+        });
+}
+
+function today(){
+
+    const d=new Date();
+
+    return [
+        d.getFullYear(),
+        String(d.getMonth()+1).padStart(2,"0"),
+        String(d.getDate()).padStart(2,"0")
+    ].join("-");
+}
+
+function nowTime(){
+
+    const d=new Date();
+
+    return [
+        String(d.getHours()).padStart(2,"0"),
+        String(d.getMinutes()).padStart(2,"0")
+    ].join(":");
+}
+
+function random6(){
+
+    return Math.floor(
+        100000 +
+        Math.random()*900000
+    );
+}
+
+function missionNumber(){
+
+    const d=new Date();
+
+    return `VIF-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}-${random6()}`;
+}
+
+function commandNumber(){
+
+    const d=new Date();
+
+    return `CMD-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}-${random6()}`;
+}
+
+function vifNumber(){
+
+    const d=new Date();
+
+    return `VIF-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}-${random6()}`;
+}
+
+async function ticketNumber(){
+
+    const {data,error} =
+        await db
+            .from(T_PESEE)
+            .select("numero_ticket")
+            .order("id",{ascending:false});
+
+    if(error){
+        console.error("Ticket pesée:",error);
+        throw new Error("Impossible de générer le N° Ticket pesée.");
+    }
+
+    let max=0;
+
+    (data || []).forEach(row=>{
+        const ticket=String(row.numero_ticket || "").trim();
+        const match=ticket.match(/^(?:T-)?(\d{4})$/);
+
+        if(match){
+            const n=parseInt(match[1],10);
+            if(n>max) max=n;
+        }
+    });
+
+    const next=max+1;
+
+    if(next>9999){
+        throw new Error("Le numéro de ticket a atteint 9999.");
+    }
+
+    return String(next).padStart(4,"0");
+}
+
+function showMessage(text,type="success"){
+
+    const n=$("notice");
+
+    n.className=
+        `notice ${type} show`;
+
+    n.textContent=text;
+
+    clearTimeout(showMessage.timer);
+
+    showMessage.timer=
+        setTimeout(()=>{
+            n.classList.remove("show");
+        },5000);
+}
+
+function escapeHtml(text){
+
+    return String(text ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+async function init(){
+
+    if(!db){
+
+        showMessage(
+            "Supabase client introuvable.",
+            "error"
+        );
+
+        return;
+    }
+
+    bindEvents();
+
+    await Promise.all([
+        loadFirmas(),
+        loadCamions(),
+        loadChauffeurs(),
+        loadArticlesVif(),
+        loadMissions()
+    ]);
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+function bindEvents(){
+
+    $("newBtn").onclick =
+        newMission;
+
+    $("refreshBtn").onclick =
+        async()=>{
+            await Promise.all([
+                loadFirmas(),
+                loadCamions(),
+                loadChauffeurs(),
+                loadMissions()
+            ]);
+        };
+
+    $("search").oninput =
+        renderMissions;
+
+    $("firmaId").onchange =
+        async()=>{
+            await loadFournisseurs(value("firmaId"));
+            autoFillOrigineFromFirma();
+            await updateLotReelAuto();
+        };
+
+    $("fournisseurId").onchange =
+        supplierReference;
+
+    $("designationReelle").onchange =
+        async()=>{
+            articleVifSelected();
+            await updateLotReelAuto();
+        };
+
+    $("sexeAnimalReel").onchange =
+        updateLotReelAuto;
+
+    $("effectifReel").addEventListener(
+        "input",
+        calculateCalibreReel
+    );
+
+    $("poidsP2").addEventListener(
+        "input",
+        calculateCalibreReel
+    );
+
+    $("camionId").onchange =
+        camionSelected;
+
+    $("chauffeurId").onchange =
+        chauffeurSelected;
+
+    $("poidsP1").oninput =
+        ()=>{
+            $("poidsSortieDisplay")
+                .textContent =
+                `${format(number("poidsP1"))} KG`;
+        };
+
+    $("poidsP2").oninput =
+        calculateNet;
+
+    $("effectifPrevu").oninput =
+        calculateCalibrePrevu;
+
+    $("quantitePrevue").oninput =
+        calculateCalibrePrevu;
+
+    $("effectifReel").oninput =
+        updateComparison;
+
+    $("dateEntree").onchange =
+        calculateDuration;
+
+    $("heureEntree").onchange =
+        calculateDuration;
+
+    $("saveSortieBtn").onclick =
+        saveSortie;
+
+    $("saveEntreeBtn").onclick =
+        saveEntree;
+
+    $("cancelMissionBtn").onclick =
+        cancelMission;
+
+    $("printBtn").onclick =
+        printBon;
+
+    $("backSortieBtn").onclick =
+        showSortie;
+
+    $("closeBtn").onclick =
+        closeForm;
+}
+
+
+/* =========================================================
+   FIRMAS
+========================================================= */
+
+async function loadFirmas(){
+
+    const {data,error} =
+        await db
+            .from(T_FIRMA)
+            .select("id,code_firma,nom_firma")
+            .eq("actif",true)
+            .order("nom_firma");
+
+    if(error){
+
+        console.error(
+            "Firmas:",
+            error
+        );
+
+        showMessage(
+            "Erreur chargement firmas.",
+            "error"
+        );
+
+        return;
+    }
+
+    $("firmaId").innerHTML =
+        `<option value="">
+            Sélectionner une firma
+        </option>`+
+        (data || [])
+        .map(f=>`
+            <option
+                value="${f.id}"
+                data-code="${escapeHtml(f.code_firma || "")}"
+                data-name="${escapeHtml(f.nom_firma || "")}">
+                ${escapeHtml(f.code_firma)} -
+                ${escapeHtml(f.nom_firma)}
+            </option>
+        `)
+        .join("");
+}
+
+
+/* =========================================================
+   FOURNISSEURS
+   relation existante fournisseurs_firmas
+========================================================= */
+
+async function loadFournisseurs(firmaId){
+
+    const select =
+        $("fournisseurId");
+
+    select.disabled=true;
+
+    if(!firmaId){
+
+        select.innerHTML =
+            `<option value="">
+                Sélectionner d'abord une firma
+            </option>`;
+
+        return;
+    }
+
+    select.innerHTML =
+        `<option value="">
+            Chargement...
+        </option>`;
+
+    /*
+       On essaie d'abord la table de liaison.
+    */
+
+    const {data,error} =
+        await db
+            .from("fournisseurs_firmas")
+            .select(`
+                fournisseur_id,
+                fournisseur:fournisseurs(
+                    id,
+                    code_fournisseur,
+                    nom,
+                    actif
+                )
+            `)
+            .eq("firma_id",firmaId);
+
+    if(error){
+
+        console.error(
+            "Fournisseurs/Firma:",
+            error
+        );
+
+        /*
+          Fallback :
+          on charge les fournisseurs actifs.
+          Cela évite de bloquer la mission si la
+          liaison n'est pas exposée par RLS.
+        */
+
+        const fallback =
+            await db
+                .from(T_FOURNISSEUR)
+                .select(
+                    "id,code_fournisseur,nom,actif"
+                )
+                .eq("actif",true)
+                .order("nom");
+
+        if(fallback.error){
+
+            select.innerHTML =
+                `<option value="">
+                    Erreur chargement
+                </option>`;
+
+            return;
+        }
+
+        select.innerHTML =
+            `<option value="">
+                Sélectionner un fournisseur
+            </option>`+
+            (fallback.data || [])
+            .map(f=>`
+                <option value="${f.id}">
+                    ${escapeHtml(f.code_fournisseur)}
+                    -
+                    ${escapeHtml(f.nom)}
+                </option>
+            `)
+            .join("");
+
+        select.disabled=false;
+
+        return;
+    }
+
+    const rows =
+        (data || [])
+        .map(x=>x.fournisseur)
+        .filter(Boolean)
+        .filter(f=>f.actif !== false);
+
+    select.innerHTML =
+        `<option value="">
+            Sélectionner un fournisseur
+        </option>`+
+        rows
+        .map(f=>`
+            <option value="${f.id}">
+                ${escapeHtml(f.code_fournisseur)}
+                -
+                ${escapeHtml(f.nom)}
+            </option>
+        `)
+        .join("");
+
+    select.disabled=false;
+}
+
+
+/* =========================================================
+   CAMIONS
+========================================================= */
+
+async function loadCamions(){
+
+    const {data,error} =
+        await db
+            .from(T_CAMION)
+            .select("*")
+            .eq("actif",true)
+            .order("immatriculation_camion");
+
+    if(error){
+
+        console.error(
+            "Camions:",
+            error
+        );
+
+        showMessage(
+            "Erreur chargement des camions.",
+            "error"
+        );
+
+        return;
+    }
+
+    $("camionId").innerHTML =
+        `<option value="">
+            Sélectionner un camion
+        </option>`+
+        (data || [])
+        .map(c=>`
+            <option
+                value="${c.id}"
+                data-immat="${escapeHtml(c.immatriculation_camion || "")}"
+                data-numero="${escapeHtml(c.numero_transporteur || "")}"
+                data-nom="${escapeHtml(c.nom_transporteur || "")}">
+
+                ${escapeHtml(
+                    c.immatriculation_camion || ""
+                )}
+
+            </option>
+        `)
+        .join("");
+}
+
+
+/* =========================================================
+   CHAUFFEURS
+========================================================= */
+
+async function loadChauffeurs(){
+
+    const {data,error} =
+        await db
+            .from(T_CHAUFFEUR)
+            .select(
+                "id,nom_chauffeur,telephone_chauffeur"
+            )
+            .eq("actif",true)
+            .order("nom_chauffeur");
+
+    if(error){
+
+        console.error(
+            "Chauffeurs:",
+            error
+        );
+
+        showMessage(
+            "Erreur chargement chauffeurs.",
+            "error"
+        );
+
+        return;
+    }
+
+    $("chauffeurId").innerHTML =
+        `<option value="">
+            Sélectionner un chauffeur
+        </option>`+
+        (data || [])
+        .map(c=>`
+            <option
+                value="${c.id}"
+                data-phone="${escapeHtml(c.telephone_chauffeur || "")}"
+                data-name="${escapeHtml(c.nom_chauffeur || "")}">
+
+                ${escapeHtml(c.nom_chauffeur || "")}
+
+            </option>
+        `)
+        .join("");
+}
+
+
+/* =========================================================
+   ARTICLES VIF
+   Source: public.articles
+   On ne prend que les articles dont le groupe contient VIF.
+========================================================= */
+
+async function loadArticlesVif(){
+
+    const {data,error} =
+        await db
+            .from(T_ARTICLES)
+            .select("id,article,designation,groupe,type_produit")
+            .ilike("groupe","%VIF%")
+            .order("designation");
+
+    if(error){
+
+        console.error(
+            "Articles VIF:",
+            error
+        );
+
+        articlesVif=[];
+
+        showMessage(
+            "Erreur chargement des articles VIF.",
+            "error"
+        );
+
+        return;
+    }
+
+    articlesVif =
+        (data || []).filter(a =>
+            a &&
+            a.id &&
+            a.designation
+        );
+
+    populateDesignationVif("designationReelle");
+}
+
+function populateDesignationVif(id){
+
+    const select=$(id);
+
+    if(!select)
+        return;
+
+    const currentValue =
+        select.value || "";
+
+    select.innerHTML =
+        `<option value="">
+            Sélectionner une désignation
+        </option>`+
+        articlesVif
+            .map(a=>`
+                <option
+                    value="${a.id}"
+                    data-article="${escapeHtml(a.article || "")}"
+                    data-designation="${escapeHtml(a.designation || "")}"
+                    data-groupe="${escapeHtml(a.groupe || "")}"
+                    data-type="${escapeHtml(a.type_produit || "")}">
+                    ${escapeHtml(a.article || "")}
+                    - 
+                    ${escapeHtml(a.designation || "")}
+                </option>
+            `)
+            .join("");
+
+    if(currentValue)
+        select.value=currentValue;
+}
+
+function articleVifSelected(){
+
+    const select =
+        $("designationReelle");
+
+    const option =
+        select?.selectedOptions?.[0];
+
+    if(!option || !option.value)
+        return;
+
+    /*
+       L'article_id sera enregistré dans
+       camions_vif_details.article_id.
+       La désignation reste la valeur lisible
+       de la ligne article.
+    */
+
+    if($("origineFermeReelle") &&
+       !value("origineFermeReelle")){
+
+        const firma =
+            $("firmaId")?.selectedOptions?.[0]
+                ?.dataset?.name || "";
+
+        if(firma)
+            $("origineFermeReelle").value=firma;
+    }
+}
+
+/* =========================================================
+   AUTO
+========================================================= */
+
+    updateLotReelAuto();
+
+function autoFillOrigineFromFirma(){
+
+    const option =
+        $("firmaId")?.selectedOptions?.[0];
+
+    if(!option || !value("firmaId"))
+        return;
+
+    /*
+       Aucun tableau "fermes" n'a été fourni.
+       On utilise donc le nom de la Firma comme
+       origine par défaut dans Ferme / Origine.
+    */
+    const codeFirma =
+        option.dataset.code || "";
+
+    const nomFirma =
+        option.dataset.name || "";
+
+    const origine =
+        [codeFirma, nomFirma]
+            .filter(Boolean)
+            .join(" - ");
+
+    if(origine && $("origineFermeReelle"))
+        $("origineFermeReelle").value = origine;
+}
+
+
+/* =========================================================
+   LOT AUTOMATIQUE — YY + JJJ + CODE PRODUIT + CODE FIRMA
+========================================================= */
+
+function businessDate(dateValue=null, timeValue=null){
+    /*
+       JOUR MÉTIER LOT : 06:00 → 06:00.
+       Le lot est déterminé par la date/heure de SORTIE du camion,
+       jamais par la date/heure de réception.
+    */
+    let d;
+
+    if(dateValue){
+        const datePart = String(dateValue).slice(0,10);
+        const timePart = String(timeValue || "00:00").slice(0,8);
+        d = new Date(`${datePart}T${timePart}`);
+    }else{
+        d = new Date();
+    }
+
+    if(Number.isNaN(d.getTime()))
+        d = new Date();
+
+    /*
+       00:00 → 05:59 = journée métier de la veille.
+       06:00 = nouveau jour métier.
+    */
+    if(d.getHours() < 6)
+        d.setDate(d.getDate()-1);
+
+    return d;
+}
+
+function ymdLocal(d){
+    return [
+        d.getFullYear(),
+        String(d.getMonth()+1).padStart(2,"0"),
+        String(d.getDate()).padStart(2,"0")
+    ].join("-");
+}
+
+function dayOfYear(d){
+    const start =
+        new Date(d.getFullYear(),0,1);
+
+    return Math.floor(
+        (new Date(
+            d.getFullYear(),
+            d.getMonth(),
+            d.getDate()
+        ) - start) /
+        86400000
+    ) + 1;
+}
+
+/*
+=========================================================
+LOT FINAL VIF
+Format : YY + JJJ + CODE_PRODUIT + CODE_FIRMA
+
+Exemple : 26227PF001
+
+26  = année
+227 = jour métier
+PF  = code produit
+001 = code Firma
+
+Journée métier : 06:00 -> 05:59 du lendemain.
+=========================================================
+*/
+
+function getVifProductCode(){
+
+    const option =
+        $("designationReelle")?.selectedOptions?.[0];
+
+    if(!option || !value("designationReelle"))
+        return "";
+
+    const article =
+        String(option.dataset.article || "")
+            .trim()
+            .toUpperCase();
+
+    const sexe =
+        String(value("sexeAnimalReel") || "")
+            .trim()
+            .toUpperCase();
+
+    const codes = {
+        "AVP03": "PF",
+        "AVP01": "PC",
+        "AVC01": "CP",
+        "AVP02": "PR"
+    };
+
+    if(article === "AVD01"){
+
+        if(sexe === "M")
+            return "DY";
+
+        if(sexe === "F")
+            return "DX";
+
+        return "";
+    }
+
+    return codes[article] || "";
+}
+
+function getFirmaCode(){
+
+    const option =
+        $("firmaId")?.selectedOptions?.[0];
+
+    if(!option || !value("firmaId"))
+        return "";
+
+    return String(option.dataset.code || "")
+        .trim()
+        .toUpperCase();
+}
+
+function getBusinessLotNumber(
+    dateValue=null,
+    timeValue=null
+){
+
+    const bd =
+        businessDate(
+            dateValue,
+            timeValue
+        );
+
+    const yy =
+        String(bd.getFullYear())
+            .slice(-2);
+
+    const jjj =
+        String(dayOfYear(bd))
+            .padStart(3,"0");
+
+    return yy + jjj;
+}
+
+function buildVifLot(
+    dateValue=null,
+    timeValue=null
+){
+
+    const base =
+        getBusinessLotNumber(
+            dateValue,
+            timeValue
+        );
+
+    const productCode =
+        getVifProductCode();
+
+    const firmaCode =
+        getFirmaCode();
+
+    if(!productCode || !firmaCode)
+        return "";
+
+    return base +
+        productCode +
+        firmaCode;
+}
+
+async function generateLotAuto(
+    dateValue=null,
+    timeValue=null
+){
+
+    const sortieDate =
+        dateValue ||
+        current?.date_depart ||
+        value("dateDepart") ||
+        today();
+
+    const sortieHeure =
+        timeValue ||
+        current?.heure_depart ||
+        value("heureDepart") ||
+        nowTime();
+
+    const lot =
+        buildVifLot(
+            sortieDate,
+            sortieHeure
+        );
+
+    if(!lot){
+
+        if(!getFirmaCode())
+            throw new Error(
+                "Sélectionnez une Firma pour générer le Lot."
+            );
+
+        if(!getVifProductCode())
+            throw new Error(
+                "Sélectionnez la désignation VIF et, pour la dinde, le sexe."
+            );
+    }
+
+    return lot;
+}
+
+async function ensureLotAuto(){
+
+    const sortieDate =
+        current?.date_depart ||
+        value("dateDepart") ||
+        today();
+
+    const sortieHeure =
+        current?.heure_depart ||
+        value("heureDepart") ||
+        nowTime();
+
+    const lot =
+        await generateLotAuto(
+            sortieDate,
+            sortieHeure
+        );
+
+    if($("lotReel"))
+        $("lotReel").value = lot;
+
+    return lot;
+}
+
+async function updateLotReelAuto(){
+
+    if(!value("firmaId") ||
+       !value("designationReelle")){
+
+        if($("lotReel"))
+            $("lotReel").value = "";
+
+        return "";
+    }
+
+    const article =
+        String(
+            $("designationReelle")
+                ?.selectedOptions?.[0]
+                ?.dataset?.article || ""
+        )
+        .trim()
+        .toUpperCase();
+
+    if(article === "AVD01" &&
+       !value("sexeAnimalReel")){
+
+        if($("lotReel"))
+            $("lotReel").value = "";
+
+        return "";
+    }
+
+    try{
+
+        return await ensureLotAuto();
+
+    }catch(error){
+
+        console.error(
+            "LOT VIF AUTO:",
+            error
+        );
+
+        if($("lotReel"))
+            $("lotReel").value = "";
+
+        return "";
+    }
+}
+
+
+function supplierReference(){
+
+    const id =
+        value("fournisseurId");
+
+    $("referenceFournisseur").value =
+        id || "";
+}
+
+/* =========================================================
+   CALIBRE PREVU AUTO
+   Calibre = Quantité prévue / Effectif prévu
+========================================================= */
+
+function calculateCalibrePrevu(){
+
+    const effectif =
+        number("effectifPrevu");
+
+    const quantite =
+        number("quantitePrevue");
+
+    const calibre =
+        effectif > 0 && quantite > 0
+            ? quantite / effectif
+            : 0;
+
+    $("calibrePrevu").value =
+        calibre > 0
+            ? calibre.toFixed(3)
+            : "";
+}
+
+function camionSelected(){
+
+    const o =
+        $("camionId")
+        .selectedOptions[0];
+
+    if(!o) return;
+
+    $("numeroTransporteur").value =
+        o.dataset.numero || "";
+
+    $("nomTransporteur").value =
+        o.dataset.nom || "";
+}
+
+function chauffeurSelected(){
+
+    const o =
+        $("chauffeurId")
+        .selectedOptions[0];
+
+    if(!o) return;
+
+    $("telephoneChauffeur").value =
+        o.dataset.phone || "";
+}
+
+
+/* =========================================================
+   MISSIONS
+========================================================= */
+
+async function loadMissions(){
+
+    const {data,error} =
+        await db
+            .from(T_MISSION)
+            .select("*")
+            .order("created_at",{
+                ascending:false
+            });
+
+    if(error){
+
+        console.error(
+            "Missions:",
+            error
+        );
+
+        $("missionList").innerHTML =
+            `<div class="empty">
+                Erreur de chargement
+            </div>`;
+
+        return;
+    }
+
+    missions=data || [];
+
+    renderMissions();
+}
+
+function renderMissions(){
+
+    const q =
+        value("search")
+        .trim()
+        .toLowerCase();
+
+    const rows =
+        missions.filter(m=>{
+
+            if(!q) return true;
+
+            return [
+                m.numero_mission,
+                m.numero_commande,
+                m.numero_vif_bl,
+                m.immatriculation_camion,
+                m.nom_transporteur,
+                m.nom_chauffeur,
+                m.reference_fournisseur
+            ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(q);
+        });
+
+    if(!rows.length){
+
+        $("missionList").innerHTML =
+            `<div class="empty">
+                <i class="fa-solid fa-truck"></i>
+                <br>
+                Aucune mission
+            </div>`;
+
+        return;
+    }
+
+    $("missionList").innerHTML =
+        rows.map(m=>{
+
+            const active =
+                current &&
+                current.id === m.id
+                ? "active"
+                : "";
+
+            const statusClass =
+                m.statut === "RECEPTIONNE"
+                    ? "received"
+                    : m.statut === "EN_ROUTE"
+                        ? "route"
+                        : m.statut === "RETOUR" ||
+                          m.statut === "ARRIVE"
+                            ? "return"
+                            : m.statut === "ANNULE"
+                                ? "cancel"
+                                : "prep";
+
+            return `
+            <div
+                class="mission ${active}"
+                data-id="${m.id}">
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                ">
+
+                    <span class="mission-number">
+                        ${escapeHtml(m.numero_mission)}
+                    </span>
+
+                    <span class="status ${statusClass}">
+                        ${escapeHtml(m.statut)}
+                    </span>
+
+                </div>
+
+                <div class="mission-row">
+                    <span>CAMION</span>
+                    <strong>
+                        ${escapeHtml(
+                            m.immatriculation_camion || "—"
+                        )}
+                    </strong>
+                </div>
+
+                <div class="mission-row">
+                    <span>CHAUFFEUR</span>
+                    <strong>
+                        ${escapeHtml(
+                            m.nom_chauffeur || "—"
+                        )}
+                    </strong>
+                </div>
+
+            </div>
+            `;
+        })
+        .join("");
+
+    document
+        .querySelectorAll(".mission")
+        .forEach(el=>{
+            el.onclick=()=>{
+                openMission(
+                    Number(el.dataset.id)
+                );
+            };
+        });
+}
+
+
+/* =========================================================
+   NEW MISSION
+========================================================= */
+
+async function newMission(){
+
+    current=null;
+    currentDetail=null;
+    currentPesee=null;
+
+    resetForm();
+
+    $("numeroMission").value =
+        missionNumber();
+
+    $("numeroCommande").value =
+        commandNumber();
+
+    $("numeroVifBl").value =
+        vifNumber();
+
+    try{
+        $("numeroTicket").value =
+            await ticketNumber();
+    }catch(error){
+        showMessage(error.message,"error");
+        return;
+    }
+
+    $("dateDepart").value =
+        today();
+
+    $("heureDepart").value =
+        nowTime();
+
+    $("emptyState").classList.add("hidden");
+    $("form").classList.remove("hidden");
+
+    $("formTitle").textContent =
+        "Nouvelle mission";
+
+    $("formSubtitle").textContent =
+        "Préparation du camion avant sortie";
+
+    showSortie();
+
+    renderMissions();
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetForm(){
+
+    [
+        "numeroMission",
+        "numeroCommande",
+        "referenceFournisseur",
+        "numeroVifBl",
+        "numeroTransporteur",
+        "nomTransporteur",
+        "telephoneChauffeur",
+        "origineFerme",
+        "lot",
+        "effectifPrevu",
+        "calibrePrevu",
+        "quantitePrevue",
+        "numeroTicket",
+        "poidsP1",
+        "observationsSortie",
+        "dateEntree",
+        "heureEntree",
+        "poidsP2",
+        "designationReelle",
+        "origineFermeReelle",
+        "effectifReel",
+        "calibreReel",
+        "lotReel",
+        "quantiteReelle",
+        "uniteReelle",
+        "observationsEntree"
+    ]
+    .forEach(id=>{
+        if($(id))
+            $(id).value="";
+    });
+
+    $("firmaId").value="";
+
+    $("fournisseurId").innerHTML =
+        `<option value="">
+            Sélectionner d'abord une firma
+        </option>`;
+
+    $("fournisseurId").disabled=true;
+
+    $("camionId").value="";
+    $("chauffeurId").value="";
+
+    $("designation").value="";
+    $("sexeAnimal").value="";
+    $("unite").value="KG";
+
+    $("designationReelle").value="";
+    $("origineFermeReelle").value="";
+    $("sexeAnimalReel").value="";
+    $("uniteReelle").value="KG";
+
+    $("postePesee").value="PB2";
+
+    $("dateDepart").value=today();
+    $("heureDepart").value=nowTime();
+
+    $("poidsSortieDisplay")
+        .textContent="0,000 KG";
+
+    $("p1Display")
+        .textContent="0,000 KG";
+
+    $("poidsNet")
+        .textContent="0,000 KG";
+
+    $("dureeTrajet")
+        .textContent="—";
+
+    $("cmpEffPrev").textContent="0";
+    $("cmpEffReal").textContent="0";
+    $("cmpQtyPrev").textContent="0,000 KG";
+    $("cmpQtyReal").textContent="0,000 KG";
+
+    $("saveSortieBtn").classList.remove("hidden");
+    $("printBtn").classList.add("hidden");
+
+    $("saveEntreeBtn").disabled=false;
+
+    // À la création : les informations de retour restent verrouillées.
+    lockSortie(false);
+}
+
+
+/* =========================================================
+   OPEN MISSION
+========================================================= */
+
+async function openMission(id){
+
+    const {data,error} =
+        await db
+            .from(T_MISSION)
+            .select("*")
+            .eq("id",id)
+            .single();
+
+    if(error){
+
+        console.error(error);
+
+        showMessage(
+            "Impossible d'ouvrir la mission.",
+            "error"
+        );
+
+        return;
+    }
+
+    current=data;
+
+    const detail =
+        await db
+            .from(T_DETAIL)
+            .select("*")
+            .eq("camion_vif_id",id)
+            .order("id",{
+                ascending:false
+            })
+            .limit(1);
+
+    currentDetail =
+        detail.data?.[0] || null;
+
+    const pesee =
+        await db
+            .from(T_PESEE)
+            .select("*")
+            .eq("camion_vif_id",id)
+            .order("id",{
+                ascending:false
+            })
+            .limit(1);
+
+    currentPesee =
+        pesee.data?.[0] || null;
+
+    await fillMission();
+
+    $("emptyState").classList.add("hidden");
+    $("form").classList.remove("hidden");
+
+    if(
+        current.statut === "EN_ROUTE" ||
+        current.statut === "RETOUR" ||
+        current.statut === "ARRIVE"
+    ){
+
+        showEntree();
+
+    }else if(
+        current.statut === "RECEPTIONNE"
+    ){
+
+        showEntree();
+
+    }else{
+
+        showSortie();
+    }
+
+    renderMissions();
+}
+
+
+/* =========================================================
+   FILL
+========================================================= */
+
+async function fillMission(){
+
+    const m=current;
+    const d=currentDetail;
+    const p=currentPesee;
+
+    $("formTitle").textContent =
+        m.numero_mission;
+
+    $("numeroMission").value =
+        m.numero_mission || "";
+
+    $("numeroCommande").value =
+        m.numero_commande || "";
+
+    $("numeroVifBl").value =
+        m.numero_vif_bl || "";
+
+    const receptionDone =
+        m.statut === "RECEPTIONNE";
+
+    if(receptionDone){
+        $("firmaId").value = m.firma_id || "";
+        await loadFournisseurs(m.firma_id);
+        $("fournisseurId").value = m.fournisseur_id || "";
+        supplierReference();
+    }else{
+        $("firmaId").value = "";
+        $("fournisseurId").innerHTML =
+            `<option value="">Sélectionner d'abord une firma</option>`;
+        $("fournisseurId").disabled = true;
+        $("referenceFournisseur").value = "";
+    }
+
+    $("camionId").value="";
+
+    const camionOption =
+        [...$("camionId").options]
+        .find(o =>
+            o.dataset.immat ===
+            m.immatriculation_camion
+        );
+
+    if(camionOption){
+
+        $("camionId").value =
+            camionOption.value;
+
+        camionSelected();
+
+    }else{
+
+        $("numeroTransporteur").value =
+            m.numero_transporteur || "";
+
+        $("nomTransporteur").value =
+            m.nom_transporteur || "";
+    }
+
+
+    $("chauffeurId").value="";
+
+    const chauffeurOption =
+        [...$("chauffeurId").options]
+        .find(o =>
+            o.dataset.name ===
+            m.nom_chauffeur
+        );
+
+    if(chauffeurOption){
+
+        $("chauffeurId").value =
+            chauffeurOption.value;
+
+        chauffeurSelected();
+
+    }else{
+
+        $("telephoneChauffeur").value =
+            m.telephone_chauffeur || "";
+    }
+
+
+    $("dateDepart").value =
+        m.date_depart || "";
+
+    $("heureDepart").value =
+        m.heure_depart || "";
+
+    $("statut").textContent =
+        m.statut || "PREPARE";
+
+
+    /* Ne jamais recopier les données de réception dans SORTIE. */
+    $("designation").value = "";
+    $("origineFerme").value = "";
+    $("lot").value = "";
+    $("sexeAnimal").value = "";
+    $("effectifPrevu").value = "";
+    $("calibrePrevu").value = "";
+    $("quantitePrevue").value = "";
+    $("unite").value = "KG";
+
+
+    $("numeroTicket").value =
+        p?.numero_ticket || "";
+
+    $("postePesee").value =
+        p?.poste_pesee || "";
+
+    $("poidsP1").value =
+        p?.poids_p1 ?? "";
+
+    $("poidsP2").value =
+        p?.poids_p2 ?? "";
+
+
+    $("dateEntree").value =
+        m.date_entree || "";
+
+    $("heureEntree").value =
+        m.heure_entree || "";
+
+
+    populateDesignationVif("designationReelle");
+
+    if(receptionDone){
+        if(d?.article_id){
+            $("designationReelle").value = String(d.article_id);
+        }else if(d?.designation){
+            const option = [...$("designationReelle").options].find(o =>
+                String(o.dataset.designation || "").trim().toLowerCase() ===
+                String(d.designation || "").trim().toLowerCase()
+            );
+            $("designationReelle").value = option?.value || "";
+        }
+
+        $("origineFermeReelle").value = d?.origine_ferme || "";
+        $("sexeAnimalReel").value = d?.sexe_animal || "";
+        $("effectifReel").value = d?.effectif_reel ?? "";
+        $("calibreReel").value = d?.calibre_reel ?? "";
+        $("lotReel").value = d?.lot || "";
+
+        if(
+            value("lotReel") &&
+            /^\d{5}$/.test(value("lotReel"))
+        ){
+
+            await updateLotReelAuto();
+        }
+        $("quantiteReelle").value = d?.quantite_reelle ?? "";
+        $("uniteReelle").value = d?.unite || "KG";
+    }else{
+        $("designationReelle").value = "";
+        $("origineFermeReelle").value = "";
+        $("sexeAnimalReel").value = "";
+        $("effectifReel").value = "";
+        $("calibreReel").value = "";
+        $("lotReel").value = "";
+        $("quantiteReelle").value = "";
+        $("uniteReelle").value = "KG";
+    }
+
+
+    $("observationsSortie").value =
+        m.observations || "";
+
+    $("observationsEntree").value =
+        d?.observations || "";
+
+
+    $("poidsSortieDisplay").textContent =
+        `${format(p?.poids_p1)} KG`;
+
+    $("p1Display").textContent =
+        `${format(p?.poids_p1)} KG`;
+
+    calculateNet();
+    calculateCalibreReel();
+    calculateDuration();
+    updateComparison();
+
+    updateStatus(m.statut);
+
+
+    const locked =
+        m.statut !== "PREPARE";
+
+    lockSortie(locked);
+
+    if(locked){
+
+        $("saveSortieBtn")
+            .classList.add("hidden");
+
+        $("printBtn")
+            .classList.remove("hidden");
+
+    }else{
+
+        $("saveSortieBtn")
+            .classList.remove("hidden");
+
+        $("printBtn")
+            .classList.add("hidden");
+    }
+
+
+    if(m.statut==="RECEPTIONNE"){
+
+        $("saveEntreeBtn").disabled=true;
+        $("cancelMissionBtn").disabled=true;
+
+    }else if(m.statut==="ANNULE"){
+
+        $("saveEntreeBtn").disabled=true;
+        $("cancelMissionBtn").disabled=true;
+
+    }else{
+
+        $("saveEntreeBtn").disabled=false;
+        $("cancelMissionBtn").disabled=false;
+    }
+}
+
+
+/* =========================================================
+   LOCK SORTIE
+========================================================= */
+
+function lockSortie(lock){
+
+    /*
+       Champs réellement connus à la sortie :
+       camion + chauffeur + poste + P1 + observations.
+       Les informations de marchandise/firma/fournisseur
+       restent verrouillées jusqu'au retour.
+    */
+
+    [
+        "camionId",
+        "chauffeurId",
+        "postePesee",
+        "poidsP1",
+        "observationsSortie"
+    ]
+    .forEach(id=>{
+
+        if($(id))
+            $(id).disabled=lock;
+    });
+
+    /*
+       Champs à compléter uniquement au retour.
+       Ils sont désactivés pendant PREPARE et activés
+       dès que la mission est EN_ROUTE/RETOUR/ARRIVE.
+    */
+
+    [
+        "firmaId",
+        "fournisseurId"
+    ]
+    .forEach(id=>{
+        if($(id))
+            $(id).disabled=!lock;
+    });
+
+    /* La marchandise est saisie uniquement dans RÉCEPTION RÉELLE. */
+    [
+        "designation",
+        "origineFerme",
+        "lot",
+        "sexeAnimal",
+        "effectifPrevu",
+        "calibrePrevu",
+        "quantitePrevue",
+        "unite"
+    ]
+    .forEach(id=>{
+        if($(id)){
+            $(id).disabled=true;
+            $(id).value="";
+        }
+    });
+
+    /*
+       Ces références restent automatiques / verrouillées.
+    */
+
+    [
+        "numeroMission",
+        "numeroCommande",
+        "referenceFournisseur",
+        "numeroVifBl",
+        "numeroTransporteur",
+        "nomTransporteur",
+        "telephoneChauffeur",
+        "dateDepart",
+        "heureDepart",
+        "numeroTicket"
+    ]
+    .forEach(id=>{
+
+        if($(id))
+            $(id).readOnly=true;
+
+    });
+
+    if($("retourInfoHint"))
+        $("retourInfoHint").classList.toggle("hidden",!lock);
+}
+
+/* =========================================================
+   SAVE SORTIE
+========================================================= */
+
+async function saveSortie(){
+
+    if(current &&
+       current.statut !== "PREPARE"){
+
+        showMessage(
+            "Cette sortie est déjà verrouillée.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    if(!value("camionId")){
+
+        showMessage(
+            "Sélectionnez le camion.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("chauffeurId")){
+
+        showMessage(
+            "Sélectionnez le chauffeur.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("numeroMission") ||
+       !value("numeroCommande") ||
+       !value("numeroVifBl")){
+
+        showMessage(
+            "Les références automatiques de la mission sont obligatoires.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("numeroTransporteur") ||
+       !value("nomTransporteur")){
+
+        showMessage(
+            "Les informations du transporteur sont obligatoires.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("telephoneChauffeur")){
+
+        showMessage(
+            "Le téléphone du chauffeur est obligatoire.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("dateDepart") ||
+       !value("heureDepart")){
+
+        showMessage(
+            "La date et l'heure de départ sont obligatoires.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("numeroTicket")){
+
+        showMessage(
+            "Le N° Ticket pesée est obligatoire.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(number("poidsP1") <= 0){
+
+        showMessage(
+            "Le poids P1 est obligatoire.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    const camion =
+        $("camionId")
+        .selectedOptions[0];
+
+    const chauffeur =
+        $("chauffeurId")
+        .selectedOptions[0];
+
+
+    const missionPayload={
+
+        numero_mission:
+            value("numeroMission"),
+
+        numero_vif_bl:
+            value("numeroVifBl"),
+
+        firma_id:
+            value("firmaId")
+                ? Number(value("firmaId"))
+                : null,
+
+        fournisseur_id:
+            value("fournisseurId")
+                ? Number(value("fournisseurId"))
+                : null,
+
+        numero_commande:
+            value("numeroCommande") || null,
+
+        reference_fournisseur:
+            value("referenceFournisseur") || null,
+
+        immatriculation_camion:
+            camion?.dataset.immat || "",
+
+        numero_transporteur:
+            value("numeroTransporteur") || null,
+
+        nom_transporteur:
+            value("nomTransporteur") || null,
+
+        nom_chauffeur:
+            chauffeur?.dataset.name ||
+            chauffeur?.textContent.trim() ||
+            "",
+
+        telephone_chauffeur:
+            value("telephoneChauffeur") || null,
+
+        date_depart:
+            value("dateDepart"),
+
+        heure_depart:
+            value("heureDepart"),
+
+        statut:
+            "EN_ROUTE",
+
+        observations:
+            value("observationsSortie") || null
+    };
+
+
+    try{
+
+        let missionData;
+
+
+        if(current?.id){
+
+            const {data,error} =
+                await db
+                    .from(T_MISSION)
+                    .update(missionPayload)
+                    .eq("id",current.id)
+                    .select()
+                    .single();
+
+            if(error) throw error;
+
+            missionData=data;
+
+        }else{
+
+            const {data,error} =
+                await db
+                    .from(T_MISSION)
+                    .insert(missionPayload)
+                    .select()
+                    .single();
+
+            if(error) throw error;
+
+            missionData=data;
+        }
+
+
+        current=missionData;
+
+
+        /* DETAIL */
+
+        const detailPayload={
+
+            camion_vif_id:
+                missionData.id,
+
+            article_id:null,
+
+            designation:
+                value("designation") ||
+                "À COMPLÉTER À LA RÉCEPTION",
+
+            origine_ferme:
+                value("origineFerme") || null,
+
+            lot:
+                value("lot") || null,
+
+            sexe_animal:
+                value("sexeAnimal") || null,
+
+            effectif_prevu:
+                number("effectifPrevu"),
+
+            effectif_reel:
+                0,
+
+            calibre_prevu:
+                number("calibrePrevu"),
+
+            calibre_reel:
+                0,
+
+            quantite_prevue:
+                number("quantitePrevue"),
+
+            quantite_reelle:
+                0,
+
+            unite:
+                value("unite") || "KG",
+
+            observations:null
+        };
+
+
+        let detailData;
+
+
+        if(currentDetail?.id){
+
+            const {data,error} =
+                await db
+                    .from(T_DETAIL)
+                    .update(detailPayload)
+                    .eq("id",currentDetail.id)
+                    .select()
+                    .single();
+
+            if(error) throw error;
+
+            detailData=data;
+
+        }else{
+
+            const {data,error} =
+                await db
+                    .from(T_DETAIL)
+                    .insert(detailPayload)
+                    .select()
+                    .single();
+
+            if(error) throw error;
+
+            detailData=data;
+        }
+
+
+        currentDetail=detailData;
+
+
+        /* PESEE P1 */
+
+        const peseePayload={
+
+            camion_vif_id:
+                missionData.id,
+
+            numero_ticket:
+                value("numeroTicket"),
+
+            poste_pesee:
+                value("postePesee") || null,
+
+            date_pesee_1:
+                value("dateDepart"),
+
+            heure_pesee_1:
+                value("heureDepart"),
+
+            poids_p1:
+                number("poidsP1"),
+
+            // P2 temporairement égal à P1 : la contrainte SQL exige P2 >= P1.
+            // Au retour, P2 sera remplacé par le poids réel.
+            poids_p2:
+                number("poidsP1")
+        };
+
+
+        let peseeData;
+
+
+        if(currentPesee?.id){
+
+            const {data,error} =
+                await db
+                    .from(T_PESEE)
+                    .update(peseePayload)
+                    .eq("id",currentPesee.id)
+                    .select()
+                    .single();
+
+            if(error) throw error;
+
+            peseeData=data;
+
+        }else{
+
+            let inserted=null;
+            let insertError=null;
+
+            for(let attempt=0; attempt<3; attempt++){
+
+                const {data,error} =
+                    await db
+                        .from(T_PESEE)
+                        .insert(peseePayload)
+                        .select()
+                        .single();
+
+                if(!error){
+                    inserted=data;
+                    insertError=null;
+                    break;
+                }
+
+                insertError=error;
+
+                // Si le ticket existe déjà, prendre le suivant et réessayer.
+                if(
+                    String(error.code || "") === "23505" ||
+                    String(error.message || "").toLowerCase().includes("ticket")
+                ){
+                    peseePayload.numero_ticket =
+                        await ticketNumber();
+                    $("numeroTicket").value =
+                        peseePayload.numero_ticket;
+                    continue;
+                }
+
+                break;
+            }
+
+            if(insertError) throw insertError;
+
+            peseeData=inserted;
+        }
+
+
+        currentPesee=peseeData;
+
+
+        /* LOCK */
+
+        lockSortie(true);
+
+        $("saveSortieBtn")
+            .classList.add("hidden");
+
+        $("printBtn")
+            .classList.remove("hidden");
+
+        updateStatus("EN_ROUTE");
+
+        await loadMissions();
+
+        showMessage(
+            "Sortie enregistrée. Toutes les données de sortie sont maintenant verrouillées.",
+            "success"
+        );
+
+        printBon();
+
+    }catch(error){
+
+        console.error(
+            "SAVE SORTIE:",
+            error
+        );
+
+        showMessage(
+            "Erreur lors de l'enregistrement : "+
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   SHOW SORTIE
+========================================================= */
+
+function showSortie(){
+
+    $("sortiePanel")
+        .classList.remove("hidden");
+
+    $("entreePanel")
+        .classList.add("hidden");
+
+    if($("retourInfoHint"))
+        $("retourInfoHint").classList.add("hidden");
+
+    $("stepSortie")
+        .classList.add("active");
+
+    $("stepEntree")
+        .classList.remove("active");
+
+    if(current?.statut !== "PREPARE")
+        $("stepSortie").classList.add("done");
+}
+
+
+/* =========================================================
+   SHOW ENTREE
+========================================================= */
+
+async function showEntree(){
+
+    /* Date/heure du retour : automatiques au premier affichage de l'entrée. */
+    if(!value("dateEntree"))
+        $("dateEntree").value = today();
+
+    if(!value("heureEntree"))
+        $("heureEntree").value = nowTime();
+
+    /*
+       Au retour, les informations inconnues à la sortie
+       deviennent disponibles.
+    */
+    autoFillOrigineFromFirma();
+
+    /*
+       Le Lot réel dépend de la journée métier + produit + Firma.
+       Pour la dinde, le sexe détermine DY/DX.
+    */
+    if(value("firmaId") &&
+       value("designationReelle")){
+
+        await updateLotReelAuto();
+    }
+
+    /*
+       On garde la partie informations/marchandise visible :
+       elle contient les champs à compléter au retour.
+       Les champs de sortie sont verrouillés par lockSortie().
+    */
+    $("sortiePanel")
+        .classList.remove("hidden");
+
+    $("entreePanel")
+        .classList.remove("hidden");
+
+    $("stepSortie")
+        .classList.remove("active");
+
+    $("stepSortie")
+        .classList.add("done");
+
+    $("stepEntree")
+        .classList.add("active");
+
+    $("p1Display").textContent =
+        `${format(number("poidsP1"))} KG`;
+
+    calculateNet();
+    calculateCalibreReel();
+    updateComparison();
+    calculateDuration();
+}
+
+
+/* =========================================================
+   NET
+========================================================= */
+
+
+function calculateCalibreReel(){
+
+    const effectif =
+        Number(value("effectifReel") || 0);
+
+    const p1 =
+        Number(value("poidsP1") || 0);
+
+    const p2 =
+        Number(value("poidsP2") || 0);
+
+    const net =
+        Math.max(0, p2 - p1);
+
+    const calibre =
+        effectif > 0
+            ? net / effectif
+            : 0;
+
+    if($("calibreReel")){
+
+        $("calibreReel").value =
+            effectif > 0 && net >= 0
+                ? calibre.toFixed(3)
+                : "";
+    }
+
+    return calibre;
+}
+
+function calculateNet(){
+
+    const p1 =
+        number("poidsP1");
+
+    const p2 =
+        number("poidsP2");
+
+    const net =
+        p2 >= p1
+            ? p2-p1
+            : 0;
+
+    $("poidsNet").textContent =
+        `${format(net)} KG`;
+
+    $("quantiteReelle").value =
+        net
+            ? net.toFixed(3)
+            : "";
+
+    updateComparison();
+
+    calculateCalibreReel();
+}
+
+
+/* =========================================================
+   COMPARISON
+========================================================= */
+
+function updateComparison(){
+
+    $("cmpEffPrev").textContent =
+        format(number("effectifPrevu"),0);
+
+    $("cmpEffReal").textContent =
+        format(number("effectifReel"),0);
+
+    $("cmpQtyPrev").textContent =
+        `${format(number("quantitePrevue"))} KG`;
+
+    const p1 =
+        number("poidsP1");
+
+    const p2 =
+        number("poidsP2");
+
+    const net =
+        p2 >= p1
+            ? p2-p1
+            : 0;
+
+    $("cmpQtyReal").textContent =
+        `${format(net)} KG`;
+}
+
+
+/* =========================================================
+   DURATION
+========================================================= */
+
+function calculateDuration(){
+
+    if(
+        !value("dateDepart") ||
+        !value("heureDepart") ||
+        !value("dateEntree") ||
+        !value("heureEntree")
+    ){
+
+        $("dureeTrajet")
+            .textContent="—";
+
+        return;
+    }
+
+    const a =
+        new Date(
+            `${value("dateDepart")}T${value("heureDepart")}`
+        );
+
+    const b =
+        new Date(
+            `${value("dateEntree")}T${value("heureEntree")}`
+        );
+
+    const diff =
+        Math.max(
+            0,
+            b-a
+        );
+
+    const minutes =
+        Math.floor(
+            diff/60000
+        );
+
+    const h =
+        Math.floor(minutes/60);
+
+    const m =
+        minutes%60;
+
+    $("dureeTrajet")
+        .textContent =
+        `${h}h ${String(m).padStart(2,"0")} min`;
+}
+
+
+/* =========================================================
+   SAVE ENTREE
+========================================================= */
+
+
+
+async function enregistrerMouvementEntreeVIF({mission, detail, net}){
+
+    const option = $("designationReelle")?.selectedOptions?.[0];
+
+    const article = String(option?.dataset?.article || "").trim();
+    const designation = String(
+        option?.dataset?.designation ||
+        detail?.designation ||
+        ""
+    ).trim();
+
+    const lot = value("lotReel") || detail?.lot || null;
+    const unite = value("uniteReelle") || detail?.unite || "KG";
+    const magasin = "VIF01";
+    const quantite = Number(net);
+
+    if(!article) throw new Error("Article VIF introuvable pour le stock.");
+    if(!lot) throw new Error("Lot VIF introuvable pour le stock.");
+    if(!(quantite > 0)) throw new Error("La quantité reçue doit être supérieure à 0.");
+
+    /*
+      Vérifier d'abord si cette réception a déjà été enregistrée.
+      Cela évite d'ajouter deux fois la même quantité au stock.
+    */
+    const {data:existingMove,error:existingMoveError} = await db
+        .from("mouvements_stock")
+        .select("id, stock_id")
+        .eq("document_vente", mission.numero_commande || "")
+        .eq("type_mouvement", "ENTREE")
+        .eq("article", article)
+        .eq("lot", lot)
+        .eq("magasin_destination", magasin)
+        .limit(1);
+
+    if(existingMoveError) throw existingMoveError;
+
+    if(existingMove?.length){
+        return {
+            stock_id: existingMove[0].stock_id,
+            mouvement_id: existingMove[0].id,
+            deja_existant: true
+        };
+    }
+
+    /*
+      Stock VIF01 : on utilise emplacement NULL car aucun emplacement
+      n'est demandé au moment de la réception VIF.
+    */
+    const {data:stockRows,error:stockFindError} = await db
+        .from("stock")
+        .select("id, quantite, designation_article, unite")
+        .eq("article", article)
+        .eq("lot", lot)
+        .eq("magasin", magasin)
+        .is("emplacement", null)
+        .limit(1);
+
+    if(stockFindError) throw stockFindError;
+
+    let stockId;
+
+    if(stockRows?.length){
+
+        const stockRow = stockRows[0];
+
+        const {error:updateError} = await db
+            .from("stock")
+            .update({
+                quantite: Number(stockRow.quantite || 0) + quantite,
+                designation_article:
+                    designation || stockRow.designation_article,
+                unite: unite,
+                updated_at: new Date().toISOString()
+            })
+            .eq("id", stockRow.id);
+
+        if(updateError) throw updateError;
+
+        stockId = stockRow.id;
+
+    }else{
+
+        const {data:newStock,error:insertError} = await db
+            .from("stock")
+            .insert({
+                historique_import_id: null,
+                division: null,
+                magasin: magasin,
+                emplacement: null,
+                article: article,
+                designation_article: designation,
+                lot: lot,
+                quantite: quantite,
+                unite: unite,
+                type_article: "VIF",
+                groupe_article: "VIF",
+                famille_article: null,
+                controle_qualite: 0,
+                stock_reserve: 0,
+                statut: "DISPONIBLE",
+                date_import: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .select("id")
+            .single();
+
+        if(insertError) throw insertError;
+
+        stockId = newStock.id;
+    }
+
+    let utilisateur = null;
+
+    try{
+        const {data:userData} = await db.auth.getUser();
+        utilisateur = userData?.user?.id || null;
+    }catch(_){
+        utilisateur = null;
+    }
+
+    const {data:movement,error:movementError} = await db
+        .from("mouvements_stock")
+        .insert({
+            stock_id: stockId,
+            document_vente: mission.numero_commande || null,
+            type_mouvement: "ENTREE",
+            article: article,
+            designation_article: designation || null,
+            lot: lot,
+            magasin_source: null,
+            magasin_destination: magasin,
+            quantite: quantite,
+            unite: unite,
+            utilisateur: utilisateur,
+            commentaire: `Réception VIF ${mission.numero_mission || ""}`,
+            date_mouvement: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+    if(movementError) throw movementError;
+
+    return {
+        stock_id: stockId,
+        mouvement_id: movement.id,
+        deja_existant: false
+    };
+}
+
+
+
+async function creerDemandeAchatDepuisVIF({mission,detail,net}){
+    const option=$("designationReelle")?.selectedOptions?.[0];
+    const articleId=Number(value("designationReelle"));
+    const article=String(option?.dataset?.article||"").trim();
+    const designation=String(option?.dataset?.designation||detail?.designation||"").trim();
+    const groupe=String(option?.dataset?.groupe||"VIF").trim();
+    const typeProduit=String(option?.dataset?.type||"").trim();
+    const quantite=Number(net);
+    const unite=value("uniteReelle")||"KG";
+    if(!articleId) throw new Error("Article ID introuvable pour la demande d'achat.");
+    if(!(quantite>0)) throw new Error("Quantité invalide pour la demande d'achat.");
+
+    const motif=`Réception VIF ${mission.numero_mission||""}`;
+    const {data:ex,error:exErr}=await db.from("demandes_achat")
+        .select("id,numero_demande").eq("motif",motif).limit(1);
+    if(exErr) throw exErr;
+    if(ex?.length) return {demande_id:ex[0].id,numero_demande:ex[0].numero_demande,deja_existante:true};
+
+    const {data:last,error:lastErr}=await db.from("demandes_achat")
+        .select("id").order("id",{ascending:false}).limit(1);
+    if(lastErr) throw lastErr;
+    const nextId=Number(last?.[0]?.id||0)+1;
+    const d=new Date(), y=d.getFullYear(),
+          m=String(d.getMonth()+1).padStart(2,"0"),
+          j=String(d.getDate()).padStart(2,"0");
+    const numero=`DA-VIF-${y}${m}${j}-${String(nextId).padStart(4,"0")}`;
+
+    let userId=null,demandeur=null;
+    try{
+        const {data:u}=await db.auth.getUser();
+        userId=u?.user?.id||null;
+        demandeur=u?.user?.user_metadata?.full_name||u?.user?.email||null;
+    }catch(_){}
+
+    const {data:demande,error:demErr}=await db.from("demandes_achat").insert({
+        numero_demande:numero,date_demande:today(),demandeur_id:userId,
+        demandeur,service:"Commercial",priorite:"NORMALE",motif,statut:"BROUILLON",
+        created_at:new Date().toISOString(),updated_at:new Date().toISOString()
+    }).select().single();
+    if(demErr) throw demErr;
+
+    const {error:detErr}=await db.from("demandes_achat_details").insert({
+        demande_achat_id:demande.id,article_id:articleId,article,
+        designation,groupe,type_produit:typeProduit,quantite,unite,
+        created_at:new Date().toISOString()
+    });
+    if(detErr){
+        await db.from("demandes_achat").delete().eq("id",demande.id);
+        throw detErr;
+    }
+    return {demande_id:demande.id,numero_demande:demande.numero_demande,deja_existante:false};
+}
+
+async function saveEntree(){
+
+    if(!current?.id){
+
+        showMessage(
+            "Aucune mission sélectionnée.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("designationReelle")){
+
+        showMessage(
+            "Sélectionnez une désignation VIF.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("firmaId")){
+
+        showMessage(
+            "Sélectionnez la Firma à la réception.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("fournisseurId")){
+
+        showMessage(
+            "Sélectionnez le Fournisseur à la réception.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("designationReelle")){
+
+        showMessage(
+            "Saisissez la désignation réelle de la marchandise.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(!value("origineFermeReelle")){
+
+        showMessage(
+            "Saisissez la Ferme / Origine réelle.",
+            "warning"
+        );
+
+        return;
+    }
+
+    await updateLotReelAuto();
+
+    if(!value("lotReel")){
+
+        showMessage(
+            "Impossible de générer automatiquement le Lot. Vérifiez Firma, Désignation et Sexe.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(number("effectifReel") <= 0){
+
+        showMessage(
+            "Saisissez l'effectif réel.",
+            "warning"
+        );
+
+        return;
+    }
+
+    const p1 =
+        number("poidsP1");
+
+    const p2 =
+        number("poidsP2");
+
+    if(p2 <= 0){
+
+        showMessage(
+            "Le poids P2 est obligatoire.",
+            "warning"
+        );
+
+        return;
+    }
+
+    if(p2 < p1){
+
+        showMessage(
+            "P2 ne peut pas être inférieur à P1.",
+            "error"
+        );
+
+        return;
+    }
+
+    if(!value("dateEntree"))
+        $("dateEntree").value=today();
+
+    if(!value("heureEntree"))
+        $("heureEntree").value=nowTime();
+
+
+    const net =
+        p2-p1;
+
+
+    try{
+
+        /* MISSION */
+
+        const {data:mission,error:missionError} =
+            await db
+                .from(T_MISSION)
+                .update({
+
+                    firma_id:
+                        Number(value("firmaId")),
+
+                    fournisseur_id:
+                        Number(value("fournisseurId")),
+
+                    reference_fournisseur:
+                        value("referenceFournisseur") || null,
+
+                    date_entree:
+                        value("dateEntree"),
+
+                    heure_entree:
+                        value("heureEntree"),
+
+                    statut:
+                        "RECEPTIONNE",
+
+                    observations:
+                        value("observationsEntree") ||
+                        current.observations ||
+                        null,
+
+                    updated_at:
+                        new Date().toISOString()
+
+                })
+                .eq("id",current.id)
+                .select()
+                .single();
+
+        if(missionError)
+            throw missionError;
+
+        current=mission;
+
+
+        /* DETAIL */
+
+        if(currentDetail?.id){
+
+            const {data,error} =
+                await db
+                    .from(T_DETAIL)
+                    .update({
+
+                        article_id:
+                            Number(value("designationReelle")),
+
+                        designation:
+                            $("designationReelle")
+                                ?.selectedOptions?.[0]
+                                ?.dataset?.designation ||
+                            currentDetail.designation,
+
+                        origine_ferme:
+                            value("origineFermeReelle") ||
+                            currentDetail.origine_ferme,
+
+                        sexe_animal:
+                            value("sexeAnimalReel") ||
+                            currentDetail.sexe_animal,
+
+                        effectif_reel:
+                            number("effectifReel"),
+
+                        calibre_reel:
+                            number("calibreReel") > 0
+                                ? number("calibreReel")
+                                : (
+                                    number("effectifReel") > 0
+                                        ? net / number("effectifReel")
+                                        : 0
+                                  ),
+
+                        quantite_reelle:
+                            net,
+
+                        lot:
+                            value("lotReel") ||
+                            currentDetail.lot,
+
+                        unite:
+                            value("uniteReelle") ||
+                            currentDetail.unite ||
+                            "KG",
+
+                        observations:
+                            value("observationsEntree") ||
+                            currentDetail.observations ||
+                            null,
+
+                        updated_at:
+                            new Date().toISOString()
+
+                    })
+                    .eq("id",currentDetail.id)
+                    .select()
+                    .single();
+
+            if(error)
+                throw error;
+
+            currentDetail=data;
+        }
+
+
+        /* PESEE */
+
+        if(currentPesee?.id){
+
+            const {data,error} =
+                await db
+                    .from(T_PESEE)
+                    .update({
+
+                        date_pesee_2:
+                            value("dateEntree"),
+
+                        heure_pesee_2:
+                            value("heureEntree"),
+
+                        poids_p2:
+                            p2,
+
+                        poids_moyen_tete:
+                            number("effectifReel") > 0
+                                ? net /
+                                  number("effectifReel")
+                                : 0,
+
+                        updated_at:
+                            new Date().toISOString()
+
+                    })
+                    .eq("id",currentPesee.id)
+                    .select()
+                    .single();
+
+            if(error)
+                throw error;
+
+            currentPesee=data;
+        }
+
+
+        /*
+           MOUVEMENT STOCK
+           ----------------
+           Réception VIF = ENTREE
+           Magasin destination automatique = VIF01
+           N° Commande = document_vente
+           Quantité = poids NET réel
+        */
+
+        await enregistrerMouvementEntreeVIF({
+
+            mission:
+                current,
+
+            detail:
+                currentDetail,
+
+            net:
+                net
+
+        });
+
+        const demandeAchat =
+            await creerDemandeAchatDepuisVIF({
+                mission: current,
+                detail: currentDetail,
+                net: net
+            });
+
+        $("saveEntreeBtn")
+            .disabled=true;
+
+        updateStatus("RECEPTIONNE");
+
+        await loadMissions();
+
+        calculateNet();
+        updateComparison();
+
+        showMessage(
+            `Réception validée : stock VIF01 + mouvement ENTREE + demande d'achat ${demandeAchat.numero_demande}. Poids net : ${format(net)} KG.`,
+            "success"
+        );
+
+    }catch(error){
+
+        console.error(
+            "SAVE ENTREE:",
+            error
+        );
+
+        showMessage(
+            "Erreur lors de la réception : "+
+            error.message,
+            "error"
+        );
+    }
+}
+
+
+async function cancelMission(){
+
+    if(!current?.id)
+        return;
+
+    if(current.statut === "RECEPTIONNE"){
+        showMessage(
+            "Une mission déjà réceptionnée ne peut plus être annulée.",
+            "warning"
+        );
+        return;
+    }
+
+    const ok =
+        window.confirm(
+            "Voulez-vous vraiment annuler cette mission ?"
+        );
+
+    if(!ok)
+        return;
+
+    try{
+
+        const {data,error} =
+            await db
+                .from(T_MISSION)
+                .update({
+                    statut:"ANNULE",
+                    updated_at:new Date().toISOString()
+                })
+                .eq("id",current.id)
+                .select()
+                .single();
+
+        if(error)
+            throw error;
+
+        current=data;
+
+        $("saveEntreeBtn").disabled=true;
+
+        updateStatus("ANNULE");
+
+        lockSortie(true);
+
+        await loadMissions();
+
+        showMessage(
+            "Mission annulée.",
+            "success"
+        );
+
+    }catch(error){
+
+        console.error("CANCEL MISSION:",error);
+
+        showMessage(
+            "Erreur lors de l'annulation : "+error.message,
+            "error"
+        );
+    }
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function updateStatus(status){
+
+    const badge =
+        $("statusBadge");
+
+    badge.className="status";
+
+    if(status==="PREPARE"){
+
+        badge.classList.add("prep");
+        badge.textContent="PRÉPARÉ";
+
+    }else if(status==="EN_ROUTE"){
+
+        badge.classList.add("route");
+        badge.textContent="EN ROUTE";
+
+    }else if(
+        status==="RETOUR" ||
+        status==="ARRIVE"
+    ){
+
+        badge.classList.add("return");
+        badge.textContent=status;
+
+    }else if(status==="RECEPTIONNE"){
+
+        badge.classList.add("received");
+        badge.textContent="RÉCEPTIONNÉ";
+
+    }else{
+
+        badge.classList.add("cancel");
+        badge.textContent=status;
+    }
+
+    $("statut").textContent=status;
+}
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+function printBon(){
+
+    if(!current)
+        return;
+
+    /*
+       BON DE SORTIE :
+       uniquement les informations connues AVANT le retour.
+       Firma / fournisseur / produit / lot / effectif
+       restent volontairement VIDES.
+    */
+
+    const camion =
+        value("camionId")
+            ? $("camionId")
+                .selectedOptions[0]
+                ?.dataset.immat || ""
+            : current.immatriculation_camion || "";
+
+    const chauffeur =
+        value("chauffeurId")
+            ? $("chauffeurId")
+                .selectedOptions[0]
+                ?.dataset.name || ""
+            : current.nom_chauffeur || "";
+
+    const p1 =
+        number("poidsP1");
+
+    const w =
+        window.open(
+            "",
+            "_blank",
+            "width=800,height=1000"
+        );
+
+    if(!w){
+
+        showMessage(
+            "La fenêtre d'impression est bloquée.",
+            "warning"
+        );
+
+        return;
+    }
+
+    w.document.write(`
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Bon sortie VIF</title>
+
+<style>
+
+@page{
+    size:A4 portrait;
+    margin:0;
+}
+
+html,body{
+    width:210mm;
+    min-height:297mm;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    margin:0;
+    padding:0;
+    color:#111;
+}
+
+.sheet{
+    width:190mm;
+    min-height:277mm;
+    margin:10mm auto;
+    border:1px solid #222;
+    padding:8mm;
+    box-sizing:border-box;
+}
+
+.logo{
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.title{
+    text-align:center;
+    font-size:17px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.line{
+    border-bottom:1px solid #222;
+    padding:9px 0;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:4px 0;
+    gap:20px;
+    min-height:18px;
+}
+
+.label{
+    font-weight:bold;
+}
+
+.blank{
+    min-width:80mm;
+    border-bottom:1px dotted #555;
+    height:18px;
+}
+
+.weight{
+    border:2px solid #111;
+    padding:18px;
+    margin:20px 0;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.signatures{
+    margin-top:70px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.signature{
+    width:75mm;
+}
+
+@media print{
+    html,body{
+        width:210mm;
+        min-height:297mm;
+    }
+
+    .sheet{
+        width:190mm;
+        min-height:277mm;
+        margin:10mm auto;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sheet">
+
+<div class="logo">
+SAHEL ABATTOIRS
+</div>
+
+<div class="title">
+BON DE SORTIE VIF
+</div>
+
+<div class="line">
+
+<div class="row">
+<span class="label">N° Mission</span>
+<span>${escapeHtml(current.numero_mission || "")}</span>
+</div>
+
+<div class="row">
+<span class="label">N° Commande</span>
+<span>${escapeHtml(current.numero_commande || "")}</span>
+</div>
+
+<div class="row">
+<span class="label">N° VIF / BL</span>
+<span>${escapeHtml(current.numero_vif_bl || "")}</span>
+</div>
+
+<div class="row">
+<span class="label">N° Ticket pesée</span>
+<span>${escapeHtml(value("numeroTicket"))}</span>
+</div>
+
+</div>
+
+<!-- Informations volontairement vides jusqu'au retour -->
+
+<div class="line">
+
+<div class="row">
+<span class="label">Firma</span>
+<span class="blank"></span>
+</div>
+
+<div class="row">
+<span class="label">Fournisseur</span>
+<span class="blank"></span>
+</div>
+
+</div>
+
+<div class="line">
+
+<div class="row">
+<span class="label">Camion</span>
+<span>${escapeHtml(camion)}</span>
+</div>
+
+<div class="row">
+<span class="label">N° transporteur</span>
+<span>${escapeHtml(current.numero_transporteur || "")}</span>
+</div>
+
+<div class="row">
+<span class="label">Transporteur</span>
+<span>${escapeHtml(current.nom_transporteur || "")}</span>
+</div>
+
+<div class="row">
+<span class="label">Chauffeur</span>
+<span>${escapeHtml(chauffeur)}</span>
+</div>
+
+<div class="row">
+<span class="label">Téléphone</span>
+<span>${escapeHtml(current.telephone_chauffeur || "")}</span>
+</div>
+
+</div>
+
+<div class="line">
+
+<div class="row">
+<span class="label">Produit</span>
+<span class="blank"></span>
+</div>
+
+<div class="row">
+<span class="label">Ferme / Origine</span>
+<span class="blank"></span>
+</div>
+
+<div class="row">
+<span class="label">Lot</span>
+<span class="blank"></span>
+</div>
+
+<div class="row">
+<span class="label">Effectif prévu</span>
+<span class="blank"></span>
+</div>
+
+</div>
+
+<div class="weight">
+
+POIDS SORTIE CAMION<br>
+
+${format(p1)} KG
+
+</div>
+
+<div class="line">
+
+<div class="row">
+<span class="label">Date départ</span>
+<span>${escapeHtml(current.date_depart || "")}</span>
+</div>
+
+<div class="row">
+<span class="label">Heure départ</span>
+<span>${escapeHtml(current.heure_depart || "")}</span>
+</div>
+
+</div>
+
+<div class="signatures">
+
+<div class="signature">
+Signature chauffeur
+<br><br>
+____________________________
+</div>
+
+<div class="signature" style="text-align:right">
+Cachet / Signature
+<br><br>
+____________________________
+</div>
+
+</div>
+
+</div>
+
+<script>
+window.onload=function(){
+    window.print();
+};
+<\/script>
+
+</body>
+</html>
+
+`);
+
+    w.document.close();
+}
+
+
+/* =========================================================
+   CLOSE
+========================================================= */
+
+function closeForm(){
+
+    current=null;
+    currentDetail=null;
+    currentPesee=null;
+
+    $("form")
+        .classList.add("hidden");
+
+    $("emptyState")
+        .classList.remove("hidden");
+
+    renderMissions();
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+if(document.readyState==="loading"){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        init
+    );
+
+}else{
+
+    init();
+}
+
+})();
+</script>
+
+</body>
+</html>
