@@ -452,63 +452,98 @@ function printStock(){
     window.print();
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{
+
+let stockPageInitialized = false;
+let stockSearchTimer = null;
+
+async function initStockPage() {
+    if (stockPageInitialized) return;
+
+    const requiredIds = [
+        'stockTableBody',
+        'searchArticleInput',
+        'searchLotInput',
+        'magasinFilter',
+        'resetFilters',
+        'clearBtn',
+        'refreshBtn',
+        'topRefreshBtn',
+        'prevPageBtn',
+        'nextPageBtn',
+        'excelBtn',
+        'pdfBtn',
+        'printBtn'
+    ];
+
+    // Le Dashboard peut injecter le HTML après que le module ait été chargé.
+    if (!requiredIds.every(id => document.getElementById(id))) {
+        console.warn('[STOCK] HTML pas encore disponible, nouvelle tentative...');
+        setTimeout(initStockPage, 100);
+        return;
+    }
+
+    stockPageInitialized = true;
 
     initLiveClock();
 
-    await populateMagasinFilterDropdown();
-    await loadStockData();
+    try {
+        await populateMagasinFilterDropdown();
+        await loadStockData();
+    } catch (error) {
+        console.error('[STOCK] Erreur initialisation:', error);
+        stockPageInitialized = false;
+        return;
+    }
 
-    let searchTimer;
+    $('searchArticleInput').addEventListener('input', event => {
+        clearTimeout(stockSearchTimer);
 
-    $('searchArticleInput').addEventListener('input',event=>{
-        clearTimeout(searchTimer);
-
-        searchTimer = setTimeout(()=>{
+        stockSearchTimer = setTimeout(() => {
             currentSearchArticle = event.target.value.trim();
             currentPage = 1;
             loadStockData();
-        },300);
+        }, 300);
     });
 
-    $('searchLotInput').addEventListener('input',event=>{
-        clearTimeout(searchTimer);
+    $('searchLotInput').addEventListener('input', event => {
+        clearTimeout(stockSearchTimer);
 
-        searchTimer = setTimeout(()=>{
+        stockSearchTimer = setTimeout(() => {
             currentSearchLot = event.target.value.trim();
             currentPage = 1;
             loadStockData();
-        },300);
+        }, 300);
     });
 
-    $('magasinFilter').addEventListener('change',event=>{
+    $('magasinFilter').addEventListener('change', event => {
         currentMagasin = event.target.value;
         currentPage = 1;
         loadStockData();
     });
 
-    $('resetFilters').addEventListener('click',resetFilters);
-    $('clearBtn').addEventListener('click',resetFilters);
+    $('resetFilters').addEventListener('click', resetFilters);
+    $('clearBtn').addEventListener('click', resetFilters);
 
-    $('refreshBtn').addEventListener('click',()=>{
-        loadStockData();
-    });
+    $('refreshBtn').addEventListener('click', loadStockData);
+    $('topRefreshBtn').addEventListener('click', loadStockData);
 
-    $('topRefreshBtn').addEventListener('click',()=>{
-        loadStockData();
-    });
+    $('prevPageBtn').addEventListener('click', () => changePage(-1));
+    $('nextPageBtn').addEventListener('click', () => changePage(1));
 
-    $('prevPageBtn').addEventListener('click',()=>{
-        changePage(-1);
-    });
+    $('excelBtn').addEventListener('click', exportToExcel);
+    $('pdfBtn').addEventListener('click', exportToPDF);
+    $('printBtn').addEventListener('click', printStock);
+}
 
-    $('nextPageBtn').addEventListener('click',()=>{
-        changePage(1);
-    });
+// Important pour le Dashboard qui charge les Modules dynamiquement.
+window.initStockPage = initStockPage;
 
-    $('excelBtn').addEventListener('click',exportToExcel);
-    $('pdfBtn').addEventListener('click',exportToPDF);
-    $('printBtn').addEventListener('click',printStock);
-});
+// Ouverture directe de stock.html.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStockPage, { once: true });
+} else {
+    initStockPage();
+}
+
 </script>
 </body></html>
