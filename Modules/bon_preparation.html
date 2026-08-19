@@ -78,18 +78,18 @@
         /* Table Layout Optimisé Pleine Page */
         .table-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; margin: 4px 0; border: 1px solid black; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background-color: #e5e7eb !important; color: black !important; font-weight: bold; font-size: 11px; padding: 4px; border: 1px solid black; text-align: center; }
-        td { border: 1px solid black; padding: 4px 3px; text-align: center; font-size: 11px; color: black; }
+        th { background-color: #e5e7eb !important; color: black !important; font-weight: bold; font-size: 13px; padding: 7px 5px; height: 30px; border: 1px solid black; text-align: center; }
+        td { border: 1px solid black; padding: 7px 5px; text-align: center; font-size: 13px; height: 34px; color: black; }
         
         .col-poste { width: 7%; }
-        .col-article { width: 38%; } 
-        .col-kg { width: 9%; } 
-        .col-pieces { width: 9%; } 
-        .col-lot { width: 22%; } 
-        .col-prep { width: 9%; } 
-        .col-ctrl { width: 6%; }
+        .col-article { width: 43%; } 
+        .col-kg { width: 10%; } 
+        .col-pieces { width: 10%; } 
+        .col-lot { width: 18%; } 
+        .col-prep { width: 10%; } 
+        .col-ctrl { width: 9%; }
         
-        .product-name { font-weight: bold; font-size: 11px; text-align: left; padding-left: 6px; line-height: 1.2; }
+        .product-name { font-weight: bold; font-size: 14px; text-align: left; padding: 7px 8px; line-height: 1.25; min-height: 34px; }
         .footer-section { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px; }
     </style>
 </head>
@@ -241,7 +241,7 @@
                         <tr>
                             <td class="font-bold text-amber-600">${item.Poste || ''}</td>
                             <td class="product-name">
-                                <span class="text-[9px] text-gray-800 font-bold font-mono block">${item.article || ''}</span>
+                                <span class="text-[11px] text-gray-800 font-bold font-mono block">${item.article || ''}</span>
                                 ${item.designation_article || ''}
                             </td>
                             <td>${kg.toFixed(2)}</td>
