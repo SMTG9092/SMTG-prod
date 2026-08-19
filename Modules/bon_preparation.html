@@ -186,7 +186,7 @@
             try {
                 const { data: suiviData } = await supabase
                     .from('suivi_commandes_lancer')
-                    .select('num_lancement, client, itineraire, date_lancement, date_livraison, user_profiles:lance_par(nom_complet)')
+                    .select('num_lancement, client, itineraire, date_lancement, date_livraison, user_profiles:lance_par(matricule)')
                     .eq('document_vente', cmd)
                     .maybeSingle();
 
@@ -212,7 +212,7 @@
                     }
                     
                     document.getElementById('val-date-livraison').innerText = suiviData.date_livraison ? new Date(suiviData.date_livraison).toLocaleDateString() : '-';
-                    document.getElementById('val-lance-par').innerText = suiviData.user_profiles?.nom_complet || '-';
+                    document.getElementById('val-lance-par').innerText = suiviData.user_profiles?.matricule || '-';
                     
                     QRCode.toCanvas(document.getElementById('qrcode'), `Cmd: ${cmd} | Lancement: ${suiviData.num_lancement}`, { width: 56, margin: 0 });
                 }
