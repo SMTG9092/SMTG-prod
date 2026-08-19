@@ -464,7 +464,6 @@ async function initStockPage() {
         'searchArticleInput',
         'searchLotInput',
         'magasinFilter',
-        'resetFilters',
         'clearBtn',
         'refreshBtn',
         'topRefreshBtn',
@@ -521,7 +520,11 @@ async function initStockPage() {
         loadStockData();
     });
 
-    $('resetFilters').addEventListener('click', resetFilters);
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', resetFilters);
+    }
+
     $('clearBtn').addEventListener('click', resetFilters);
 
     $('refreshBtn').addEventListener('click', loadStockData);
