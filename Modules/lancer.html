@@ -365,92 +365,77 @@
             setTimeout(() => { modal.style.display = "none"; }, 200);
         };
 
+        /*
+         * Numéro de lancement journalier
+         * Commande : C-260819-001
+         * Tournée   : T-260819-001
+         *
+         * Le compteur recommence à 001 chaque nouveau jour.
+         * Une tournée reçoit UN SEUL numéro T pour toutes ses commandes.
+         */
         async function genererNumLancement(prefix) {
             const now = new Date();
-            const jj = String(now.getDate()).padStart(2, '0');
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
             const yy = String(now.getFullYear()).slice(-2);
-            const datePrefix = `${prefix}-${jj}${mm}${yy}-`;
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const datePrefix = `${prefix}-${yy}${mm}${dd}-`;
 
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('suivi_commandes_lancer')
                 .select('num_lancement')
                 .like('num_lancement', `${datePrefix}%`);
 
+            if (error) throw new Error(`Impossible de récupérer les numéros : ${error.message}`);
+
             let nextSeq = 1;
-            if (data && data.length > 0) {
-                const seqs = data.map(item => {
-                    if (!item.num_lancement) return 0;
-                    const parts = item.num_lancement.split('-');
-                    return parseInt(parts[parts.length - 1], 10) || 0;
-                });
-                nextSeq = Math.max(...seqs, 0) + 1;
-            }
+            (data || []).forEach(item => {
+                const value = String(item.num_lancement || '');
+                const match = value.match(new RegExp(`^${prefix}-\\d{6}-(\\d+)$`, 'i'));
+                if (match) nextSeq = Math.max(nextSeq, parseInt(match[1], 10) + 1);
+            });
+
             return `${datePrefix}${String(nextSeq).padStart(3, '0')}`;
+        }
+
+        async function genererNumLancementUnique(prefix) {
+            let num = await genererNumLancement(prefix);
+
+            for (let i = 0; i < 10; i++) {
+                const { data, error } = await supabase
+                    .from('suivi_commandes_lancer')
+                    .select('num_lancement')
+                    .eq('num_lancement', num)
+                    .limit(1);
+
+                if (error) throw new Error(`Vérification numéro impossible : ${error.message}`);
+                if (!data || data.length === 0) return num;
+
+                const parts = num.split('-');
+                const seq = (parseInt(parts.pop(), 10) || 0) + 1;
+                num = `${parts.join('-')}-${String(seq).padStart(3, '0')}`;
+            }
+
+            throw new Error("Impossible de générer un numéro de lancement unique.");
         }
 
         window.lancerCommande = async function(docVente) {
             if (!confirm(`Voulez-vous lancer la commande ${docVente} ?`)) return;
-            
-            const { data: { user } } = await supabase.auth.getUser();
-            const userId = user ? user.id : null;
-            const numLancement = await genererNumLancement('C');
-            const nowIso = new Date().toISOString();
 
-            const { error: err1 } = await supabase
-                .from('commandes_excel')
-                .update({ statut: 'LANCEE', updated_at: nowIso })
-                .eq('document_vente', docVente);
-                
-            if (err1) { alert("Erreur commandes_excel: " + err1.message); return; }
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                const userId = user ? user.id : null;
+                const numLancement = await genererNumLancementUnique('C');
+                const nowIso = new Date().toISOString();
 
-            const { error: err2 } = await supabase
-                .from('suivi_commandes_lancer')
-                .update({
-                    statut: 'LANCEE',
-                    num_lancement: numLancement,
-                    lance_par: userId,
-                    date_lancement: nowIso,
-                    updated_at: nowIso
-                })
-                .eq('document_vente', docVente);
-
-            if (err2) { alert("Erreur suivi_commandes_lancer: " + err2.message); return; }
-            
-            window.open(`Modules/bon_preparation.html?cmd=${docVente}`, '_blank');
-            loadSuiviCommandes();
-        };
-
-        window.lancerTournee = async function(tourneeName) {
-            if (!confirm(`Voulez-vous vraiment lancer toute la tournée "${tourneeName}" ?`)) return;
-            
-            const dateDebut = document.getElementById('dateDebut').value;
-            const dateFin = document.getElementById('dateFin').value;
-
-            const { data: { user } } = await supabase.auth.getUser();
-            const userId = user ? user.id : null;
-            const nowIso = new Date().toISOString();
-
-            let queryDocs = supabase.from('commandes_excel').select('document_vente').eq('statut', 'IMPORTEE').eq('itineraire', tourneeName);
-            if (dateDebut) queryDocs = queryDocs.gte('date_livraison', dateDebut);
-            if (dateFin) queryDocs = queryDocs.lte('date_livraison', dateFin);
-            const { data: docsRows } = await queryDocs;
-
-            if (!docsRows || docsRows.length === 0) {
-                alert("Aucune commande trouvée pour cette tournée.");
-                return;
-            }
-
-            const uniqueDocs = [...new Set(docsRows.map(r => r.document_vente))];
-
-            for (let docVente of uniqueDocs) {
-                const numLancement = await genererNumLancement('T');
-
-                await supabase.from('commandes_excel')
+                const { error: err1 } = await supabase
+                    .from('commandes_excel')
                     .update({ statut: 'LANCEE', updated_at: nowIso })
                     .eq('document_vente', docVente);
 
-                await supabase.from('suivi_commandes_lancer')
+                if (err1) throw new Error("Erreur commandes_excel : " + err1.message);
+
+                const { error: err2 } = await supabase
+                    .from('suivi_commandes_lancer')
                     .update({
                         statut: 'LANCEE',
                         num_lancement: numLancement,
@@ -459,11 +444,96 @@
                         updated_at: nowIso
                     })
                     .eq('document_vente', docVente);
-            }
 
-            alert(`La tournée "${tourneeName}" a été lancée avec succès (${uniqueDocs.length} commandes) !`);
-            window.open(`Modules/bon_preparation_tournee.html?tournee=${encodeURIComponent(tourneeName)}`, '_blank');
-            loadSuiviCommandes();
+                if (err2) throw new Error("Erreur suivi_commandes_lancer : " + err2.message);
+
+                window.open(
+                    `Modules/bon_preparation.html?cmd=${encodeURIComponent(docVente)}&lancement=${encodeURIComponent(numLancement)}`,
+                    '_blank'
+                );
+
+                loadSuiviCommandes();
+            } catch (err) {
+                console.error(err);
+                alert(err.message || "Erreur lors du lancement de la commande.");
+            }
+        };
+
+        window.lancerTournee = async function(tourneeName) {
+            if (!confirm(`Voulez-vous vraiment lancer toute la tournée "${tourneeName}" ?`)) return;
+
+            const dateDebut = document.getElementById('dateDebut').value;
+            const dateFin = document.getElementById('dateFin').value;
+
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                const userId = user ? user.id : null;
+                const nowIso = new Date().toISOString();
+
+                let queryDocs = supabase
+                    .from('commandes_excel')
+                    .select('document_vente')
+                    .eq('statut', 'IMPORTEE')
+                    .eq('itineraire', tourneeName);
+
+                if (dateDebut) queryDocs = queryDocs.gte('date_livraison', dateDebut);
+                if (dateFin) queryDocs = queryDocs.lte('date_livraison', dateFin);
+
+                const { data: docsRows, error: docsErr } = await queryDocs;
+                if (docsErr) throw new Error("Erreur récupération : " + docsErr.message);
+
+                if (!docsRows || docsRows.length === 0) {
+                    alert("Aucune commande trouvée pour cette tournée.");
+                    return;
+                }
+
+                const uniqueDocs = [...new Set(docsRows.map(r => r.document_vente))];
+
+                // UN SEUL numéro T pour toute la tournée.
+                const numLancement = await genererNumLancementUnique('T');
+
+                for (const docVente of uniqueDocs) {
+                    const { error: updateCmdErr } = await supabase
+                        .from('commandes_excel')
+                        .update({ statut: 'LANCEE', updated_at: nowIso })
+                        .eq('document_vente', docVente);
+
+                    if (updateCmdErr) {
+                        throw new Error(`Commande ${docVente} : ${updateCmdErr.message}`);
+                    }
+
+                    const { error: updateSuiviErr } = await supabase
+                        .from('suivi_commandes_lancer')
+                        .update({
+                            statut: 'LANCEE',
+                            num_lancement: numLancement,
+                            lance_par: userId,
+                            date_lancement: nowIso,
+                            updated_at: nowIso
+                        })
+                        .eq('document_vente', docVente);
+
+                    if (updateSuiviErr) {
+                        throw new Error(`Suivi ${docVente} : ${updateSuiviErr.message}`);
+                    }
+                }
+
+                alert(
+                    `La tournée "${tourneeName}" a été lancée avec succès !\n\n` +
+                    `N° lancement : ${numLancement}\n` +
+                    `Commandes : ${uniqueDocs.length}`
+                );
+
+                window.open(
+                    `Modules/bon_preparation_tournee.html?tournee=${encodeURIComponent(tourneeName)}&lancement=${encodeURIComponent(numLancement)}`,
+                    '_blank'
+                );
+
+                loadSuiviCommandes();
+            } catch (err) {
+                console.error(err);
+                alert(err.message || "Erreur lors du lancement de la tournée.");
+            }
         };
 
         setInterval(() => {
