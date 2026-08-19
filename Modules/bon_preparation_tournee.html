@@ -150,7 +150,7 @@
 
                     // Pour une tournée, le numéro T transmis dans l'URL est prioritaire.
                     // Cela garantit que toute la feuille affiche le même N° de lancement.
-                    const numLancement = lancementParam || suivi.num_lancement || '-';
+                    const numLancement = lancementParam || suivi.num_lancement || window.__tourneeNumLancement || '-';
                     const lancePar = suivi.user_profiles?.nom_complet || '-';
                     
                     let dateLancementStr = '';
@@ -171,6 +171,7 @@
                             <div class="header-box">
                                 <div class="text-xs space-y-0.5">
                                     <p><strong>Tournée:</strong> <span>${itineraire}</span></p>
+                                    <p><strong>N° Lancement:</strong> <span class="font-bold text-blue-700">${numLancement}</span></p>
                                 </div>
 
                                 <h1 class="text-lg font-bold uppercase text-center tracking-wide px-2">Bon de Préparation</h1>
