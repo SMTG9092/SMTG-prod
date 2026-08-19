@@ -35,21 +35,21 @@
         .header-box { border: 2px solid black; padding: 3px 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; flex-shrink: 0; background: #fff; }
         .commands-container { flex-grow: 1; display: flex; flex-direction: column; gap: 3px; justify-content: flex-start; overflow: hidden; }
         
-        .command-block { display: flex; flex-direction: column; border: 1px solid #000; padding: 3px; background: #fff; flex-shrink: 0; min-height: 58px; }
-        .command-title { font-weight: bold; font-size: 10px; background: #e5e7eb; padding: 3px 6px; border-bottom: 1px solid #000; margin-bottom: 2px; min-height: 18px; }
+        .command-block { display: flex; flex-direction: column; border: 1px solid #000; padding: 2px; background: #fff; flex-shrink: 0; }
+        .command-title { font-weight: bold; font-size: 9px; background: #e5e7eb; padding: 1px 5px; border-bottom: 1px solid #000; margin-bottom: 1px; }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background-color: #e5e7eb !important; font-weight: bold; font-size: 9px; padding: 3px 2px; height: 20px; border: 1px solid black; text-align: center; }
-        td { border: 1px solid black; padding: 4px 3px; text-align: center; font-size: 10px; height: 24px; }
+        th { background-color: #e5e7eb !important; font-weight: bold; font-size: 8px; padding: 1px; border: 1px solid black; text-align: center; }
+        td { border: 1px solid black; padding: 1px 2px; text-align: center; font-size: 9px; }
         
-        .col-article { width: 44%; } 
-        .col-kg { width: 10%; } 
-        .col-pieces { width: 10%; } 
-        .col-lot { width: 18%; } 
+        .col-article { width: 42%; } 
+        .col-kg { width: 9%; } 
+        .col-pieces { width: 9%; } 
+        .col-lot { width: 22%; } 
         .col-prep { width: 10%; } 
         .col-ctrl { width: 8%; }
         
-        .product-name { font-weight: bold; font-size: 10px; text-align: left; padding: 4px 6px; line-height: 1.15; min-height: 24px; }
+        .product-name { font-weight: bold; font-size: 9px; text-align: left; padding-left: 4px; line-height: 1; }
         .footer-section { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 3px; padding-top: 3px; border-top: 1px solid #000; flex-shrink: 0; background: #fff; }
     </style>
 </head>
@@ -118,7 +118,7 @@
                 // Récupérer les infos de suivi et pièces correspondantes
                 const { data: suiviList } = await supabase
                     .from("suivi_commandes_lancer")
-                    .select("num_lancement, document_vente, date_lancement, user_profiles:lance_par(nom_complet)");
+                    .select("num_lancement, document_vente, date_lancement, user_profiles:lance_par(matricule)");
 
                 const { data: piecesList } = await supabase
                     .from("commandes_clients_pieces")
@@ -151,7 +151,7 @@
                     // Pour une tournée, le numéro T transmis dans l'URL est prioritaire.
                     // Cela garantit que toute la feuille affiche le même N° de lancement.
                     const numLancement = lancementParam || suivi.num_lancement || window.__tourneeNumLancement || '-';
-                    const lancePar = suivi.user_profiles?.nom_complet || '-';
+                    const lancePar = suivi.user_profiles?.matricule || '-';
                     
                     let dateLancementStr = '';
                     let timeLancementStr = '';
@@ -274,7 +274,7 @@
                         </div>
                     `;
 
-                    const blockHeight = 48 + (items.length * 25);
+                    const blockHeight = 35 + (items.length * 18);
 
                     if (estimatedPageHeight + blockHeight > 450 && currentCommandsHtml !== '') {
                         allPagesHtml += generateSheet(currentCommandsHtml, firstItemOfPage, pageKg, pagePieces);
