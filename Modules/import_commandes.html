@@ -208,7 +208,7 @@ button,input,select,textarea{font-family:inherit}
 
     <div class="import-grid">
         <aside class="import-panel">
-            <aside class="w-[380px] bg-slate-900/50 border-r border-slate-800/80 flex flex-col p-5 gap-5 overflow-y-auto shrink-0">
+            <div class="w-[380px] bg-slate-900/50 border-r border-slate-800/80 flex flex-col p-5 gap-5 overflow-y-auto shrink-0">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                     <i class="fas fa-file-arrow-up text-emerald-400"></i> Panneau d'Importation
@@ -301,7 +301,11 @@ button,input,select,textarea{font-family:inherit}
 
                 <!-- RAPPORT STATS -->
                 <div id="analysisReportBox" class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-3 shadow-lg">
-                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                    <div class="text-[10px] text-slate-400 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2">
+                            <i class="fas fa-calendar-day text-emerald-400 mr-1"></i>
+                            Les suppressions et modifications sont comparées uniquement avec les commandes synchronisées aujourd'hui.
+                        </div>
+                        <h4 class="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
                         <i class="fas fa-shield-halved"></i> Rapport Delta et Horodatage Complet
                     </h4>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
@@ -584,56 +588,139 @@ button,input,select,textarea{font-family:inherit}
             const nowIso = new Date().toISOString();
 
             try {
-                const { data: existingRows, error } = await supabase
-                    .from('commandes_excel')
-                    .select('document_vente, Poste, article, quantite_commandee, nombre_pieces, designation_article, nom_receptionnaire, unite, itineraire, statut');
+                /*
+                 * IMPORTANT :
+                 * Les suppressions/modifications sont calculées uniquement
+                 * sur les commandes qui ont déjà été synchronisées LE MÊME JOUR.
+                 *
+                 * On ne compare donc plus avec toute la table commandes_excel.
+                 * On récupère d'abord les historiques COMMANDES_KG du jour,
+                 * puis uniquement les lignes liées à ces imports.
+                 *
+                 * Ainsi :
+                 * - les commandes des jours précédents ne sont JAMAIS considérées supprimées ;
+                 * - une commande supprimée du fichier SAP du jour est détectée ;
+                 * - une modification de quantité du même jour reste détectée.
+                 */
 
-                if (!error && existingRows && existingRows.length > 0) {
-                    const newSet = new Set(finalMatchedData.map(d => `${d.document_vente}_${d.Poste}_${d.article}`.toLowerCase()));
-                    const newMap = new Map(finalMatchedData.map(d => [`${d.document_vente}_${d.Poste}_${d.article}`.toLowerCase(), d]));
+                const today = new Date();
 
-                    existingRows.forEach(ex => {
-                        const exKey = `${ex.document_vente}_${ex.Poste}_${ex.article}`.toLowerCase();
-                        if (!newSet.has(exKey)) {
-                            detectedDeletions.push({
+                // Début et fin du jour local du navigateur (Maroc), convertis en UTC
+                // pour être compatibles avec les timestamps Supabase.
+                const startOfToday = new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    today.getDate(),
+                    0, 0, 0, 0
+                );
+
+                const startOfTomorrow = new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    today.getDate() + 1,
+                    0, 0, 0, 0
+                );
+
+                const { data: todayImports, error: historyErr } = await supabase
+                    .from('historique_imports')
+                    .select('id, created_at')
+                    .eq('type_import', 'COMMANDES_KG')
+                    .gte('created_at', startOfToday.toISOString())
+                    .lt('created_at', startOfTomorrow.toISOString());
+
+                if (historyErr) {
+                    console.warn("Impossible de récupérer les imports du jour :", historyErr);
+                }
+
+                const todayImportIds = (todayImports || []).map(row => row.id);
+
+                let existingRows = [];
+
+                if (todayImportIds.length > 0) {
+                    const { data, error: existingErr } = await supabase
+                        .from('commandes_excel')
+                        .select(`
+                            document_vente,
+                            Poste,
+                            article,
+                            quantite_commandee,
+                            nombre_pieces,
+                            designation_article,
+                            nom_receptionnaire,
+                            unite,
+                            itineraire,
+                            statut,
+                            historique_import_id
+                        `)
+                        .in('historique_import_id', todayImportIds);
+
+                    if (existingErr) {
+                        console.warn("Erreur lors de la lecture des commandes du jour :", existingErr);
+                    } else {
+                        existingRows = data || [];
+                    }
+                }
+
+                const newSet = new Set(
+                    finalMatchedData.map(d =>
+                        `${d.document_vente}_${d.Poste}_${d.article}`.toLowerCase()
+                    )
+                );
+
+                const newMap = new Map(
+                    finalMatchedData.map(d => [
+                        `${d.document_vente}_${d.Poste}_${d.article}`.toLowerCase(),
+                        d
+                    ])
+                );
+
+                existingRows.forEach(ex => {
+                    const exKey =
+                        `${ex.document_vente}_${ex.Poste}_${ex.article}`.toLowerCase();
+
+                    // SUPPRESSION : uniquement si la ligne existait déjà
+                    // dans un import du jour et n'existe plus dans le nouveau fichier.
+                    if (!newSet.has(exKey)) {
+                        detectedDeletions.push({
+                            document_vente: ex.document_vente,
+                            ligne_commande: ex.Poste,
+                            client: ex.nom_receptionnaire,
+                            article: ex.article,
+                            designation_article: ex.designation_article,
+                            quantite: ex.quantite_commandee,
+                            unite: ex.unite,
+                            itineraire: ex.itineraire,
+                            motif_suppression: 'SUPPRIMEE_DEPUIS_SAP',
+                            origine_suppression: 'SAP',
+                            statut: 'EN_ATTENTE',
+                            ancienne_ligne: ex,
+                            date_suppression: nowIso
+                        });
+                    } else {
+                        const incoming = newMap.get(exKey);
+
+                        if (incoming &&
+                            Number(incoming.quantite_commandee) !== Number(ex.quantite_commandee)) {
+
+                            detectedModifications.push({
                                 document_vente: ex.document_vente,
                                 ligne_commande: ex.Poste,
-                                client: ex.nom_receptionnaire,
                                 article: ex.article,
                                 designation_article: ex.designation_article,
-                                quantite: ex.quantite_commandee,
-                                unite: ex.unite,
-                                itineraire: ex.itineraire,
-                                motif_suppression: 'SUPPRIMEE_DEPUIS_SAP',
-                                origine_suppression: 'SAP',
-                                statut: 'EN_ATTENTE',
+                                type_action: 'MODIFICATION_QUANTITE',
+                                champ_modifie: 'quantite_commandee',
+                                ancienne_valeur: String(ex.quantite_commandee),
+                                nouvelle_valeur: String(incoming.quantite_commandee),
                                 ancienne_ligne: ex,
-                                date_suppression: nowIso
+                                nouvelle_ligne: incoming,
+                                statut_avant: ex.statut,
+                                statut_apres: 'MODIFIE',
+                                date_action: nowIso
                             });
-                        } else {
-                            const incoming = newMap.get(exKey);
-                            if (incoming) {
-                                if (Number(incoming.quantite_commandee) !== Number(ex.quantite_commandee)) {
-                                    detectedModifications.push({
-                                        document_vente: ex.document_vente,
-                                        ligne_commande: ex.Poste,
-                                        article: ex.article,
-                                        designation_article: ex.designation_article,
-                                        type_action: 'MODIFICATION_QUANTITE',
-                                        champ_modifie: 'quantite_commandee',
-                                        ancienne_valeur: String(ex.quantite_commandee),
-                                        nouvelle_valeur: String(incoming.quantite_commandee),
-                                        ancienne_ligne: ex,
-                                        nouvelle_ligne: incoming,
-                                        statut_avant: ex.statut,
-                                        statut_apres: 'MODIFIE',
-                                        date_action: nowIso
-                                    });
-                                }
-                            }
                         }
-                    });
-                }
+                    }
+                });
+
             } catch (dbErr) {
                 console.warn("Base de données en attente ou injoignable :", dbErr);
             }
