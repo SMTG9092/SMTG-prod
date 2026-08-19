@@ -70,6 +70,11 @@
         const tourneeName = params.get('tournee');
         const datesParam = params.get('dates');
 
+        // N° de lancement transmis par lancer.html.
+        // Pour une tournée, ce numéro est le même pour toutes les commandes :
+        // ex. T-260819-001.
+        const lancementParam = params.get('lancement');
+
         async function loadTourneeBons() {
             if (!tourneeName) {
                 document.getElementById('tournee-container').innerHTML = `<p class="text-center text-red-500 font-bold p-10">Paramètre de tournée manquant dans l'URL.</p>`;
@@ -142,7 +147,10 @@
                     const firstItem = firstIt || {};
                     const docVente = firstItem.document_vente || '';
                     const suivi = (suiviList || []).find(s => s.document_vente === docVente) || {};
-                    const numLancement = suivi.num_lancement || '-';
+
+                    // Pour une tournée, le numéro T transmis dans l'URL est prioritaire.
+                    // Cela garantit que toute la feuille affiche le même N° de lancement.
+                    const numLancement = lancementParam || suivi.num_lancement || '-';
                     const lancePar = suivi.user_profiles?.nom_complet || '-';
                     
                     let dateLancementStr = '';
@@ -172,7 +180,7 @@
                                         <p><strong>Création:</strong> <span>${dateCreation}</span></p>
                                         <p><strong>Livraison:</strong> <span>${dateLivraison}</span></p>
                                     </div>
-                                    <canvas id="${qrId}" class="w-10 h-10" data-qr="Tournee: ${itineraire} | Lancement: ${numLancement}"></canvas>
+                                    <canvas id="${qrId}" class="w-10 h-10" data-qr="Tournee: ${itineraire} | N° Lancement: ${numLancement}"></canvas>
                                 </div>
                             </div>
 
