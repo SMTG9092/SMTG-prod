@@ -157,6 +157,30 @@ button,input,select,textarea{font-family:inherit}
 
 .import-modal{z-index:9999!important}
 
+
+/* Fix horizontal overflow inside the import panel when loaded by Dashboard */
+.import-panel > aside{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+}
+.import-panel{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+}
+.import-panel > aside > div,
+.import-panel > aside .w-\[380px\]{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+}
+.import-panel *{
+    max-width:100%;
+}
+
 @media(max-width:950px){
     .import-grid{grid-template-columns:1fr}
     .import-panel{max-height:none}
