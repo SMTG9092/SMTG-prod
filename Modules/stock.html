@@ -1,430 +1,63 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestion Stock - SoufStock</title>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,Arial,sans-serif}
-body{background:transparent!important;color:#101828;font-size:13px}
-button,input,select{font-family:inherit}
-
-.stock-page{
-    width:100%;
-    min-height:100%;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
-
-.stock-header{
-    min-height:74px;
-    width:100%;
-    background:#fff;
-    border:1px solid #e1e8e4;
-    border-radius:14px;
-    box-shadow:0 3px 14px rgba(16,24,40,.06);
-    padding:13px 18px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-}
-
-.stock-title{display:flex;align-items:center;gap:12px}
-.stock-icon{
-    width:42px;height:42px;border-radius:12px;
-    background:#eaf8f0;border:1px solid #ccebd8;
-    color:#079455;display:flex;align-items:center;justify-content:center;
-}
-.stock-title h1{margin:0;font-size:16px;font-weight:800;color:#101828}
-.stock-title p{margin:3px 0 0;font-size:10px;color:#667085}
-
-.stock-clock{
-    display:flex;flex-direction:column;align-items:flex-end;
-    padding:6px 10px;border:1px solid #d8e4dd;
-    border-radius:10px;background:#f8fbf9;
-}
-.stock-clock span{font-size:10px;color:#667085}
-.stock-clock strong{font-size:11px;color:#079455;font-family:monospace}
-
-.stock-grid{
-    flex:1;
-    min-height:0;
-    display:grid;
-    grid-template-columns:310px minmax(0,1fr);
-    gap:12px;
-}
-
-.stock-panel{
-    min-width:0;
-    background:#fff!important;
-    border:1px solid #e1e8e4!important;
-    border-radius:14px!important;
-    box-shadow:0 3px 14px rgba(16,24,40,.06)!important;
-    padding:14px!important;
-    overflow:auto;
-}
-
-.stock-results{
-    min-width:0;
-    overflow:auto;
-}
-
-.panel-head{
-    display:flex;align-items:center;justify-content:space-between;
-    padding-bottom:12px;border-bottom:1px solid #dfe7e2;
-}
-.panel-head h2{
-    margin:0;font-size:11px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.08em;color:#344054;
-}
-.panel-head i{color:#079455;margin-right:6px}
-
-.filter-card{
-    background:#fff;
-    border:1px solid #e1e8e4;
-    border-radius:12px;
-    padding:12px;
-    margin-top:12px;
-}
-.filter-card label{
-    display:block;font-size:10px;font-weight:800;
-    color:#344054;margin-bottom:6px;text-transform:uppercase;
-}
-.filter-input,.filter-select{
-    width:100%;height:38px;padding:0 11px;
-    background:#fff;border:1px solid #d5dfda;
-    border-radius:9px;color:#101828;font-size:11px;
-    outline:none;
-}
-.filter-input:focus,.filter-select:focus{
-    border-color:#079455;box-shadow:0 0 0 3px rgba(7,148,85,.08);
-}
-.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-
-.action-btn{
-    width:100%;height:38px;border-radius:9px;
-    font-size:11px;font-weight:700;display:flex;
-    align-items:center;justify-content:center;gap:7px;
-    cursor:pointer;border:1px solid transparent;transition:.2s;
-}
-.btn-green{background:#079455;color:#fff}
-.btn-green:hover{background:#067a47}
-.btn-light-green{background:#eaf8f0;color:#079455;border-color:#ccebd8}
-.btn-light-green:hover{background:#dff3e8}
-.btn-sky{background:#eff8ff;color:#0877b9;border-color:#cfeaff}
-.btn-amber{background:#fff7e6;color:#b77900;border-color:#f3dfae}
-.btn-gray{background:#f4f6f5;color:#475467;border-color:#dfe7e2}
-
-.stock-summary{
-    background:#fff;border:1px solid #e1e8e4;border-radius:12px;
-    padding:12px;margin-top:12px;
-}
-.summary-line{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:7px 0;border-bottom:1px solid #edf1ef;
-}
-.summary-line:last-child{border-bottom:0}
-.summary-line span{font-size:10px;color:#667085}
-.summary-line strong{font-size:12px;font-family:monospace;color:#101828}
-.summary-line.total strong{color:#079455;font-size:14px}
-
-.results-main{
-    width:100%;
-    min-height:100%;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
-
-.results-card{
-    background:#fff;
-    border:1px solid #e1e8e4;
-    border-radius:14px;
-    box-shadow:0 3px 14px rgba(16,24,40,.06);
-    padding:14px;
-}
-
-.results-title{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:12px;
-}
-.results-title h2{
-    margin:0;font-size:14px;font-weight:800;color:#101828;
-}
-.results-title p{margin:3px 0 0;font-size:10px;color:#667085}
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-}
-.stat{
-    background:#fff;border:1px solid #e1e8e4;border-radius:12px;
-    padding:12px;display:flex;align-items:center;justify-content:space-between;
-}
-.stat small{display:block;color:#667085;font-size:9px;text-transform:uppercase;font-weight:800}
-.stat strong{display:block;margin-top:4px;font-size:17px;font-family:monospace}
-.stat .ico{
-    width:38px;height:38px;border-radius:10px;
-    display:flex;align-items:center;justify-content:center;
-}
-.green{color:#079455}.sky{color:#0877b9}.amber{color:#b77900}
-.green-bg{background:#eaf8f0;border:1px solid #ccebd8}
-.sky-bg{background:#eff8ff;border:1px solid #cfeaff}
-.amber-bg{background:#fff7e6;border:1px solid #f3dfae}
-
-.table-card{
-    flex:1;min-height:0;background:#fff;
-    border:1px solid #e1e8e4;border-radius:14px;
-    box-shadow:0 3px 14px rgba(16,24,40,.06);
-    overflow:hidden;display:flex;flex-direction:column;
-}
-.table-wrap{overflow:auto;flex:1}
-.stock-table{width:100%;border-collapse:collapse}
-.stock-table th{
-    background:#f1f5f3;color:#344054;
-    border-bottom:2px solid #c8d2cd;
-    padding:10px 9px;font-size:9px;font-weight:800;
-    text-transform:uppercase;white-space:nowrap;
-}
-.stock-table td{
-    padding:10px 9px;border-bottom:1px solid #e1e8e4;
-    font-size:10px;color:#344054;background:#fff;
-}
-.stock-table tbody tr:nth-child(even) td{background:#f9fbfa}
-.stock-table tbody tr:hover td{background:#eef8f2}
-.article-cell{font-weight:800;color:#079455!important}
-.lot-cell{font-family:monospace;color:#667085!important}
-.qty{font-family:monospace;text-align:right;font-weight:800}
-.badge{
-    display:inline-flex;padding:4px 8px;border-radius:999px;
-    font-size:8px;font-weight:800;border:1px solid;
-}
-.badge-ok{color:#067a47;background:#eaf8f0;border-color:#bde4cc}
-.badge-zero{color:#b42318;background:#fff0ef;border-color:#f3c8c5}
-.badge-res{color:#b77900;background:#fff7e6;border-color:#f0dba7}
-
-.pagination{
-    min-height:48px;padding:9px 12px;
-    border-top:1px solid #e1e8e4;background:#f8faf9;
-    display:flex;align-items:center;justify-content:space-between;
-    gap:10px;font-size:10px;color:#667085;
-}
-.page-btn{
-    border:1px solid #d5dfda;background:#fff;color:#344054;
-    border-radius:8px;padding:7px 10px;font-size:10px;font-weight:700;
-    cursor:pointer;
-}
-.page-btn:disabled{opacity:.4;cursor:not-allowed}
-.page-btn:not(:disabled):hover{border-color:#079455;color:#079455}
-
-.empty{
-    padding:45px 15px!important;text-align:center!important;color:#98a2b3!important;
-}
-.loading i{color:#079455}
-
-@media(max-width:950px){
-    .stock-grid{grid-template-columns:1fr}
-    .stock-panel{max-height:none}
-    .stats{grid-template-columns:1fr}
-    .stock-header{align-items:flex-start}
-    .stock-clock{display:none}
-}
+html,body{margin:0;padding:0;width:100%;min-height:100%;font-family:Inter,Arial,sans-serif;background:#f7f9f8;color:#0f172a}
+body{overflow-x:hidden} button,input,select{font-family:inherit}
+.stock-page{width:100%;padding:10px 14px 14px;min-height:100%}
+.stock-header{width:100%;background:#fff;border:1px solid #e7ece9;border-radius:16px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 3px 14px rgba(15,23,42,.055)}
+.stock-title{display:flex;align-items:center;gap:15px}.stock-title-icon{width:54px;height:54px;border-radius:16px;background:#ecf8f2;color:#059669;display:flex;align-items:center;justify-content:center;font-size:25px;flex:none}
+.stock-title h1{margin:0;font-size:24px;line-height:1.15;font-weight:800;color:#0b1020}.stock-title p{margin:6px 0 0;color:#64748b;font-size:12px}
+.header-actions{display:flex;align-items:center;gap:10px}.btn{height:42px;border-radius:11px;padding:0 17px;border:1px solid #d8e2dd;background:#fff;color:#087f4d;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s ease}.btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(15,23,42,.07)}
+#topRefreshBtn{background:#eaf8f0;color:#087f4d;border-color:#b9dccb}
+.stats-grid{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.stat-card{min-height:108px;background:#fff;border:1px solid #e8ecea;border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 14px rgba(15,23,42,.05)}
+.stat-label{display:block;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.035em;font-weight:700}.stat-value{display:block;margin-top:8px;font-size:27px;line-height:1;font-weight:800}
+#totalStockBadge{color:#059669}#totalArticlesBadge{color:#2563eb}#totalLotsBadge{color:#b77900}.stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px}.green-bg{background:#edf9f3;color:#0aa56c;border:1px solid #ccebd8}.blue-bg{background:#eff5ff;color:#3b82f6;border:1px solid #cfe0ff}.amber-bg{background:#fff7e6;color:#b77900;border:1px solid #f3dfae}
+.filters-card{margin-top:14px;background:#fff;border:1px solid #e8ecea;border-radius:16px;padding:16px 20px 17px;box-shadow:0 3px 14px rgba(15,23,42,.05)}.search-box{position:relative;width:100%}.search-box i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#64748b;font-size:16px;pointer-events:none}.filter-input,.filter-select{width:100%;height:46px;border:1px solid #d5dee0;border-radius:10px;background:#fff;color:#0f172a;padding:0 16px;font-size:13px;outline:none}.search-box .filter-input{padding-left:44px}.filter-input:focus,.filter-select:focus{border-color:#9acfb8;box-shadow:0 0 0 3px rgba(5,150,105,.08);outline:none}.filters-row{margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.filter-label{font-size:11px;color:#475569;font-weight:800;margin:0 0 6px;display:block}.filter-actions{display:flex;gap:10px}.filter-actions .btn{flex:1}.btn-green{background:#059669;color:#fff;border-color:#059669}.btn-green:hover{background:#047857}.btn-clear{background:#f4f6f5;color:#475467;border-color:#dfe7e2}
+.results-card{margin-top:14px;background:#fff;border:1px solid #e8ecea;border-radius:16px;box-shadow:0 3px 14px rgba(15,23,42,.05);overflow:hidden}.results-head{padding:15px 18px;border-bottom:1px solid #e4eae7;display:flex;align-items:center;justify-content:space-between;gap:12px}.results-head h2{margin:0;font-size:14px;font-weight:800;color:#0b1020}.results-head p{margin:4px 0 0;color:#64748b;font-size:10px}
+.table-scroll{width:100%;overflow:auto}.stock-table{width:100%;min-width:900px;border-collapse:separate;border-spacing:0}.stock-table th{height:45px;padding:0 12px;background:#f4f7f6;border-bottom:1px solid #dbe3df;border-right:1px solid #e1e8e5;color:#0b1020;font-size:10px;text-transform:uppercase;letter-spacing:.02em;font-weight:800;text-align:center;vertical-align:middle;white-space:nowrap}.stock-table th:last-child{border-right:0}.stock-table td{min-height:52px;padding:11px 12px;border-bottom:1px solid #e4eae7;border-right:1px solid #e4eae7;color:#0b1020;font-size:11px;line-height:1.3;font-weight:650;text-align:center;vertical-align:middle;background:#fff}.stock-table td:last-child{border-right:0}.stock-table tbody tr:nth-child(even) td{background:#fbfdfc}.stock-table tbody tr:hover td{background:#f1faf5}.article-cell{font-weight:800!important;color:#087f4d!important;white-space:nowrap}.designation-cell{text-align:left!important;min-width:260px}.lot-cell{font-family:monospace;white-space:nowrap}.qty{font-family:monospace;font-weight:800;white-space:nowrap}.green{color:#059669!important}.amber{color:#b77900!important}.badge{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:999px;font-size:9px;font-weight:800;border:1px solid;white-space:nowrap}.badge-ok{color:#067a47;background:#eaf8f0;border-color:#bde4cc}.badge-zero{color:#b42318;background:#fff0ef;border-color:#f3c8c5}.badge-res{color:#b77900;background:#fff7e6;border-color:#f0dba7}.empty{padding:55px 20px!important;text-align:center!important;color:#64748b!important}.loading i{color:#059669}
+.table-footer{min-height:66px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px;background:#fff}.results-info{font-size:12px;color:#64748b}.pagination{display:flex;align-items:center;gap:8px}.page-btn{min-width:38px;height:36px;padding:0 11px;border:1px solid #dbe3df;background:#fff;border-radius:9px;color:#0f172a;font-size:12px;font-weight:700;cursor:pointer}.page-btn:hover:not(:disabled){background:#f1faf5;border-color:#a9d9c0}.page-btn:disabled{opacity:.4;cursor:not-allowed}.export-row{display:flex;gap:8px}.export-row .btn{height:38px;font-size:11px}.btn-excel{background:#eaf8f0;color:#087f4d;border-color:#ccebd8}.btn-pdf{background:#eff5ff;color:#2563eb;border-color:#cfe0ff}.btn-print{background:#fff7e6;color:#b77900;border-color:#f3dfae}
+@media(max-width:900px){.stats-grid,.filters-row{grid-template-columns:1fr}.stock-header{align-items:flex-start;flex-direction:column}.header-actions{width:100%;justify-content:flex-end}.results-head{align-items:flex-start;flex-direction:column}}@media(max-width:600px){.stock-page{padding:8px}.stock-title h1{font-size:20px}.table-footer{align-items:flex-start;flex-direction:column}.pagination{width:100%;justify-content:flex-end}}
 </style>
 </head>
-
 <body>
 <main class="stock-page">
-
-    <div class="stock-header">
-        <div class="stock-title">
-            <div class="stock-icon"><i class="fas fa-boxes-stacked"></i></div>
-            <div>
-                <h1>Gestion Stock</h1>
-                <p>État global du stock · Consultation en direct · Recherche par article et lot</p>
-            </div>
-        </div>
-        <div class="stock-clock">
-            <span id="currentDate">Chargement...</span>
-            <strong id="currentTime">00:00:00</strong>
-        </div>
-    </div>
-
-    <div class="stock-grid">
-
-        <aside class="stock-panel">
-            <div class="panel-head">
-                <h2><i class="fas fa-sliders"></i>Panneau Stock</h2>
-                <button id="resetFilters" style="border:0;background:none;color:#079455;font-size:10px;text-decoration:underline;cursor:pointer">
-                    Réinitialiser
-                </button>
-            </div>
-
-            <div class="filter-card">
-                <label><i class="fas fa-tag green"></i> Article / Produit</label>
-                <input id="searchArticleInput" class="filter-input" type="text"
-                       placeholder="Article ou désignation...">
-            </div>
-
-            <div class="filter-card">
-                <label><i class="fas fa-barcode amber"></i> Lot</label>
-                <input id="searchLotInput" class="filter-input" type="text"
-                       placeholder="Rechercher un lot...">
-            </div>
-
-            <div class="filter-card">
-                <label><i class="fas fa-store green"></i> Magasin</label>
-                <select id="magasinFilter" class="filter-select">
-                    <option value="">Tous les magasins</option>
-                </select>
-            </div>
-
-            <div class="filter-card">
-                <div class="filter-row">
-                    <button id="refreshBtn" class="action-btn btn-green">
-                        <i class="fas fa-rotate"></i> Actualiser
-                    </button>
-                    <button id="clearBtn" class="action-btn btn-gray">
-                        <i class="fas fa-eraser"></i> Effacer
-                    </button>
-                </div>
-            </div>
-
-            <div class="filter-card">
-                <label>Exports & Impression</label>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                    <button id="excelBtn" class="action-btn btn-light-green">
-                        <i class="fas fa-file-excel"></i> Export Excel
-                    </button>
-                    <button id="pdfBtn" class="action-btn btn-sky">
-                        <i class="fas fa-file-pdf"></i> Export PDF
-                    </button>
-                    <button id="printBtn" class="action-btn btn-amber">
-                        <i class="fas fa-print"></i> Imprimer
-                    </button>
-                </div>
-            </div>
-
-            <div class="stock-summary">
-                <div class="summary-line total">
-                    <span>Total disponible</span>
-                    <strong id="sideTotalStock">0.00</strong>
-                </div>
-                <div class="summary-line">
-                    <span>Articles</span>
-                    <strong id="sideTotalArticles">0</strong>
-                </div>
-                <div class="summary-line">
-                    <span>Lots</span>
-                    <strong id="sideTotalLots">0</strong>
-                </div>
-                <div class="summary-line">
-                    <span>Lignes</span>
-                    <strong id="sideTotalRows">0</strong>
-                </div>
-            </div>
-        </aside>
-
-        <section class="stock-results">
-            <div class="results-main">
-
-                <div class="results-card">
-                    <div class="results-title">
-                        <div>
-                            <h2><i class="fas fa-warehouse green" style="margin-right:7px"></i>État Global du Stock</h2>
-                            <p>Stock disponible et réservé en temps réel depuis <strong>vw_stock</strong>.</p>
-                        </div>
-                        <button id="topRefreshBtn" class="action-btn btn-light-green" style="width:auto;padding:0 13px">
-                            <i class="fas fa-rotate"></i> Actualiser
-                        </button>
-                    </div>
-                </div>
-
-                <div class="stats">
-                    <div class="stat">
-                        <div>
-                            <small>Total Quantité Disponible</small>
-                            <strong id="totalStockBadge" class="green">Chargement...</strong>
-                        </div>
-                        <div class="ico green-bg green"><i class="fas fa-boxes"></i></div>
-                    </div>
-
-                    <div class="stat">
-                        <div>
-                            <small>Nombre d'Articles</small>
-                            <strong id="totalArticlesBadge" class="sky">Chargement...</strong>
-                        </div>
-                        <div class="ico sky-bg sky"><i class="fas fa-tags"></i></div>
-                    </div>
-
-                    <div class="stat">
-                        <div>
-                            <small>Nombre de Lots</small>
-                            <strong id="totalLotsBadge" class="amber">Chargement...</strong>
-                        </div>
-                        <div class="ico amber-bg amber"><i class="fas fa-barcode"></i></div>
-                    </div>
-                </div>
-
-                <div class="table-card">
-                    <div class="table-wrap">
-                        <table class="stock-table">
-                            <thead>
-                                <tr>
-                                    <th>Article</th>
-                                    <th>Désignation</th>
-                                    <th>Lot</th>
-                                    <th>Magasin</th>
-                                    <th>Unité</th>
-                                    <th style="text-align:right">Stock Disponible</th>
-                                    <th style="text-align:right">Stock Réservé</th>
-                                    <th style="text-align:center">Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stockTableBody">
-                                <tr>
-                                    <td colspan="8" class="empty loading">
-                                        <i class="fas fa-spinner fa-spin" style="margin-right:7px"></i>
-                                        Chargement des données du stock...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="pagination">
-                        <span id="paginationInfo">Affichage de 0 à 0 sur 0 entrées</span>
-                        <div style="display:flex;align-items:center;gap:6px">
-                            <button id="prevPageBtn" class="page-btn">
-                                <i class="fas fa-chevron-left"></i> Précédent
-                            </button>
-                            <span id="pageIndicator" style="padding:0 7px;font-family:monospace;color:#079455;font-weight:800">
-                                Page 1 / 1
-                            </span>
-                            <button id="nextPageBtn" class="page-btn">
-                                Suivant <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-    </div>
+<header class="stock-header">
+ <div class="stock-title"><div class="stock-title-icon"><i class="fas fa-boxes-stacked"></i></div><div><h1>Gestion Stock</h1><p>État global du stock · Consultation en direct · Recherche par article et lot</p></div></div>
+ <div class="header-actions"><button id="topRefreshBtn" class="btn"><i class="fas fa-rotate"></i> Actualiser</button></div>
+</header>
+<section class="stats-grid">
+ <div class="stat-card"><div><span class="stat-label">Total Quantité Disponible</span><span id="totalStockBadge" class="stat-value">Chargement...</span></div><div class="stat-icon green-bg"><i class="fas fa-boxes-stacked"></i></div></div>
+ <div class="stat-card"><div><span class="stat-label">Nombre d'articles</span><span id="totalArticlesBadge" class="stat-value">Chargement...</span></div><div class="stat-icon blue-bg"><i class="fas fa-tags"></i></div></div>
+ <div class="stat-card"><div><span class="stat-label">Nombre de lots</span><span id="totalLotsBadge" class="stat-value">Chargement...</span></div><div class="stat-icon amber-bg"><i class="fas fa-barcode"></i></div></div>
+</section>
+<section class="filters-card">
+ <div class="search-box"><i class="fas fa-search"></i><input id="searchArticleInput" class="filter-input" placeholder="Rechercher par Article ou Désignation..."></div>
+ <div class="filters-row">
+  <div><label class="filter-label">Lot</label><input id="searchLotInput" class="filter-input" placeholder="Rechercher un lot..."></div>
+  <div><label class="filter-label">Magasin</label><select id="magasinFilter" class="filter-select"><option value="">Tous les magasins</option></select></div>
+  <div><label class="filter-label">Actions</label><div class="filter-actions"><button id="clearBtn" class="btn btn-clear"><i class="fas fa-eraser"></i> Effacer</button><button id="refreshBtn" class="btn btn-green"><i class="fas fa-rotate"></i> Actualiser</button></div></div>
+ </div>
+</section>
+<section class="results-card">
+ <div class="results-head">
+  <div><h2><i class="fas fa-warehouse" style="color:#059669;margin-right:7px"></i>État Global du Stock</h2><p>Stock disponible et réservé en temps réel depuis <b>vw_stock</b>.</p></div>
+  <div class="export-row"><button id="excelBtn" class="btn btn-excel"><i class="fas fa-file-excel"></i> Excel</button><button id="pdfBtn" class="btn btn-pdf"><i class="fas fa-file-pdf"></i> PDF</button><button id="printBtn" class="btn btn-print"><i class="fas fa-print"></i> Imprimer</button></div>
+ </div>
+ <div class="table-scroll"><table class="stock-table"><thead><tr><th>Article</th><th>Désignation</th><th>Lot</th><th>Magasin</th><th>Unité</th><th>Stock Disponible</th><th>Stock Réservé</th><th>Statut</th></tr></thead><tbody id="stockTableBody"><tr><td colspan="8" class="empty loading"><i class="fas fa-spinner fa-spin"></i> Chargement des données du stock...</td></tr></tbody></table></div>
+ <div class="table-footer"><div id="paginationInfo" class="results-info">Affichage de 0 à 0 sur 0 entrées</div><div class="pagination"><button id="prevPageBtn" class="page-btn"><i class="fas fa-chevron-left"></i> Précédent</button><span id="pageIndicator" class="results-info">Page 1 / 1</span><button id="nextPageBtn" class="page-btn">Suivant <i class="fas fa-chevron-right"></i></button></div></div>
+</section>
 </main>
-
 <script type="module">
-import supabase from './assets/js/core/supabase.js';
+import supabase from '../assets/js/core/supabase.js';
 
 let currentPage = 1;
 const pageSize = 50;
@@ -878,5 +511,4 @@ document.addEventListener('DOMContentLoaded',async()=>{
     $('printBtn').addEventListener('click',printStock);
 });
 </script>
-</body>
-</html>
+</body></html>
