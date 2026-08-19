@@ -1,544 +1,882 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Stock - SoufStock Enterprise ERP/WMS</title>
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- SheetJS pour Export Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- jsPDF pour Export PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion Stock - SoufStock</title>
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            950: '#020617',
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155',
-                            400: '#94a3b8',
-                            300: '#cbd5e1',
-                            100: '#f1f5f9'
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            600: '#059669',
-                            400: '#34d399',
-                            300: '#6ee7b7'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        body { background-color: #020617; color: #f1f5f9; font-family: ui-sans-serif, system-ui, sans-serif; }
-    </style>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,Arial,sans-serif}
+body{background:transparent!important;color:#101828;font-size:13px}
+button,input,select{font-family:inherit}
+
+.stock-page{
+    width:100%;
+    min-height:100%;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.stock-header{
+    min-height:74px;
+    width:100%;
+    background:#fff;
+    border:1px solid #e1e8e4;
+    border-radius:14px;
+    box-shadow:0 3px 14px rgba(16,24,40,.06);
+    padding:13px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.stock-title{display:flex;align-items:center;gap:12px}
+.stock-icon{
+    width:42px;height:42px;border-radius:12px;
+    background:#eaf8f0;border:1px solid #ccebd8;
+    color:#079455;display:flex;align-items:center;justify-content:center;
+}
+.stock-title h1{margin:0;font-size:16px;font-weight:800;color:#101828}
+.stock-title p{margin:3px 0 0;font-size:10px;color:#667085}
+
+.stock-clock{
+    display:flex;flex-direction:column;align-items:flex-end;
+    padding:6px 10px;border:1px solid #d8e4dd;
+    border-radius:10px;background:#f8fbf9;
+}
+.stock-clock span{font-size:10px;color:#667085}
+.stock-clock strong{font-size:11px;color:#079455;font-family:monospace}
+
+.stock-grid{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns:310px minmax(0,1fr);
+    gap:12px;
+}
+
+.stock-panel{
+    min-width:0;
+    background:#fff!important;
+    border:1px solid #e1e8e4!important;
+    border-radius:14px!important;
+    box-shadow:0 3px 14px rgba(16,24,40,.06)!important;
+    padding:14px!important;
+    overflow:auto;
+}
+
+.stock-results{
+    min-width:0;
+    overflow:auto;
+}
+
+.panel-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:12px;border-bottom:1px solid #dfe7e2;
+}
+.panel-head h2{
+    margin:0;font-size:11px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.08em;color:#344054;
+}
+.panel-head i{color:#079455;margin-right:6px}
+
+.filter-card{
+    background:#fff;
+    border:1px solid #e1e8e4;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+}
+.filter-card label{
+    display:block;font-size:10px;font-weight:800;
+    color:#344054;margin-bottom:6px;text-transform:uppercase;
+}
+.filter-input,.filter-select{
+    width:100%;height:38px;padding:0 11px;
+    background:#fff;border:1px solid #d5dfda;
+    border-radius:9px;color:#101828;font-size:11px;
+    outline:none;
+}
+.filter-input:focus,.filter-select:focus{
+    border-color:#079455;box-shadow:0 0 0 3px rgba(7,148,85,.08);
+}
+.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.action-btn{
+    width:100%;height:38px;border-radius:9px;
+    font-size:11px;font-weight:700;display:flex;
+    align-items:center;justify-content:center;gap:7px;
+    cursor:pointer;border:1px solid transparent;transition:.2s;
+}
+.btn-green{background:#079455;color:#fff}
+.btn-green:hover{background:#067a47}
+.btn-light-green{background:#eaf8f0;color:#079455;border-color:#ccebd8}
+.btn-light-green:hover{background:#dff3e8}
+.btn-sky{background:#eff8ff;color:#0877b9;border-color:#cfeaff}
+.btn-amber{background:#fff7e6;color:#b77900;border-color:#f3dfae}
+.btn-gray{background:#f4f6f5;color:#475467;border-color:#dfe7e2}
+
+.stock-summary{
+    background:#fff;border:1px solid #e1e8e4;border-radius:12px;
+    padding:12px;margin-top:12px;
+}
+.summary-line{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:7px 0;border-bottom:1px solid #edf1ef;
+}
+.summary-line:last-child{border-bottom:0}
+.summary-line span{font-size:10px;color:#667085}
+.summary-line strong{font-size:12px;font-family:monospace;color:#101828}
+.summary-line.total strong{color:#079455;font-size:14px}
+
+.results-main{
+    width:100%;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.results-card{
+    background:#fff;
+    border:1px solid #e1e8e4;
+    border-radius:14px;
+    box-shadow:0 3px 14px rgba(16,24,40,.06);
+    padding:14px;
+}
+
+.results-title{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+}
+.results-title h2{
+    margin:0;font-size:14px;font-weight:800;color:#101828;
+}
+.results-title p{margin:3px 0 0;font-size:10px;color:#667085}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+.stat{
+    background:#fff;border:1px solid #e1e8e4;border-radius:12px;
+    padding:12px;display:flex;align-items:center;justify-content:space-between;
+}
+.stat small{display:block;color:#667085;font-size:9px;text-transform:uppercase;font-weight:800}
+.stat strong{display:block;margin-top:4px;font-size:17px;font-family:monospace}
+.stat .ico{
+    width:38px;height:38px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+}
+.green{color:#079455}.sky{color:#0877b9}.amber{color:#b77900}
+.green-bg{background:#eaf8f0;border:1px solid #ccebd8}
+.sky-bg{background:#eff8ff;border:1px solid #cfeaff}
+.amber-bg{background:#fff7e6;border:1px solid #f3dfae}
+
+.table-card{
+    flex:1;min-height:0;background:#fff;
+    border:1px solid #e1e8e4;border-radius:14px;
+    box-shadow:0 3px 14px rgba(16,24,40,.06);
+    overflow:hidden;display:flex;flex-direction:column;
+}
+.table-wrap{overflow:auto;flex:1}
+.stock-table{width:100%;border-collapse:collapse}
+.stock-table th{
+    background:#f1f5f3;color:#344054;
+    border-bottom:2px solid #c8d2cd;
+    padding:10px 9px;font-size:9px;font-weight:800;
+    text-transform:uppercase;white-space:nowrap;
+}
+.stock-table td{
+    padding:10px 9px;border-bottom:1px solid #e1e8e4;
+    font-size:10px;color:#344054;background:#fff;
+}
+.stock-table tbody tr:nth-child(even) td{background:#f9fbfa}
+.stock-table tbody tr:hover td{background:#eef8f2}
+.article-cell{font-weight:800;color:#079455!important}
+.lot-cell{font-family:monospace;color:#667085!important}
+.qty{font-family:monospace;text-align:right;font-weight:800}
+.badge{
+    display:inline-flex;padding:4px 8px;border-radius:999px;
+    font-size:8px;font-weight:800;border:1px solid;
+}
+.badge-ok{color:#067a47;background:#eaf8f0;border-color:#bde4cc}
+.badge-zero{color:#b42318;background:#fff0ef;border-color:#f3c8c5}
+.badge-res{color:#b77900;background:#fff7e6;border-color:#f0dba7}
+
+.pagination{
+    min-height:48px;padding:9px 12px;
+    border-top:1px solid #e1e8e4;background:#f8faf9;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;font-size:10px;color:#667085;
+}
+.page-btn{
+    border:1px solid #d5dfda;background:#fff;color:#344054;
+    border-radius:8px;padding:7px 10px;font-size:10px;font-weight:700;
+    cursor:pointer;
+}
+.page-btn:disabled{opacity:.4;cursor:not-allowed}
+.page-btn:not(:disabled):hover{border-color:#079455;color:#079455}
+
+.empty{
+    padding:45px 15px!important;text-align:center!important;color:#98a2b3!important;
+}
+.loading i{color:#079455}
+
+@media(max-width:950px){
+    .stock-grid{grid-template-columns:1fr}
+    .stock-panel{max-height:none}
+    .stats{grid-template-columns:1fr}
+    .stock-header{align-items:flex-start}
+    .stock-clock{display:none}
+}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
 
-    <!-- MAIN CONTAINER -->
-    <div class="flex-1 flex flex-col min-w-0">
-        
-        <!-- HEADER -->
-        <header class="h-20 bg-slate-900/40 border-b border-slate-800/80 px-8 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-6">
-                <!-- زر الرجوع السريع إلى index-stock.html -->
-                <a href="../index-stock.html" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm group">
-                    <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-                    <span>Retour au Hub</span>
-                </a>
+<body>
+<main class="stock-page">
 
-                <div>
-                    <h1 id="pageTitle" class="text-xl font-bold tracking-tight text-slate-100">Gestion Stock</h1>
-                    <div id="breadcrumb" class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                        <span>Accueil</span>
-                        <span>/</span>
-                        <strong class="text-slate-300">Gestion Stock</strong>
-                    </div>
+    <div class="stock-header">
+        <div class="stock-title">
+            <div class="stock-icon"><i class="fas fa-boxes-stacked"></i></div>
+            <div>
+                <h1>Gestion Stock</h1>
+                <p>État global du stock · Consultation en direct · Recherche par article et lot</p>
+            </div>
+        </div>
+        <div class="stock-clock">
+            <span id="currentDate">Chargement...</span>
+            <strong id="currentTime">00:00:00</strong>
+        </div>
+    </div>
+
+    <div class="stock-grid">
+
+        <aside class="stock-panel">
+            <div class="panel-head">
+                <h2><i class="fas fa-sliders"></i>Panneau Stock</h2>
+                <button id="resetFilters" style="border:0;background:none;color:#079455;font-size:10px;text-decoration:underline;cursor:pointer">
+                    Réinitialiser
+                </button>
+            </div>
+
+            <div class="filter-card">
+                <label><i class="fas fa-tag green"></i> Article / Produit</label>
+                <input id="searchArticleInput" class="filter-input" type="text"
+                       placeholder="Article ou désignation...">
+            </div>
+
+            <div class="filter-card">
+                <label><i class="fas fa-barcode amber"></i> Lot</label>
+                <input id="searchLotInput" class="filter-input" type="text"
+                       placeholder="Rechercher un lot...">
+            </div>
+
+            <div class="filter-card">
+                <label><i class="fas fa-store green"></i> Magasin</label>
+                <select id="magasinFilter" class="filter-select">
+                    <option value="">Tous les magasins</option>
+                </select>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-row">
+                    <button id="refreshBtn" class="action-btn btn-green">
+                        <i class="fas fa-rotate"></i> Actualiser
+                    </button>
+                    <button id="clearBtn" class="action-btn btn-gray">
+                        <i class="fas fa-eraser"></i> Effacer
+                    </button>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-4 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-xl">
-                <div class="text-right">
-                    <span id="currentDate" class="text-xs font-medium text-slate-300 block">Chargement...</span>
-                    <span id="currentTime" class="text-[10px] text-emerald-400 font-mono block">00:00:00</span>
+
+            <div class="filter-card">
+                <label>Exports & Impression</label>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <button id="excelBtn" class="action-btn btn-light-green">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <button id="pdfBtn" class="action-btn btn-sky">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button id="printBtn" class="action-btn btn-amber">
+                        <i class="fas fa-print"></i> Imprimer
+                    </button>
                 </div>
             </div>
-        </header>
 
-        <!-- PAGE BODY -->
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div class="w-full px-4 flex flex-col gap-6">
-                
-                <!-- TOP HEADER & ACTION BUTTONS BAR -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
-                            <i class="fas fa-warehouse text-emerald-400"></i> État Global du Stock
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-1">
-                            Consultation en direct et analyses globales du stock[cite: 4].
-                        </p>
-                    </div>
-                    
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <!-- ACTION BUTTONS -->
-                        <button onclick="exportToExcel()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="fas fa-file-excel"></i> <span>Excel</span>
-                        </button>
-                        
-                        <button onclick="exportToPDF()" class="bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="fas fa-file-pdf"></i> <span>PDF</span>
-                        </button>
+            <div class="stock-summary">
+                <div class="summary-line total">
+                    <span>Total disponible</span>
+                    <strong id="sideTotalStock">0.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>Articles</span>
+                    <strong id="sideTotalArticles">0</strong>
+                </div>
+                <div class="summary-line">
+                    <span>Lots</span>
+                    <strong id="sideTotalLots">0</strong>
+                </div>
+                <div class="summary-line">
+                    <span>Lignes</span>
+                    <strong id="sideTotalRows">0</strong>
+                </div>
+            </div>
+        </aside>
 
-                        <button onclick="printStock()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="fas fa-print"></i> <span>Imprimer</span>
-                        </button>
+        <section class="stock-results">
+            <div class="results-main">
 
-                        <!-- Magasin Filter Select -->
-                        <div class="relative">
-                            <i class="fas fa-store absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                            <select id="magasinFilter" class="bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-8 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition shadow-inner appearance-none cursor-pointer">
-                                <option value="">Tous les magasins</option>
-                            </select>
-                            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none"></i>
+                <div class="results-card">
+                    <div class="results-title">
+                        <div>
+                            <h2><i class="fas fa-warehouse green" style="margin-right:7px"></i>État Global du Stock</h2>
+                            <p>Stock disponible et réservé en temps réel depuis <strong>vw_stock</strong>.</p>
                         </div>
-
-                        <!-- Search Input: Article / Produit -->
-                        <div class="relative">
-                            <i class="fas fa-tag absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400 text-sm"></i>
-                            <input type="text" id="searchArticleInput" placeholder="Rechercher Article / Produit..." 
-                                class="bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 w-48 transition shadow-inner">
-                        </div>
-
-                        <!-- Search Input: Lot -->
-                        <div class="relative">
-                            <i class="fas fa-barcode absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-400 text-sm"></i>
-                            <input type="text" id="searchLotInput" placeholder="Rechercher Lot..." 
-                                class="bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 w-44 transition shadow-inner">
-                        </div>
+                        <button id="topRefreshBtn" class="action-btn btn-light-green" style="width:auto;padding:0 13px">
+                            <i class="fas fa-rotate"></i> Actualiser
+                        </button>
                     </div>
                 </div>
 
-                <!-- STATS CARDS GRID -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Total Stock Card -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
+                <div class="stats">
+                    <div class="stat">
                         <div>
-                            <span class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider block">Total Quantité Disponible</span>
-                            <span id="totalStockBadge" class="text-xl font-bold text-emerald-400 font-mono mt-1 block">Chargement...</span>
+                            <small>Total Quantité Disponible</small>
+                            <strong id="totalStockBadge" class="green">Chargement...</strong>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg">
-                            <i class="fas fa-boxes"></i>
-                        </div>
+                        <div class="ico green-bg green"><i class="fas fa-boxes"></i></div>
                     </div>
 
-                    <!-- Total Articles Card -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
+                    <div class="stat">
                         <div>
-                            <span class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider block">Nombre d'Articles</span>
-                            <span id="totalArticlesBadge" class="text-xl font-bold text-sky-400 font-mono mt-1 block">Chargement...</span>
+                            <small>Nombre d'Articles</small>
+                            <strong id="totalArticlesBadge" class="sky">Chargement...</strong>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 text-lg">
-                            <i class="fas fa-tags"></i>
-                        </div>
+                        <div class="ico sky-bg sky"><i class="fas fa-tags"></i></div>
                     </div>
 
-                    <!-- Total Lots Card -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
+                    <div class="stat">
                         <div>
-                            <span class="text-[11px] text-slate-400 uppercase font-semibold tracking-wider block">Nombre de Lots</span>
-                            <span id="totalLotsBadge" class="text-xl font-bold text-amber-400 font-mono mt-1 block">Chargement...</span>
+                            <small>Nombre de Lots</small>
+                            <strong id="totalLotsBadge" class="amber">Chargement...</strong>
                         </div>
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-lg">
-                            <i class="fas fa-barcode"></i>
-                        </div>
+                        <div class="ico amber-bg amber"><i class="fas fa-barcode"></i></div>
                     </div>
                 </div>
 
-                <!-- TABLE CONTAINER -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left border-collapse text-sm">
+                <div class="table-card">
+                    <div class="table-wrap">
+                        <table class="stock-table">
                             <thead>
-                                <tr class="bg-slate-950/60 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800 font-semibold">
-                                    <th class="p-4">Article</th>
-                                    <th class="p-4">Désignation</th>
-                                    <th class="p-4">Lot</th>
-                                    <th class="p-4">Magasin</th>
-                                    <th class="p-4">Unité</th>
-                                    <th class="p-4 text-right">Stock Disponible</th>
-                                    <th class="p-4 text-right">Stock Réservé</th>
-                                    <th class="p-4 text-center">Statut</th>
+                                <tr>
+                                    <th>Article</th>
+                                    <th>Désignation</th>
+                                    <th>Lot</th>
+                                    <th>Magasin</th>
+                                    <th>Unité</th>
+                                    <th style="text-align:right">Stock Disponible</th>
+                                    <th style="text-align:right">Stock Réservé</th>
+                                    <th style="text-align:center">Statut</th>
                                 </tr>
                             </thead>
-                            <tbody id="stockTableBody" class="divide-y divide-slate-800/50">
+                            <tbody id="stockTableBody">
                                 <tr>
-                                    <td colspan="8" class="p-10 text-center text-slate-400 text-xs">
-                                        <i class="fas fa-spinner fa-spin mr-2 text-emerald-500 text-base"></i> Chargement des données du stock...
+                                    <td colspan="8" class="empty loading">
+                                        <i class="fas fa-spinner fa-spin" style="margin-right:7px"></i>
+                                        Chargement des données du stock...
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- PAGINATION BAR -->
-                    <div class="bg-slate-950/40 border-t border-slate-800 px-6 py-4 flex items-center justify-between text-xs text-slate-400">
-                        <div id="paginationInfo">Affichage de 0 à 0 sur 0 entrées</div>
-                        <div class="flex items-center gap-2">
-                            <button id="prevPageBtn" onclick="changePage(-1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer">
-                                <i class="fas fa-chevron-left mr-1"></i> Précédent
+                    <div class="pagination">
+                        <span id="paginationInfo">Affichage de 0 à 0 sur 0 entrées</span>
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <button id="prevPageBtn" class="page-btn">
+                                <i class="fas fa-chevron-left"></i> Précédent
                             </button>
-                            <span id="pageIndicator" class="px-3 py-1 font-mono text-emerald-400 font-semibold">Page 1 / 1</span>
-                            <button id="nextPageBtn" onclick="changePage(1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer">
-                                Suivant <i class="fas fa-chevron-right ml-1"></i>
+                            <span id="pageIndicator" style="padding:0 7px;font-family:monospace;color:#079455;font-weight:800">
+                                Page 1 / 1
+                            </span>
+                            <button id="nextPageBtn" class="page-btn">
+                                Suivant <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
             </div>
-        </main>
+        </section>
     </div>
+</main>
 
-    <!-- SCRIPTS -->
-    <script type="module">
-        import supabase from './assets/js/core/supabase.js';
+<script type="module">
+import supabase from '../assets/js/core/supabase.js';
 
-        let currentPage = 1;
-        const pageSize = 50; 
-        let totalRecords = 0;
-        let currentSearchArticle = "";
-        let currentSearchLot = "";
-        let currentMagasin = "";
-        let allFilteredDataForExport = []; 
+let currentPage = 1;
+const pageSize = 50;
+let totalRecords = 0;
 
-        window.changePage = async function(direction) {
-            currentPage += direction;
-            await loadStockData();
-        }
+let currentSearchArticle = "";
+let currentSearchLot = "";
+let currentMagasin = "";
+let allFilteredDataForExport = [];
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            initLiveClock();
-            await populateMagasinFilterDropdown();
-            await loadStockData();
+const $ = id => document.getElementById(id);
 
-            const searchArticleInput = document.getElementById("searchArticleInput");
-            const searchLotInput = document.getElementById("searchLotInput");
-            const magasinFilter = document.getElementById("magasinFilter");
+function escapeHtml(value){
+    return String(value ?? '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+}
 
-            let searchTimeout;
+function formatNumber(value, decimals=2){
+    return Number(value || 0).toLocaleString('fr-FR',{
+        minimumFractionDigits:decimals,
+        maximumFractionDigits:decimals
+    });
+}
 
-            if (searchArticleInput) {
-                searchArticleInput.addEventListener("input", (e) => {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(async () => {
-                        currentSearchArticle = e.target.value.trim();
-                        currentPage = 1; 
-                        await loadStockData();
-                    }, 300);
-                });
-            }
+function initLiveClock(){
+    const update = () => {
+        const now = new Date();
+        $('currentDate').textContent =
+            now.toLocaleDateString('fr-FR',{
+                weekday:'short',
+                year:'numeric',
+                month:'short',
+                day:'numeric'
+            });
+        $('currentTime').textContent =
+            now.toTimeString().split(' ')[0];
+    };
+    update();
+    setInterval(update,1000);
+}
 
-            if (searchLotInput) {
-                searchLotInput.addEventListener("input", (e) => {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(async () => {
-                        currentSearchLot = e.target.value.trim();
-                        currentPage = 1; 
-                        await loadStockData();
-                    }, 300);
-                });
-            }
+function applyFilters(query){
+    if(currentSearchArticle){
+        query = query.or(
+            `article.ilike.%${currentSearchArticle}%,designation_article.ilike.%${currentSearchArticle}%`
+        );
+    }
 
-            if (magasinFilter) {
-                magasinFilter.addEventListener("change", async (e) => {
-                    currentMagasin = e.target.value;
-                    currentPage = 1; 
-                    await loadStockData();
-                });
-            }
+    if(currentSearchLot){
+        query = query.ilike('lot',`%${currentSearchLot}%`);
+    }
+
+    if(currentMagasin){
+        query = query.eq('magasin',currentMagasin);
+    }
+
+    return query;
+}
+
+async function populateMagasinFilterDropdown(){
+    try{
+        const {data,error} = await supabase
+            .from('vw_stock')
+            .select('magasin')
+            .limit(10000);
+
+        if(error || !data) return;
+
+        const magasins = [...new Set(
+            data.map(x => x.magasin).filter(Boolean)
+        )].sort();
+
+        $('magasinFilter').innerHTML =
+            '<option value="">Tous les magasins</option>';
+
+        magasins.forEach(magasin=>{
+            const option = document.createElement('option');
+            option.value = magasin;
+            option.textContent = magasin;
+            $('magasinFilter').appendChild(option);
         });
+    }catch(error){
+        console.error('Erreur chargement magasins:',error);
+    }
+}
 
-        // تشغيل الساعة والتاريخ الحي
-        function initLiveClock() {
-            const updateClock = () => {
-                const now = new Date();
-                const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const dateStr = now.toLocaleDateString('fr-FR', optionsDate);
-                const timeStr = now.toTimeString().split(' ')[0];
+async function loadStockData(){
+    const tbody = $('stockTableBody');
 
-                const dateEl = document.getElementById("currentDate");
-                const timeEl = document.getElementById("currentTime");
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="empty loading">
+                <i class="fas fa-spinner fa-spin" style="margin-right:7px"></i>
+                Chargement des données du stock...
+            </td>
+        </tr>`;
 
-                if (dateEl) dateEl.innerText = dateStr;
-                if (timeEl) timeEl.innerText = timeStr;
-            };
+    try{
+        let query = supabase
+            .from('vw_stock')
+            .select('*',{count:'exact'});
 
-            updateClock();
-            setInterval(updateClock, 1000);
-        }
+        query = applyFilters(query);
 
-        async function populateMagasinFilterDropdown() {
-            try {
-                const { data, error } = await supabase.from('vw_stock').select('magasin').limit(10000);
-                if (error || !data) return;
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize - 1;
 
-                const magasins = [...new Set(data.map(item => item.magasin).filter(Boolean))].sort();
-                const magasinFilter = document.getElementById("magasinFilter");
-                if (!magasinFilter) return;
+        query = query
+            .range(start,end)
+            .order('article',{ascending:true});
 
-                magasinFilter.innerHTML = `<option value="">Tous les magasins</option>`;
-                magasins.forEach(mag => {
-                    const opt = document.createElement("option");
-                    opt.value = mag;
-                    opt.textContent = mag;
-                    magasinFilter.appendChild(opt);
-                });
-            } catch (err) {
-                console.error("Erreur chargement magasins:", err);
-            }
-        }
+        const {data,count,error} = await query;
 
-        function applyFilters(query) {
-            if (currentSearchArticle !== "") {
-                query = query.or(`article.ilike.%${currentSearchArticle}%,designation_article.ilike.%${currentSearchArticle}%`);
-            }
-            if (currentSearchLot !== "") {
-                query = query.ilike('lot', `%${currentSearchLot}%`);
-            }
-            if (currentMagasin !== "") {
-                query = query.eq('magasin', currentMagasin);
-            }
-            return query;
-        }
+        if(error) throw error;
 
-        async function loadStockData() {
-            const tbody = document.getElementById("stockTableBody");
-            
-            try {
-                let query = supabase.from('vw_stock').select('*', { count: 'exact' });
-                query = applyFilters(query);
+        totalRecords = count || 0;
 
-                const start = (currentPage - 1) * pageSize;
-                const end = start + pageSize - 1;
-                query = query.range(start, end).order('article', { ascending: true });
+        renderTable(data || []);
+        updatePaginationControls();
 
-                const { data, count, error } = await query;
+        await calculateGlobalStatsAndFetchAll();
 
-                if (error) {
-                    console.error("Erreur chargement stock:", error);
-                    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-400 text-xs"><i class="fas fa-exclamation-triangle mr-2"></i> Erreur lors du chargement des données.</td></tr>`;
-                    return;
-                }
+    }catch(error){
+        console.error('Erreur chargement stock:',error);
 
-                totalRecords = count || 0;
-                renderTable(data || []);
-                updatePaginationControls();
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty" style="color:#b42318!important">
+                    <i class="fas fa-triangle-exclamation" style="margin-right:7px"></i>
+                    Erreur lors du chargement des données du stock.
+                </td>
+            </tr>`;
+    }
+}
 
-                await calculateGlobalStatsAndFetchAll();
+async function calculateGlobalStatsAndFetchAll(){
+    try{
+        let grandTotalStock = 0;
+        const articlesSet = new Set();
+        const lotsSet = new Set();
+        let fullDataList = [];
 
-            } catch (err) {
-                console.error("Erreur technique:", err);
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-red-400 text-xs">Erreur de connexion au serveur.</td></tr>`;
-            }
-        }
+        const batchSize = 1000;
+        let offset = 0;
+        let fetchMore = true;
 
-        async function calculateGlobalStatsAndFetchAll() {
-            const totalStockBadge = document.getElementById("totalStockBadge");
-            const totalArticlesBadge = document.getElementById("totalArticlesBadge");
-            const totalLotsBadge = document.getElementById("totalLotsBadge");
+        while(fetchMore && offset < 50000){
 
-            try {
-                let grandTotalStock = 0;
-                let articlesSet = new Set();
-                let lotsSet = new Set();
-                let fullDataList = [];
+            let query = supabase
+                .from('vw_stock')
+                .select('*');
 
-                let batchSize = 1000;
-                let offset = 0;
-                let fetchMore = true;
+            query = applyFilters(query);
+            query = query.range(offset,offset + batchSize - 1);
 
-                while (fetchMore && offset < 50000) {
-                    let q = supabase.from('vw_stock').select('*');
-                    q = applyFilters(q);
-                    q = q.range(offset, offset + batchSize - 1);
+            const {data,error} = await query;
 
-                    const { data: chunkData, error: chunkErr } = await q;
-                    if (chunkErr || !chunkData || chunkData.length === 0) {
-                        fetchMore = false;
-                        break;
-                    }
+            if(error || !data || data.length === 0) break;
 
-                    chunkData.forEach(row => {
-                        grandTotalStock += Number(row.stock_disponible || 0);
-                        if (row.article) articlesSet.add(row.article);
-                        if (row.lot) lotsSet.add(row.lot);
-                    });
+            data.forEach(row=>{
+                grandTotalStock += Number(row.stock_disponible || 0);
 
-                    fullDataList = fullDataList.concat(chunkData);
+                if(row.article)
+                    articlesSet.add(row.article);
 
-                    if (chunkData.length < batchSize) {
-                        fetchMore = false;
-                    } else {
-                        offset += batchSize;
-                    }
-                }
-
-                allFilteredDataForExport = fullDataList;
-
-                if (totalStockBadge) {
-                    totalStockBadge.textContent = grandTotalStock.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                }
-                if (totalArticlesBadge) {
-                    totalArticlesBadge.textContent = articlesSet.size.toLocaleString();
-                }
-                if (totalLotsBadge) {
-                    totalLotsBadge.textContent = lotsSet.size.toLocaleString();
-                }
-
-            } catch (err) {
-                console.error("Erreur calcul stats globales:", err);
-            }
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById("stockTableBody");
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 text-xs"><i class="fas fa-folder-open mr-2"></i> Aucun article trouvé.</td></tr>`;
-                return;
-            }
-
-            let html = "";
-            data.forEach(item => {
-                const qteDisp = Number(item.stock_disponible || 0);
-                html += `
-                    <tr class="hover:bg-slate-800/35 transition">
-                        <td class="p-4 font-semibold text-emerald-400 text-xs">${item.article || '-'}</td>
-                        <td class="p-4 text-slate-200 font-medium text-xs">${item.designation_article || '-'}</td>
-                        <td class="p-4 text-slate-400 font-mono text-xs">${item.lot || '-'}</td>
-                        <td class="p-4 text-slate-300 font-medium text-xs">${item.magasin || '-'}</td>
-                        <td class="p-4 text-slate-400 text-[11px] uppercase">${item.unite || '-'}</td>
-                        <td class="p-4 text-right font-semibold text-emerald-300 text-xs">${qteDisp.toLocaleString()}</td>
-                        <td class="p-4 text-right font-medium text-amber-400 text-xs">${Number(item.stock_reserve || 0).toLocaleString()}</td>
-                        <td class="p-4 text-center">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-semibold bg-slate-950/80 text-slate-300 border border-slate-800 shadow-sm">
-                                ${item.statut || 'DISPONIBLE'}
-                            </span>
-                        </td>
-                    </tr>
-                `;
+                if(row.lot)
+                    lotsSet.add(row.lot);
             });
 
-            tbody.innerHTML = html;
-        }
+            fullDataList = fullDataList.concat(data);
 
-        function updatePaginationControls() {
-            const totalPages = Math.ceil(totalRecords / pageSize) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-
-            const startItem = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-            const endItem = Math.min(currentPage * pageSize, totalRecords);
-
-            document.getElementById("paginationInfo").textContent = `Affichage de ${startItem} à ${endItem} sur ${totalRecords} entrées`;
-            document.getElementById("pageIndicator").textContent = `Page ${currentPage} / ${totalPages}`;
-
-            document.getElementById("prevPageBtn").disabled = currentPage <= 1;
-            document.getElementById("nextPageBtn").disabled = currentPage >= totalPages;
-        }
-
-        // --- FONCTIONS EXPORT & IMPRESSION ---
-        window.exportToExcel = function() {
-            if (!allFilteredDataForExport || allFilteredDataForExport.length === 0) {
-                alert("Aucune donnée à exporter.");
-                return;
+            if(data.length < batchSize){
+                fetchMore = false;
+            }else{
+                offset += batchSize;
             }
-
-            const exportData = allFilteredDataForExport.map(item => ({
-                "Article": item.article || '',
-                "Désignation": item.designation_article || '',
-                "Lot": item.lot || '',
-                "Magasin": item.magasin || '',
-                "Unité": item.unite || '',
-                "Stock Disponible": Number(item.stock_disponible || 0),
-                "Stock Réservé": Number(item.stock_reserve || 0),
-                "Statut": item.statut || 'DISPONIBLE'
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Etat Stock");
-            XLSX.writeFile(workbook, `Etat_Global_Stock_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        window.exportToPDF = function() {
-            if (!allFilteredDataForExport || allFilteredDataForExport.length === 0) {
-                alert("Aucune donnée à exporter.");
-                return;
-            }
+        allFilteredDataForExport = fullDataList;
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
+        $('totalStockBadge').textContent = formatNumber(grandTotalStock);
+        $('totalArticlesBadge').textContent =
+            articlesSet.size.toLocaleString('fr-FR');
+        $('totalLotsBadge').textContent =
+            lotsSet.size.toLocaleString('fr-FR');
 
-            doc.setFontSize(16);
-            doc.setTextColor(15, 23, 42);
-            doc.text("SoufStock Enterprise - État Global du Stock", 14, 15);
+        $('sideTotalStock').textContent = formatNumber(grandTotalStock);
+        $('sideTotalArticles').textContent =
+            articlesSet.size.toLocaleString('fr-FR');
+        $('sideTotalLots').textContent =
+            lotsSet.size.toLocaleString('fr-FR');
+        $('sideTotalRows').textContent =
+            fullDataList.length.toLocaleString('fr-FR');
 
-            doc.setFontSize(10);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`Date d'export : ${new Date().toLocaleDateString('fr-FR')} | Magasin : ${currentMagasin || 'Tous'}`, 14, 22);
+    }catch(error){
+        console.error('Erreur calcul statistiques:',error);
+    }
+}
 
-            const tableColumn = ["Article", "Désignation", "Lot", "Magasin", "Unité", "Stock Disp.", "Stock Rés.", "Statut"];
-            const tableRows = [];
+function renderTable(data){
+    const tbody = $('stockTableBody');
 
-            allFilteredDataForExport.forEach(item => {
-                tableRows.push([
-                    item.article || '',
-                    item.designation_article || '',
-                    item.lot || '',
-                    item.magasin || '',
-                    item.unite || '',
-                    Number(item.stock_disponible || 0).toLocaleString(),
-                    Number(item.stock_reserve || 0).toLocaleString(),
-                    item.statut || 'DISPONIBLE'
-                ]);
-            });
+    if(!data.length){
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty">
+                    <i class="fas fa-folder-open" style="font-size:20px;margin-bottom:7px;display:block"></i>
+                    Aucun article trouvé.
+                </td>
+            </tr>`;
+        return;
+    }
 
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 28,
-                theme: 'grid',
-                styles: { fontSize: 8, cellPadding: 3 },
-                headStyles: { fillColor: [15, 23, 42] }
-            });
+    tbody.innerHTML = data.map(item=>{
 
-            doc.save(`Etat_Global_Stock_${new Date().toISOString().slice(0,10)}.pdf`);
+        const disponible = Number(item.stock_disponible || 0);
+        const reserve = Number(item.stock_reserve || 0);
+
+        let badgeClass = 'badge-ok';
+        let badgeText = item.statut || 'DISPONIBLE';
+
+        if(disponible <= 0){
+            badgeClass = 'badge-zero';
+            badgeText = 'ÉPUISÉ';
+        }else if(reserve > 0){
+            badgeClass = 'badge-res';
+            badgeText = item.statut || 'RÉSERVÉ';
         }
 
-        window.printStock = function() {
-            window.print();
-        }
-    </script>
+        return `
+            <tr>
+                <td class="article-cell">${escapeHtml(item.article || '-')}</td>
+                <td>${escapeHtml(item.designation_article || '-')}</td>
+                <td class="lot-cell">${escapeHtml(item.lot || '-')}</td>
+                <td>${escapeHtml(item.magasin || '-')}</td>
+                <td style="text-transform:uppercase">${escapeHtml(item.unite || '-')}</td>
+                <td class="qty green">${formatNumber(disponible)}</td>
+                <td class="qty amber">${formatNumber(reserve)}</td>
+                <td style="text-align:center">
+                    <span class="badge ${badgeClass}">
+                        ${escapeHtml(badgeText)}
+                    </span>
+                </td>
+            </tr>`;
+    }).join('');
+}
+
+function updatePaginationControls(){
+    const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+
+    if(currentPage > totalPages)
+        currentPage = totalPages;
+
+    const startItem =
+        totalRecords === 0
+            ? 0
+            : (currentPage - 1) * pageSize + 1;
+
+    const endItem =
+        Math.min(currentPage * pageSize,totalRecords);
+
+    $('paginationInfo').textContent =
+        `Affichage de ${startItem} à ${endItem} sur ${totalRecords} entrées`;
+
+    $('pageIndicator').textContent =
+        `Page ${currentPage} / ${totalPages}`;
+
+    $('prevPageBtn').disabled = currentPage <= 1;
+    $('nextPageBtn').disabled = currentPage >= totalPages;
+}
+
+async function changePage(direction){
+    const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+
+    currentPage = Math.max(
+        1,
+        Math.min(totalPages,currentPage + direction)
+    );
+
+    await loadStockData();
+}
+
+function resetFilters(){
+    currentSearchArticle = "";
+    currentSearchLot = "";
+    currentMagasin = "";
+    currentPage = 1;
+
+    $('searchArticleInput').value = "";
+    $('searchLotInput').value = "";
+    $('magasinFilter').value = "";
+
+    loadStockData();
+}
+
+function exportToExcel(){
+    if(!allFilteredDataForExport.length){
+        alert('Aucune donnée à exporter.');
+        return;
+    }
+
+    const exportData = allFilteredDataForExport.map(item=>({
+        "Article": item.article || '',
+        "Désignation": item.designation_article || '',
+        "Lot": item.lot || '',
+        "Magasin": item.magasin || '',
+        "Unité": item.unite || '',
+        "Stock Disponible": Number(item.stock_disponible || 0),
+        "Stock Réservé": Number(item.stock_reserve || 0),
+        "Statut": item.statut || 'DISPONIBLE'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        'Etat Stock'
+    );
+
+    XLSX.writeFile(
+        workbook,
+        `Etat_Global_Stock_${new Date().toISOString().slice(0,10)}.xlsx`
+    );
+}
+
+function exportToPDF(){
+    if(!allFilteredDataForExport.length){
+        alert('Aucune donnée à exporter.');
+        return;
+    }
+
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF('l','mm','a4');
+
+    doc.setFontSize(16);
+    doc.setTextColor(15,23,42);
+    doc.text(
+        'SoufStock Enterprise - État Global du Stock',
+        14,15
+    );
+
+    doc.setFontSize(10);
+    doc.setTextColor(100,116,139);
+    doc.text(
+        `Date d'export : ${new Date().toLocaleDateString('fr-FR')} | Magasin : ${currentMagasin || 'Tous'}`,
+        14,22
+    );
+
+    const columns = [
+        'Article',
+        'Désignation',
+        'Lot',
+        'Magasin',
+        'Unité',
+        'Stock Disp.',
+        'Stock Rés.',
+        'Statut'
+    ];
+
+    const rows = allFilteredDataForExport.map(item=>[
+        item.article || '',
+        item.designation_article || '',
+        item.lot || '',
+        item.magasin || '',
+        item.unite || '',
+        formatNumber(item.stock_disponible),
+        formatNumber(item.stock_reserve),
+        item.statut || 'DISPONIBLE'
+    ]);
+
+    doc.autoTable({
+        head:[columns],
+        body:rows,
+        startY:28,
+        theme:'grid',
+        styles:{fontSize:8,cellPadding:3},
+        headStyles:{fillColor:[7,148,85]}
+    });
+
+    doc.save(
+        `Etat_Global_Stock_${new Date().toISOString().slice(0,10)}.pdf`
+    );
+}
+
+function printStock(){
+    window.print();
+}
+
+document.addEventListener('DOMContentLoaded',async()=>{
+
+    initLiveClock();
+
+    await populateMagasinFilterDropdown();
+    await loadStockData();
+
+    let searchTimer;
+
+    $('searchArticleInput').addEventListener('input',event=>{
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(()=>{
+            currentSearchArticle = event.target.value.trim();
+            currentPage = 1;
+            loadStockData();
+        },300);
+    });
+
+    $('searchLotInput').addEventListener('input',event=>{
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(()=>{
+            currentSearchLot = event.target.value.trim();
+            currentPage = 1;
+            loadStockData();
+        },300);
+    });
+
+    $('magasinFilter').addEventListener('change',event=>{
+        currentMagasin = event.target.value;
+        currentPage = 1;
+        loadStockData();
+    });
+
+    $('resetFilters').addEventListener('click',resetFilters);
+    $('clearBtn').addEventListener('click',resetFilters);
+
+    $('refreshBtn').addEventListener('click',()=>{
+        loadStockData();
+    });
+
+    $('topRefreshBtn').addEventListener('click',()=>{
+        loadStockData();
+    });
+
+    $('prevPageBtn').addEventListener('click',()=>{
+        changePage(-1);
+    });
+
+    $('nextPageBtn').addEventListener('click',()=>{
+        changePage(1);
+    });
+
+    $('excelBtn').addEventListener('click',exportToExcel);
+    $('pdfBtn').addEventListener('click',exportToPDF);
+    $('printBtn').addEventListener('click',printStock);
+});
+</script>
 </body>
 </html>
