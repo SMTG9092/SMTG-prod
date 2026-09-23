@@ -1,24 +1,7 @@
-<!DOCTYPE html>
-<html lang="fr" class="dark">
+<!-- SMTG IMPORT STOCK - SPA VERSION -->
+<main id="import-stock-page" class="import-stock-page">
+<style>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Import Stock - SMTG WMS</title>
-
-    <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    >
-
-    <!-- SheetJS -->
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-    </script>
-
-    <style>
         * {
             box-sizing: border-box;
         }
@@ -362,26 +345,10 @@
 
         .actions {
             margin-top: auto;
-            padding: 10px 0 4px;
+            padding-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            position: sticky;
-            bottom: 0;
-            z-index: 20;
-            background: #060817;
-            flex: 0 0 auto;
-        }
-
-        .sidebar .actions {
-            flex: 0 0 auto;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        .sidebar .actions .btn {
-            display: flex !important;
-            visibility: visible !important;
         }
 
         .btn {
@@ -937,588 +904,330 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
-    </style>
-</head>
+    
+/* ============================================================
+   SPA / DASHBOARD HOST
+============================================================ */
+.import-stock-page {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #060817;
+    color: #e8edf7;
+}
+.import-stock-page .body {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+}
+.import-stock-page .main {
+    min-height: 0;
+}
+.import-stock-page .sidebar {
+    min-height: 0;
+}
 
-<body>
-
-<main class="page" id="importStockPage">
-
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
-
-    <header class="header">
-
-        <div class="brand">
-
-            <div class="brand-icon">
-                <i class="fa-solid fa-cubes"></i>
-            </div>
-
-            <div>
-                <div class="brand-title">
-                    SMTG
-                </div>
-
-                <div class="brand-subtitle">
-                    Traçabilité globale
-                </div>
-            </div>
-
-        </div>
-
-        <div class="clock-box">
-
-            <div
-                id="currentDate"
-                class="clock-date">
-                -
-            </div>
-
-            <div
-                id="currentTime"
-                class="clock-time">
-                -
-            </div>
-
-        </div>
-
-    </header>
-
-
-    <!-- =====================================================
-         BODY
-    ====================================================== -->
-
-    <div class="body">
-
-        <!-- =================================================
+</style>
+<div class="body">
+<!-- =================================================
              SIDEBAR
         ================================================== -->
-
-        <aside class="sidebar">
-
-            <div class="panel-title">
-
-                <strong>
-                    <i class="fa-solid fa-file-arrow-up"
-                       style="color:#10d69a;margin-right:5px">
-                    </i>
+<aside class="sidebar">
+<div class="panel-title">
+<strong>
+<i class="fa-solid fa-file-arrow-up" style="color:#10d69a;margin-right:5px">
+</i>
                     Panneau d'importation
                 </strong>
-
-                <button
-                    id="btnReset"
-                    class="reset-link"
-                    type="button">
+<button class="reset-link" id="btnReset" type="button">
                     Tout réinitialiser
                 </button>
-
-            </div>
-
-
-            <!-- =================================================
+</div>
+<!-- =================================================
                  FILE STOCK
             ================================================== -->
-
-            <div
-                id="fileCard"
-                class="file-card">
-
-                <input
-                    type="file"
-                    id="excelFile"
-                    class="hidden"
-                    accept=".xlsx,.xls,.csv">
-
-                <div class="file-head">
-
-                    <div class="file-title">
-
-                        <div class="file-icon">
-                            <i class="fa-solid fa-file-excel"></i>
-                        </div>
-
-                        <div>
-                            <strong>
+<div class="file-card" id="fileCard">
+<input accept=".xlsx,.xls,.csv" class="hidden" id="excelFile" type="file"/>
+<div class="file-head">
+<div class="file-title">
+<div class="file-icon">
+<i class="fa-solid fa-file-excel"></i>
+</div>
+<div>
+<strong>
                                 Fichier Stock
                             </strong>
-
-                            <span>
+<span>
                                 Fichier SAP Stock
                             </span>
-                        </div>
-
-                    </div>
-
-                    <span
-                        id="fileBadge"
-                        class="badge">
+</div>
+</div>
+<span class="badge" id="fileBadge">
                         En attente
                     </span>
-
-                </div>
-
-
-                <div
-                    id="dropZone"
-                    class="drop-zone">
-
-                    <div>
-
-                        <div
-                            id="fileName"
-                            class="file-name hidden">
-                        </div>
-
-                        <div
-                            id="dropText"
-                            style="
+</div>
+<div class="drop-zone" id="dropZone">
+<div>
+<div class="file-name hidden" id="fileName">
+</div>
+<div id="dropText" style="
                                 color:#cfd7e7;
                                 font-size:9px;
                                 font-weight:700;
                             ">
                             Sélectionner le fichier Stock
                         </div>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    id="btnBrowse"
-                    class="browse-btn"
-                    type="button">
-
-                    <i class="fa-solid fa-folder-open"></i>
+</div>
+</div>
+<button class="browse-btn" id="btnBrowse" type="button">
+<i class="fa-solid fa-folder-open"></i>
                     Parcourir Stock
 
                 </button>
-
-            </div>
-
-
-            <!-- =================================================
+</div>
+<!-- =================================================
                  MODE
             ================================================== -->
-
-            <div class="file-card">
-
-                <div class="file-head">
-
-                    <div class="file-title">
-
-                        <div class="file-icon">
-                            <i class="fa-solid fa-database"></i>
-                        </div>
-
-                        <div>
-                            <strong>
+<div class="file-card">
+<div class="file-head">
+<div class="file-title">
+<div class="file-icon">
+<i class="fa-solid fa-database"></i>
+</div>
+<div>
+<strong>
                                 Mode d'import
                             </strong>
-
-                            <span>
+<span>
                                 Mise à jour et ajout des lignes
                             </span>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div
-                    class="mode-description"
-                    style="margin-top:12px">
-
-                    <strong id="modeLabel">
+</div>
+</div>
+</div>
+<div class="mode-description" style="margin-top:12px">
+<strong id="modeLabel">
                         Mise à jour
                     </strong>
-
-                    <span id="modeDescription">
+<span id="modeDescription">
                         Met à jour et ajoute les lignes
                     </span>
-
-                </div>
-
-                <select id="importMode">
-
-                    <option value="MISE_A_JOUR">
+</div>
+<select id="importMode">
+<option value="MISE_A_JOUR">
                         Mise à jour
                     </option>
-
-                    <option value="REMPLACER">
+<option value="REMPLACER">
                         Remplacer
                     </option>
-
-                    <option value="SYNCHRONISATION">
+<option value="SYNCHRONISATION">
                         Synchronisation
                     </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- =================================================
+</select>
+</div>
+<!-- =================================================
                  ACTIONS
             ================================================== -->
-
-            <div class="actions">
-
-                <button
-                    id="btnAnalyze"
-                    class="btn btn-analyze"
-                    type="button"
-                    disabled>
-
-                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+<div class="actions">
+<button class="btn btn-analyze" disabled="" id="btnAnalyze" type="button">
+<i class="fa-solid fa-magnifying-glass-chart"></i>
 
                     Analyser le fichier
 
                 </button>
+<button class="btn btn-save" disabled="" id="btnSave" type="button">
+<i class="fa-solid fa-cloud-arrow-up"></i>
 
-
-                <button
-                    id="btnSave"
-                    class="btn btn-save"
-                    type="button"
-                    disabled>
-
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-
-                    Enregistrer & Synchroniser
+                    Enregistrer &amp; Synchroniser
 
                 </button>
-
-
-                <div class="api-status">
-
-                    <span
-                        id="apiDot"
-                        class="api-dot">
-                    </span>
-
-                    <span id="apiStatusText">
+<div class="api-status">
+<span class="api-dot" id="apiDot">
+</span>
+<span id="apiStatusText">
                         Supabase non testée
                     </span>
-
-                </div>
-
-            </div>
-
-        </aside>
-
-
-        <!-- =================================================
+</div>
+</div>
+</aside>
+<!-- =================================================
              MAIN
         ================================================== -->
-
-        <section class="main">
-
-            <div class="main-top">
-
-                <div class="main-title">
-
-                    <div>
-
-                        <h1>
+<main class="main">
+<div class="main-top">
+<div class="main-title">
+<div>
+<h1>
                             Import Stock
                         </h1>
-
-                        <p>
+<p>
                             Importation du stock SAP et enregistrement direct dans Supabase.
                         </p>
-
-                    </div>
-
-                    <div class="main-status">
+</div>
+<div class="main-status">
 
                         Mode :
                         <strong id="mainModeLabel">
                             Mise à jour
                         </strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="content">
-
-                <!-- =================================================
+</div>
+</div>
+</div>
+<div class="content">
+<!-- =================================================
                      EMPTY
                 ================================================== -->
-
-                <section
-                    id="emptyState"
-                    class="empty-state">
-
-                    <div class="empty-inner">
-
-                        <div class="empty-icon">
-                            <i class="fa-solid fa-database"></i>
-                        </div>
-
-                        <h2>
+<section class="empty-state" id="emptyState">
+<div class="empty-inner">
+<div class="empty-icon">
+<i class="fa-solid fa-database"></i>
+</div>
+<h2>
                             Prêt pour l'importation directe du stock
                         </h2>
-
-                        <p>
+<p>
                             Importez votre fichier Stock SAP pour analyser,
                             contrôler et envoyer les données au serveur SMTG.
                         </p>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =================================================
+</div>
+</section>
+<!-- =================================================
                      RESULT
                 ================================================== -->
-
-                <section
-                    id="resultSection"
-                    class="result">
-
-                    <div class="result-header">
-
-                        <strong>
+<section class="result" id="resultSection">
+<div class="result-header">
+<strong>
                             Résultat de l'analyse
                         </strong>
-
-                        <span id="analysisMessage">
+<span id="analysisMessage">
                             Fichier prêt
                         </span>
-
-                    </div>
-
-
-                    <div class="stats">
-
-                        <div class="stat green">
-
-                            <small>
+</div>
+<div class="stats">
+<div class="stat green">
+<small>
                                 Lignes valides
                             </small>
-
-                            <strong id="statRows">
+<strong id="statRows">
                                 0
                             </strong>
-
-                        </div>
-
-
-                        <div class="stat blue">
-
-                            <small>
+</div>
+<div class="stat blue">
+<small>
                                 Articles
                             </small>
-
-                            <strong id="statArticles">
+<strong id="statArticles">
                                 0
                             </strong>
-
-                        </div>
-
-
-                        <div class="stat yellow">
-
-                            <small>
+</div>
+<div class="stat yellow">
+<small>
                                 Magasins
                             </small>
-
-                            <strong id="statMagasins">
+<strong id="statMagasins">
                                 0
                             </strong>
-
-                        </div>
-
-
-                        <div class="stat green">
-
-                            <small>
+</div>
+<div class="stat green">
+<small>
                                 Quantité totale
                             </small>
-
-                            <strong id="statQuantity">
+<strong id="statQuantity">
                                 0
                             </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="table-card">
-
-                        <div class="table-head">
-
-                            <strong>
+</div>
+</div>
+<div class="table-card">
+<div class="table-head">
+<strong>
                                 Prévisualisation du stock
                             </strong>
-
-                            <span id="tableCount">
+<span id="tableCount">
                                 0 ligne
                             </span>
-
-                        </div>
-
-
-                        <div class="table-wrap">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>
                                             Article
                                         </th>
-
-                                        <th>
+<th>
                                             Désignation
                                         </th>
-
-                                        <th>
+<th>
                                             Lot
                                         </th>
-
-                                        <th>
+<th>
                                             Magasin
                                         </th>
-
-                                        <th>
+<th>
                                             Emplacement
                                         </th>
-
-                                        <th style="text-align:right">
+<th style="text-align:right">
                                             Quantité
                                         </th>
-
-                                        <th>
+<th>
                                             Unité
                                         </th>
-
-                                        <th style="text-align:right">
+<th style="text-align:right">
                                             Disponible
                                         </th>
-
-                                        <th>
+<th>
                                             Statut
                                         </th>
-
-                                    </tr>
-
-                                </thead>
-
-                                <tbody id="previewBody">
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-        </section>
-
-    </div>
-
-
-<!-- ============================================================
-     LOADER
-============================================================= -->
-
-<div
-    id="loader"
-    class="overlay">
-
-    <div class="loader-box">
-
-        <div class="spinner"></div>
-
-        <strong id="loaderTitle">
+</tr>
+</thead>
+<tbody id="previewBody">
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<div class="overlay" id="loader">
+<div class="loader-box">
+<div class="spinner"></div>
+<strong id="loaderTitle">
             Analyse
         </strong>
-
-        <div class="sync-progress">
-            <div
-                id="syncProgressBar"
-                class="sync-progress-bar">
-            </div>
-        </div>
-
-        <div
-            id="syncProgressPercent"
-            class="sync-progress-percent">
+<div class="sync-progress">
+<div class="sync-progress-bar" id="syncProgressBar">
+</div>
+</div>
+<div class="sync-progress-percent" id="syncProgressPercent">
             0%
         </div>
-
-        <p id="loaderMessage">
+<p id="loaderMessage">
             Traitement...
         </p>
-
-    </div>
-
 </div>
-
-
-<!-- ============================================================
-     MODAL
-============================================================= -->
-
-<div
-    id="modal"
-    class="overlay">
-
-    <div class="modal-box">
-
-        <div
-            id="modalIcon"
-            class="modal-icon">
-
-            <i
-                id="modalIconSymbol"
-                class="fa-solid fa-check">
-            </i>
-
-        </div>
-
-        <h3 id="modalTitle">
+</div>
+<div class="overlay" id="modal">
+<div class="modal-box">
+<div class="modal-icon" id="modalIcon">
+<i class="fa-solid fa-check" id="modalIconSymbol">
+</i>
+</div>
+<h3 id="modalTitle">
             Information
         </h3>
-
-        <div
-            id="modalMessage"
-            class="modal-message">
-        </div>
-
-        <button
-            id="modalOk"
-            class="modal-btn"
-            type="button">
+<div class="modal-message" id="modalMessage">
+</div>
+<button class="modal-btn" id="modalOk" type="button">
             ✓ OK, Compris
         </button>
-
-    </div>
-
 </div>
-
-
-</main>
-
-
+</div>
 <script type="module">
+
 "use strict";
 
 import supabase from "./assets/js/core/supabase.js";
@@ -3836,46 +3545,26 @@ function hideModal() {
 ============================================================ */
 
 function updateClock() {
-
-    const dateElement =
-        document.getElementById("currentDate");
-
-    const timeElement =
-        document.getElementById("currentTime");
-
-    // Le Dashboard SMTG possède déjà son propre horloge.
-    // Quand import_stock.html est chargé dans le SPA, ces éléments
-    // peuvent ne pas être présents dans #main-screen-content.
-    // Dans ce cas, on ne doit surtout pas interrompre l'initialisation.
-    if (!dateElement && !timeElement) {
-        return;
-    }
-
     const now = new Date();
 
-    if (dateElement) {
-        dateElement.textContent =
-            now.toLocaleDateString(
-                "fr-FR",
-                {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                }
-            );
+    const dateEl = document.getElementById("currentDate");
+    const timeEl = document.getElementById("currentTime");
+
+    if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString("fr-FR", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
     }
 
-    if (timeElement) {
-        timeElement.textContent =
-            now.toLocaleTimeString(
-                "fr-FR",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
-                }
-            );
+    if (timeEl) {
+        timeEl.textContent = now.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
     }
 }
 
@@ -3988,7 +3677,10 @@ function initImportStockPage() {
 
     updateClock();
 
-    setInterval(updateClock, 1000);
+    if (window.__SMTGImportStockClockTimer) {
+        clearInterval(window.__SMTGImportStockClockTimer);
+    }
+    window.__SMTGImportStockClockTimer = setInterval(updateClock, 1000);
 
     updateMode();
 
@@ -4013,7 +3705,6 @@ if (document.readyState === "loading") {
     initImportStockPage();
 }
 
-</script>
 
-</body>
-</html>
+</script>
+</main>
