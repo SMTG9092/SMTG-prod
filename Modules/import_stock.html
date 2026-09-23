@@ -1,2703 +1,4044 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Import Stock | SoufStock</title>
+    <title>Import Stock - SMTG WMS</title>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="assets/css/dashboard.css">
-
-    <!-- CSS Import Stock -->
-    <link rel="stylesheet" href="assets/css/import_stock.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
 
     <!-- SheetJS -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Inter, Arial, sans-serif;
+            background: #060817;
+            color: #e8edf7;
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #080a19;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #252b47;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #34405f;
+        }
+
+        .page {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(
+                    circle at 70% 10%,
+                    rgba(16,185,129,.035),
+                    transparent 28%
+                ),
+                #060817;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+            height: 82px;
+            min-height: 82px;
+            padding: 12px 18px;
+            border: 1px solid #1d2540;
+            border-radius: 12px;
+            margin: 8px 10px 0;
+            background: #101426;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(16,185,129,.35);
+            background: rgba(16,185,129,.08);
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: .3px;
+        }
+
+        .brand-subtitle {
+            margin-top: 3px;
+            color: #8290ad;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+        }
+
+        .clock-box {
+            min-width: 150px;
+            padding: 9px 14px;
+            border: 1px solid #242c49;
+            border-radius: 10px;
+            background: #0d1022;
+            text-align: right;
+        }
+
+        .clock-date {
+            color: #d8deea;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .clock-time {
+            color: #10d69a;
+            font-size: 10px;
+            font-weight: 800;
+            margin-top: 3px;
+            font-family: Consolas, monospace;
+        }
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
+        .body {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            overflow: hidden;
+            margin: 0 10px 10px;
+        }
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            width: 345px;
+            min-width: 345px;
+            padding: 18px 12px 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            border-right: 1px solid #1b2139;
+        }
+
+        .panel-title {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #20263e;
+            padding: 0 5px 9px;
+        }
+
+        .panel-title strong {
+            color: #dce3ef;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .reset-link {
+            border: 0;
+            background: transparent;
+            color: #9aa6c1;
+            font-size: 10px;
+            text-decoration: underline;
+        }
+
+        .reset-link:hover {
+            color: #10d69a;
+        }
+
+        .file-card {
+            border: 1px solid #252c48;
+            background: #111528;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .file-card.ready {
+            border-color: rgba(16,185,129,.42);
+        }
+
+        .file-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .file-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: rgba(16,185,129,.10);
+            border: 1px solid rgba(16,185,129,.25);
+            color: #10c990;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+        }
+
+        .file-title strong {
+            display: block;
+            font-size: 11px;
+            color: #edf2fa;
+        }
+
+        .file-title span {
+            display: block;
+            margin-top: 3px;
+            color: #8793ad;
+            font-size: 9px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 10px;
+            border: 1px solid #303a58;
+            color: #91a0bd;
+            background: #1a2035;
+            font-size: 8px;
+            white-space: nowrap;
+        }
+
+        .badge.ok {
+            color: #19d69c;
+            border-color: rgba(16,185,129,.30);
+            background: rgba(16,185,129,.08);
+        }
+
+        .badge.error {
+            color: #fb7185;
+            border-color: rgba(244,63,94,.30);
+            background: rgba(244,63,94,.08);
+        }
+
+        .drop-zone {
+            margin-top: 12px;
+            min-height: 72px;
+            border: 1px dashed #29324f;
+            border-radius: 9px;
+            background: #0a0d1f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            color: #dce3ef;
+            transition: .15s;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: #10b981;
+            background: rgba(16,185,129,.045);
+        }
+
+        .file-name {
+            color: #18d89d;
+            font-size: 9px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .browse-btn {
+            width: 100%;
+            height: 38px;
+            margin-top: 9px;
+            border: 0;
+            border-radius: 8px;
+            background: #222a42;
+            color: #eef3fb;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .browse-btn:hover {
+            background: #2b3552;
+        }
+
+        .mode-description {
+            margin-bottom: 8px;
+        }
+
+        .mode-description strong {
+            display: block;
+            font-size: 11px;
+        }
+
+        .mode-description span {
+            display: block;
+            color: #7f8ca7;
+            margin-top: 3px;
+            font-size: 9px;
+        }
+
+        #importMode {
+            width: 100%;
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 8px;
+            border: 1px solid #29324e;
+            background: #090c1c;
+            color: #e5ebf6;
+            outline: none;
+            font-size: 10px;
+        }
+
+        #importMode:focus {
+            border-color: #10b981;
+        }
+
+        .actions {
+            margin-top: auto;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 40px;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .btn:disabled {
+            opacity: .42;
+            cursor: not-allowed;
+        }
+
+        .btn-analyze {
+            background: #12152b;
+            border-color: #6a5921;
+            color: #f5c84a;
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            background: #1a1c34;
+        }
+
+        .btn-save {
+            background: #08b987;
+            color: white;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            background: #0aca95;
+        }
+
+        .api-status {
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            color: #8390aa;
+            font-size: 9px;
+        }
+
+        .api-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #68738d;
+            box-shadow: 0 0 8px rgba(104,115,141,.4);
+        }
+
+        .api-dot.online {
+            background: #10d69a;
+            box-shadow: 0 0 8px rgba(16,214,154,.55);
+        }
+
+        .api-dot.error {
+            background: #fb7185;
+            box-shadow: 0 0 8px rgba(251,113,133,.45);
+        }
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 14px 0 0 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main-top {
+            min-height: 62px;
+            border-bottom: 1px solid #1c233b;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+        }
+
+        .main-title {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-title h1 {
+            margin: 0;
+            font-size: 17px;
+            color: #f0f4fb;
+        }
+
+        .main-title p {
+            margin: 4px 0 0;
+            color: #7f8ca8;
+            font-size: 9px;
+        }
+
+        .main-status {
+            padding: 8px 12px;
+            border: 1px solid #252d49;
+            border-radius: 9px;
+            background: #0e1123;
+            color: #8591aa;
+            font-size: 9px;
+        }
+
+        .main-status strong {
+            color: #15d49a;
+        }
+
+        .content {
+            flex: 1;
+            min-height: 0;
+            padding: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =====================================================
+           EMPTY
+        ===================================================== */
+
+        .empty-state {
+            flex: 1;
+            min-height: 0;
+            border: 1px dashed #202742;
+            border-radius: 12px;
+            background: rgba(3,5,18,.36);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .empty-inner {
+            max-width: 520px;
+            padding: 30px;
+        }
+
+        .empty-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(16,185,129,.30);
+            background: rgba(16,185,129,.08);
+            color: #10c990;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .empty-inner h2 {
+            margin: 0;
+            font-size: 13px;
+            color: #edf2f9;
+        }
+
+        .empty-inner p {
+            margin: 8px 0 0;
+            color: #77849f;
+            line-height: 1.5;
+            font-size: 10px;
+        }
+
+        /* =====================================================
+           RESULT
+        ===================================================== */
+
+        .result {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result.show {
+            display: flex;
+        }
+
+        .result-header {
+            min-height: 46px;
+            border: 1px solid #252c48;
+            background: #111528;
+            border-radius: 10px;
+            padding: 0 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .result-header strong {
+            font-size: 10px;
+            color: #dce4f0;
+        }
+
+        .result-header span {
+            color: #8793ad;
+            font-size: 9px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap: 10px;
+        }
+
+        .stat {
+            min-height: 62px;
+            border: 1px solid #252c48;
+            border-radius: 10px;
+            background: #101327;
+            padding: 11px 13px;
+        }
+
+        .stat small {
+            display: block;
+            color: #7986a2;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: .45px;
+        }
+
+        .stat strong {
+            display: block;
+            margin-top: 5px;
+            color: #e9eef7;
+            font-size: 17px;
+        }
+
+        .stat.green strong {
+            color: #16d79c;
+        }
+
+        .stat.blue strong {
+            color: #4ba8ff;
+        }
+
+        .stat.yellow strong {
+            color: #f3c84a;
+        }
+
+        .table-card {
+            flex: 1;
+            min-height: 0;
+            border: 1px solid #252c48;
+            border-radius: 10px;
+            background: #0f1226;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .table-head {
+            min-height: 42px;
+            padding: 0 13px;
+            border-bottom: 1px solid #20263f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-head strong {
+            color: #dce4f1;
+            font-size: 10px;
+        }
+
+        .table-head span {
+            color: #78859f;
+            font-size: 9px;
+        }
+
+        .table-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #07091a;
+        }
+
+        th {
+            padding: 9px 8px;
+            color: #7e8ba6;
+            font-size: 7px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: .45px;
+            white-space: nowrap;
+            border-bottom: 1px solid #1c233b;
+        }
+
+        td {
+            padding: 9px 8px;
+            color: #d9dfeb;
+            font-size: 8px;
+            border-bottom: 1px solid rgba(37,44,72,.55);
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background: rgba(30,41,70,.20);
+        }
+
+        td.num {
+            color: #10d69a;
+            font-weight: 800;
+            font-family: Consolas, monospace;
+        }
+
+        td.qty {
+            color: #10d69a;
+            font-weight: 800;
+            text-align: right;
+            font-family: Consolas, monospace;
+        }
+
+        td.available {
+            color: #10d69a;
+            font-weight: 800;
+            text-align: right;
+            font-family: Consolas, monospace;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 7px;
+            border-radius: 9px;
+            border: 1px solid rgba(16,185,129,.28);
+            background: rgba(16,185,129,.07);
+            color: #12d69a;
+            font-size: 7px;
+            font-weight: 800;
+        }
+
+        .warning-row td.qty,
+        .warning-row td.available {
+            color: #f4c94f;
+        }
+
+        /* =====================================================
+           MODALS
+        ===================================================== */
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2,4,14,.78);
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(480px, calc(100vw - 30px));
+            border: 1px solid #29314e;
+            border-radius: 13px;
+            background: #111528;
+            box-shadow: 0 25px 80px rgba(0,0,0,.55);
+            padding: 20px;
+        }
+
+        .modal-icon {
+            width: 45px;
+            height: 45px;
+            margin: 0 auto 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(16,185,129,.30);
+            background: rgba(16,185,129,.08);
+            color: #12d69a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .modal-icon.error {
+            border-color: rgba(244,63,94,.35);
+            background: rgba(244,63,94,.08);
+            color: #fb7185;
+        }
+
+        .modal-box h3 {
+            margin: 0;
+            text-align: center;
+            color: #edf2fa;
+            font-size: 13px;
+        }
+
+        .modal-message {
+            margin-top: 10px;
+            color: #8b97b0;
+            font-size: 9px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            text-align: center;
+            max-height: 260px;
+            overflow: auto;
+        }
+
+        .modal-btn {
+            width: 100%;
+            height: 35px;
+            margin-top: 16px;
+            border: 0;
+            border-radius: 8px;
+            background: #08b987;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        /* =====================================================
+           LOADER
+        ===================================================== */
+
+        .loader-box {
+            width: min(400px, calc(100vw - 30px));
+            border: 1px solid #29314e;
+            border-radius: 13px;
+            background: #111528;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .sync-progress {
+            width: 100%;
+            height: 7px;
+            margin: 0 auto 10px;
+            border-radius: 99px;
+            overflow: hidden;
+            background: #080b1c;
+            border: 1px solid #242b46;
+        }
+
+        .sync-progress-bar {
+            width: 0%;
+            height: 100%;
+            border-radius: 99px;
+            background: #10d69a;
+            transition: width .25s ease;
+        }
+
+        .sync-progress-percent {
+            margin-top: 5px;
+            color: #10d69a;
+            font-size: 9px;
+            font-family: Consolas, monospace;
+            font-weight: 800;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            border: 3px solid #27304b;
+            border-top-color: #10d69a;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-box strong {
+            display: block;
+            color: #edf2f9;
+            font-size: 12px;
+        }
+
+        .loader-box p {
+            margin: 7px 0 0;
+            color: #818da7;
+            font-size: 9px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 280px;
+                min-width: 280px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2,1fr);
+            }
+        }
+
+        @media (max-width: 680px) {
+            html,
+            body {
+                overflow: auto;
+            }
+
+            .page {
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .body {
+                overflow: visible;
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: 0;
+                border-right: 0;
+                border-bottom: 1px solid #1b2139;
+            }
+
+            .main {
+                min-height: 700px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="app-container">
+<div class="page">
 
     <!-- =====================================================
-         SIDEBAR
+         HEADER
     ====================================================== -->
 
-    <aside id="sidebar" class="sidebar">
+    <header class="header">
 
-        <div class="sidebar-header">
+        <div class="brand">
 
-            <div class="logo-container">
-
-                <img src="assets/img/logo.png"
-                     alt="SoufStock"
-                     class="logo">
-
-                <div>
-                    <strong>SoufStock</strong>
-                    <span>Enterprise ERP</span>
-                </div>
-
+            <div class="brand-icon">
+                <i class="fa-solid fa-cubes"></i>
             </div>
 
-            <button id="sidebarToggle"
-                    class="sidebar-toggle"
-                    type="button">
+            <div>
+                <div class="brand-title">
+                    SMTG
+                </div>
 
-                <i class="fas fa-bars"></i>
-
-            </button>
+                <div class="brand-subtitle">
+                    Traçabilité globale
+                </div>
+            </div>
 
         </div>
 
-        <nav id="sidebarNav" class="sidebar-nav">
+        <div class="clock-box">
 
-            <a href="dashboard.html"
-               class="nav-item">
+            <div
+                id="currentDate"
+                class="clock-date">
+                -
+            </div>
 
-                <i class="fas fa-chart-pie"></i>
+            <div
+                id="currentTime"
+                class="clock-time">
+                -
+            </div>
 
-                <span>Dashboard</span>
+        </div>
 
-            </a>
-
-            <a href="import_stock.html"
-               class="nav-item active">
-
-                <i class="fas fa-file-import"></i>
-
-                <span>Import Stock</span>
-
-            </a>
-
-        </nav>
-
-    </aside>
+    </header>
 
 
     <!-- =====================================================
-         MAIN
+         BODY
     ====================================================== -->
 
-    <main class="main-content">
+    <div class="body">
 
-        <!-- TOPBAR -->
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
 
-        <header class="topbar">
+        <aside class="sidebar">
 
-            <div class="topbar-left">
+            <div class="panel-title">
 
-                <button id="mobileMenu"
-                        class="mobile-menu"
-                        type="button">
+                <strong>
+                    <i class="fa-solid fa-file-arrow-up"
+                       style="color:#10d69a;margin-right:5px">
+                    </i>
+                    Panneau d'importation
+                </strong>
 
-                    <i class="fas fa-bars"></i>
-
+                <button
+                    id="btnReset"
+                    class="reset-link"
+                    type="button">
+                    Tout réinitialiser
                 </button>
-
-                <div>
-
-                    <h1>Import Stock</h1>
-
-                    <p>
-                        Importation directe du stock depuis Excel
-                    </p>
-
-                </div>
 
             </div>
 
 
-            <div class="topbar-right">
+            <!-- =================================================
+                 FILE STOCK
+            ================================================== -->
 
-                <div class="connection-status"
-                     id="connectionStatus">
+            <div
+                id="fileCard"
+                class="file-card">
 
-                    <span class="status-dot"></span>
+                <input
+                    type="file"
+                    id="excelFile"
+                    class="hidden"
+                    accept=".xlsx,.xls,.csv">
 
-                    <span id="connectionText">
-                        Connexion...
+                <div class="file-head">
+
+                    <div class="file-title">
+
+                        <div class="file-icon">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </div>
+
+                        <div>
+                            <strong>
+                                Fichier Stock
+                            </strong>
+
+                            <span>
+                                Fichier SAP Stock
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <span
+                        id="fileBadge"
+                        class="badge">
+                        En attente
                     </span>
 
                 </div>
 
-            </div>
 
-        </header>
-
-
-        <!-- =================================================
-             CONTENT
-        ================================================== -->
-
-        <div class="page-content">
-
-
-            <!-- =================================================
-                 IMPORT SECTION
-            ================================================== -->
-
-            <section class="import-section">
-
-                <div class="import-card">
-
-                    <div class="import-header">
-
-                        <h3>
-
-                            <i class="fas fa-file-excel"></i>
-
-                            Importer un fichier Excel
-
-                        </h3>
-
-                        <p>
-                            Sélectionnez votre fichier Excel contenant
-                            les données du stock.
-                        </p>
-
-                    </div>
-
-
-                    <!-- DROP ZONE -->
-
-                    <div id="dropZone"
-                         class="drop-zone">
-
-                        <div class="drop-icon">
-
-                            <i class="fas fa-cloud-upload-alt"></i>
-
-                        </div>
-
-                        <h3>
-                            Déposez votre fichier ici
-                        </h3>
-
-                        <p>
-                            ou sélectionnez un fichier depuis votre ordinateur
-                        </p>
-
-
-                        <label class="btn-upload">
-
-                            <i class="fas fa-folder-open"></i>
-
-                            Choisir un fichier
-
-                            <input
-                                type="file"
-                                id="fileInput"
-                                accept=".xlsx,.xls,.csv"
-                                hidden>
-
-                        </label>
-
-
-                        <small>
-                            Formats acceptés : XLSX, XLS, CSV
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 FILE INFO
-            ================================================== -->
-
-            <section class="file-info-section"
-                     id="fileInfoSection"
-                     style="display:none;">
-
-                <div class="info-grid">
-
-
-                    <div class="info-card">
-
-                        <span>
-                            <i class="fas fa-file"></i>
-                            Fichier
-                        </span>
-
-                        <strong id="fileName">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-card">
-
-                        <span>
-                            <i class="fas fa-weight-hanging"></i>
-                            Taille
-                        </span>
-
-                        <strong id="fileSize">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-card">
-
-                        <span>
-                            <i class="fas fa-table"></i>
-                            Feuille
-                        </span>
-
-                        <strong id="sheetName">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-card">
-
-                        <span>
-                            <i class="fas fa-list"></i>
-                            Lignes
-                        </span>
-
-                        <strong id="rowCount">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 SUMMARY
-            ================================================== -->
-
-            <section class="summary-section"
-                     id="summarySection"
-                     style="display:none;">
-
-                <div class="summary-grid">
-
-
-                    <div class="summary-card">
-
-                        <i class="fas fa-list"></i>
-
-                        <span>
-                            Total lignes
-                        </span>
-
-                        <strong id="summaryRows">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div class="summary-card">
-
-                        <i class="fas fa-box"></i>
-
-                        <span>
-                            Articles
-                        </span>
-
-                        <strong id="summaryArticles">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div class="summary-card">
-
-                        <i class="fas fa-layer-group"></i>
-
-                        <span>
-                            Lots
-                        </span>
-
-                        <strong id="summaryLots">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div class="summary-card">
-
-                        <i class="fas fa-weight-hanging"></i>
-
-                        <span>
-                            Quantité totale
-                        </span>
-
-                        <strong id="summaryQuantity">
-                            0 KG
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 PREVIEW
-            ================================================== -->
-
-            <section class="preview-section">
-
-                <div class="section-header">
+                <div
+                    id="dropZone"
+                    class="drop-zone">
 
                     <div>
-
-                        <h3>
-
-                            <i class="fas fa-eye"></i>
-
-                            Prévisualisation
-
-                        </h3>
-
-                        <p>
-                            Vérifiez les données avant l'enregistrement.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        id="clearPreview"
-                        class="btn-secondary"
-                        type="button">
-
-                        <i class="fas fa-trash"></i>
-
-                        Effacer
-
-                    </button>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table class="preview-table">
-
-                        <thead>
-
-                        <tr>
-
-                            <th>Division</th>
-
-                            <th>Magasin</th>
-
-                            <th>Emplacement</th>
-
-                            <th>Article</th>
-
-                            <th>Désignation</th>
-
-                            <th>Lot</th>
-
-                            <th>Quantité</th>
-
-                            <th>Unité</th>
-
-                            <th>Type</th>
-
-                            <th>Groupe</th>
-
-                            <th>Famille</th>
-
-                        </tr>
-
-                        </thead>
-
-
-                        <tbody id="previewBody">
-
-                        <tr>
-
-                            <td colspan="11"
-                                class="empty-table">
-
-                                <i class="fas fa-file-excel"></i>
-
-                                Aucune donnée à afficher
-
-                            </td>
-
-                        </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 IMPORT MODE
-            ================================================== -->
-
-            <section class="import-mode-section">
-
-                <div class="section-header">
-
-                    <div>
-
-                        <h3>
-
-                            <i class="fas fa-cogs"></i>
-
-                            Mode d'importation
-
-                        </h3>
-
-                        <p>
-                            Choisissez comment les données doivent
-                            être enregistrées dans le stock.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="mode-grid">
-
-
-                    <!-- REMPLACER -->
-
-                    <label class="mode-card replace">
-
-                        <input
-                            type="radio"
-                            name="importMode"
-                            value="REMPLACER">
-
-                        <div class="mode-icon">
-
-                            <i class="fas fa-trash-restore"></i>
-
-                        </div>
-
-                        <h3>
-                            Remplacer
-                        </h3>
-
-                        <p>
-
-                            Supprime le stock existant puis importe
-                            toutes les lignes du fichier.
-
-                        </p>
-
-                    </label>
-
-
-                    <!-- MISE A JOUR -->
-
-                    <label class="mode-card update">
-
-                        <input
-                            type="radio"
-                            name="importMode"
-                            value="MISE_A_JOUR"
-                            checked>
-
-                        <div class="mode-icon">
-
-                            <i class="fas fa-edit"></i>
-
-                        </div>
-
-                        <h3>
-                            Mise à jour
-                        </h3>
-
-                        <p>
-
-                            Met à jour les lignes existantes et ajoute
-                            les nouvelles lignes.
-
-                        </p>
-
-                    </label>
-
-
-                    <!-- SYNCHRONISATION -->
-
-                    <label class="mode-card sync">
-
-                        <input
-                            type="radio"
-                            name="importMode"
-                            value="SYNCHRONISATION">
-
-                        <div class="mode-icon">
-
-                            <i class="fas fa-sync-alt"></i>
-
-                        </div>
-
-                        <h3>
-                            Synchronisation
-                        </h3>
-
-                        <p>
-
-                            Compare le fichier avec le stock actuel,
-                            ajoute les nouvelles lignes et supprime
-                            les lignes absentes du fichier.
-
-                        </p>
-
-                    </label>
-
-                </div>
-
-
-                <!-- SUMMARY -->
-
-                <div class="import-summary">
-
-                    <div class="summary-box">
-
-
-                        <div class="summary-item">
-
-                            <span>
-                                Mode sélectionné
-                            </span>
-
-                            <strong id="selectedMode">
-                                MISE À JOUR
-                            </strong>
-
-                        </div>
-
-
-                        <div class="summary-item">
-
-                            <span>
-                                Lignes prêtes
-                            </span>
-
-                            <strong id="readyRows">
-                                0
-                            </strong>
-
-                        </div>
-
-
-                        <button
-                            id="importButton"
-                            class="btn-import"
-                            type="button"
-                            disabled>
-
-                            <i class="fas fa-database"></i>
-
-                            Enregistrer dans le stock
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 PROGRESS
-            ================================================== -->
-
-            <section class="progress-section"
-                     id="progressSection"
-                     style="display:none;">
-
-                <div class="progress-card">
-
-                    <div class="progress-header">
-
-                        <span>
-                            Importation en cours
-                        </span>
-
-                        <strong id="progressPercent">
-                            0%
-                        </strong>
-
-                    </div>
-
-
-                    <div class="progress-bar-container">
 
                         <div
-                            id="progressBar"
-                            class="progress-bar">
+                            id="fileName"
+                            class="file-name hidden">
+                        </div>
+
+                        <div
+                            id="dropText"
+                            style="
+                                color:#cfd7e7;
+                                font-size:9px;
+                                font-weight:700;
+                            ">
+                            Sélectionner le fichier Stock
                         </div>
 
                     </div>
 
-
-                    <div class="progress-footer">
-
-                        <span id="progressText">
-                            Préparation...
-                        </span>
-
-                        <span id="progressCount">
-                            0 / 0
-                        </span>
-
-                    </div>
-
                 </div>
 
-            </section>
+
+                <button
+                    id="btnBrowse"
+                    class="browse-btn"
+                    type="button">
+
+                    <i class="fa-solid fa-folder-open"></i>
+                    Parcourir Stock
+
+                </button>
+
+            </div>
 
 
             <!-- =================================================
-                 REPORT
+                 MODE
             ================================================== -->
 
-            <section class="report-section"
-                     id="reportSection"
-                     style="display:none;">
+            <div class="file-card">
 
-                <div class="section-header">
+                <div class="file-head">
 
-                    <div>
+                    <div class="file-title">
 
-                        <h3>
+                        <div class="file-icon">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
 
-                            <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <strong>
+                                Mode d'import
+                            </strong>
 
-                            Rapport d'importation
-
-                        </h3>
-
-                        <p>
-                            Résultat de l'opération.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="report-grid">
-
-
-                    <div class="report-card success">
-
-                        <i class="fas fa-plus-circle"></i>
-
-                        <span>
-                            Nouvelles lignes
-                        </span>
-
-                        <h2 id="reportNew">
-                            0
-                        </h2>
-
-                    </div>
-
-
-                    <div class="report-card warning">
-
-                        <i class="fas fa-edit"></i>
-
-                        <span>
-                            Modifiées
-                        </span>
-
-                        <h2 id="reportUpdated">
-                            0
-                        </h2>
-
-                    </div>
-
-
-                    <div class="report-card danger">
-
-                        <i class="fas fa-trash"></i>
-
-                        <span>
-                            Supprimées
-                        </span>
-
-                        <h2 id="reportDeleted">
-                            0
-                        </h2>
-
-                    </div>
-
-
-                    <div class="report-card info">
-
-                        <i class="fas fa-check-circle"></i>
-
-                        <span>
-                            Inchangées
-                        </span>
-
-                        <h2 id="reportSame">
-                            0
-                        </h2>
+                            <span>
+                                Mise à jour et ajout des lignes
+                            </span>
+                        </div>
 
                     </div>
 
                 </div>
 
-            </section>
+                <div
+                    class="mode-description"
+                    style="margin-top:12px">
+
+                    <strong id="modeLabel">
+                        Mise à jour
+                    </strong>
+
+                    <span id="modeDescription">
+                        Met à jour et ajoute les lignes
+                    </span>
+
+                </div>
+
+                <select id="importMode">
+
+                    <option value="MISE_A_JOUR">
+                        Mise à jour
+                    </option>
+
+                    <option value="REMPLACER">
+                        Remplacer
+                    </option>
+
+                    <option value="SYNCHRONISATION">
+                        Synchronisation
+                    </option>
+
+                </select>
+
+            </div>
 
 
             <!-- =================================================
                  ACTIONS
             ================================================== -->
 
-            <section class="action-section">
+            <div class="actions">
 
-                <div class="action-buttons">
+                <button
+                    id="btnAnalyze"
+                    class="btn btn-analyze"
+                    type="button"
+                    disabled>
 
-                    <button
-                        id="resetButton"
-                        class="btn-secondary"
-                        type="button">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
 
-                        <i class="fas fa-redo"></i>
+                    Analyser le fichier
 
-                        Réinitialiser
-
-                    </button>
+                </button>
 
 
-                    <button
-                        id="importButtonBottom"
-                        class="btn-primary"
-                        type="button"
-                        disabled>
+                <button
+                    id="btnSave"
+                    class="btn btn-save"
+                    type="button"
+                    disabled>
 
-                        <i class="fas fa-database"></i>
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
 
-                        Enregistrer
+                    Enregistrer & Synchroniser
 
-                    </button>
+                </button>
+
+
+                <div class="api-status">
+
+                    <span
+                        id="apiDot"
+                        class="api-dot">
+                    </span>
+
+                    <span id="apiStatusText">
+                        API non testée
+                    </span>
 
                 </div>
 
-            </section>
+            </div>
+
+        </aside>
 
 
-        </div>
+        <!-- =================================================
+             MAIN
+        ================================================== -->
 
-    </main>
+        <main class="main">
+
+            <div class="main-top">
+
+                <div class="main-title">
+
+                    <div>
+
+                        <h1>
+                            Import Stock
+                        </h1>
+
+                        <p>
+                            Importation du stock SAP et enregistrement direct dans Supabase.
+                        </p>
+
+                    </div>
+
+                    <div class="main-status">
+
+                        Mode :
+                        <strong id="mainModeLabel">
+                            Mise à jour
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="content">
+
+                <!-- =================================================
+                     EMPTY
+                ================================================== -->
+
+                <section
+                    id="emptyState"
+                    class="empty-state">
+
+                    <div class="empty-inner">
+
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+
+                        <h2>
+                            Prêt pour l'importation synchronisée API SMTG
+                        </h2>
+
+                        <p>
+                            Importez votre fichier Stock SAP pour analyser,
+                            contrôler et envoyer les données au serveur SMTG.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     RESULT
+                ================================================== -->
+
+                <section
+                    id="resultSection"
+                    class="result">
+
+                    <div class="result-header">
+
+                        <strong>
+                            Résultat de l'analyse
+                        </strong>
+
+                        <span id="analysisMessage">
+                            Fichier prêt
+                        </span>
+
+                    </div>
+
+
+                    <div class="stats">
+
+                        <div class="stat green">
+
+                            <small>
+                                Lignes valides
+                            </small>
+
+                            <strong id="statRows">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat blue">
+
+                            <small>
+                                Articles
+                            </small>
+
+                            <strong id="statArticles">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat yellow">
+
+                            <small>
+                                Magasins
+                            </small>
+
+                            <strong id="statMagasins">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat green">
+
+                            <small>
+                                Quantité totale
+                            </small>
+
+                            <strong id="statQuantity">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-card">
+
+                        <div class="table-head">
+
+                            <strong>
+                                Prévisualisation du stock
+                            </strong>
+
+                            <span id="tableCount">
+                                0 ligne
+                            </span>
+
+                        </div>
+
+
+                        <div class="table-wrap">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Article
+                                        </th>
+
+                                        <th>
+                                            Désignation
+                                        </th>
+
+                                        <th>
+                                            Lot
+                                        </th>
+
+                                        <th>
+                                            Magasin
+                                        </th>
+
+                                        <th>
+                                            Emplacement
+                                        </th>
+
+                                        <th style="text-align:right">
+                                            Quantité
+                                        </th>
+
+                                        <th>
+                                            Unité
+                                        </th>
+
+                                        <th style="text-align:right">
+                                            Disponible
+                                        </th>
+
+                                        <th>
+                                            Statut
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="previewBody">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
 
 </div>
 
 
-<!-- =========================================================
-     SCRIPT
-========================================================== -->
+<!-- ============================================================
+     LOADER
+============================================================= -->
+
+<div
+    id="loader"
+    class="overlay">
+
+    <div class="loader-box">
+
+        <div class="spinner"></div>
+
+        <strong id="loaderTitle">
+            Analyse
+        </strong>
+
+        <div class="sync-progress">
+            <div
+                id="syncProgressBar"
+                class="sync-progress-bar">
+            </div>
+        </div>
+
+        <div
+            id="syncProgressPercent"
+            class="sync-progress-percent">
+            0%
+        </div>
+
+        <p id="loaderMessage">
+            Traitement...
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     MODAL
+============================================================= -->
+
+<div
+    id="modal"
+    class="overlay">
+
+    <div class="modal-box">
+
+        <div
+            id="modalIcon"
+            class="modal-icon">
+
+            <i
+                id="modalIconSymbol"
+                class="fa-solid fa-check">
+            </i>
+
+        </div>
+
+        <h3 id="modalTitle">
+            Information
+        </h3>
+
+        <div
+            id="modalMessage"
+            class="modal-message">
+        </div>
+
+        <button
+            id="modalOk"
+            class="modal-btn"
+            type="button">
+            ✓ OK, Compris
+        </button>
+
+    </div>
+
+</div>
+
 
 <script type="module">
+"use strict";
 
 import supabase from "./assets/js/core/supabase.js";
 
-
-/* =========================================================
-   CONFIGURATION
-========================================================= */
+/* ============================================================
+   SUPABASE DIRECT
+============================================================ */
 
 const STOCK_TABLE = "stock";
-const IMPORT_TABLE = "historique_imports";
+const HISTORY_TABLE = "historique_imports";
 
-const state = {
+/* ============================================================
+   STATE
+============================================================ */
 
-    file: null,
+let selectedFile = null;
+let rows = [];
+let analysisDone = false;
+let busy = false;
 
-    rows: [],
+/*
+ * Progression visuelle de synchronisation.
+ * Le serveur traite le POST en une seule requête, donc le navigateur
+ * ne peut pas connaître le pourcentage SQL exact sans un système de job.
+ * On affiche une progression par phases et on ne bloque plus à 80%.
+ */
+let progressTimer = null;
+let progressValue = 0;
 
-    normalizedRows: [],
 
-    imported: false
-
-};
-
-
-/* =========================================================
+/* ============================================================
    DOM
-========================================================= */
+============================================================ */
 
-const $ = id => document.getElementById(id);
-
-const fileInput = $("fileInput");
-const dropZone = $("dropZone");
-const previewBody = $("previewBody");
-
-const importButton = $("importButton");
-const importButtonBottom = $("importButtonBottom");
-
-const clearPreview = $("clearPreview");
-const resetButton = $("resetButton");
-
-const progressSection = $("progressSection");
-const reportSection = $("reportSection");
+const $ =
+    id => document.getElementById(id);
 
 
-/* =========================================================
-   UTILITIES
-========================================================= */
+/* ============================================================
+   ESCAPE
+============================================================ */
 
 function escapeHtml(value) {
 
-    if (value === null || value === undefined) {
-        return "";
-    }
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
-function normalize(value) {
+/* ============================================================
+   TEXT NORMALIZATION
+============================================================ */
 
-    if (value === null || value === undefined) {
-        return "";
-    }
+function normalizeKey(value) {
 
-    return String(value)
-        .trim()
-        .toUpperCase();
-
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[\s_\-./\\()[\]{}:;]+/g, "")
+        .replace(/['"]/g, "")
+        .trim();
 }
 
 
-function numberValue(value) {
+/* ============================================================
+   NUMBER PARSER
+   IMPORTANT:
+   Handles:
+       1234
+       1234.50
+       1234,50
+       1.234,50
+       1,234.50
+       12 345,678
+       Excel numeric cells
+============================================================ */
 
-    if (value === null || value === undefined || value === "") {
+function toNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
         return 0;
     }
 
     if (typeof value === "number") {
-        return value;
+
+        return Number.isFinite(value)
+            ? value
+            : 0;
     }
 
-    let valueString = String(value)
-        .trim()
-        .replace(/\s/g, "")
-        .replace(",", ".");
+    let text =
+        String(value)
+            .trim()
+            .replace(/\u00A0/g, "")
+            .replace(/\s/g, "");
 
-    const result = Number(valueString);
-
-    return Number.isFinite(result)
-        ? result
-        : 0;
-
-}
-
-
-function formatNumber(value) {
-
-    return Number(value || 0).toLocaleString(
-        "fr-FR",
-        {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        }
-    );
-
-}
-
-
-function formatFileSize(bytes) {
-
-    if (!bytes) return "0 KB";
-
-    const units = ["Bytes", "KB", "MB", "GB"];
-
-    const index = Math.floor(
-        Math.log(bytes) / Math.log(1024)
-    );
-
-    return (
-        bytes /
-        Math.pow(1024, index)
-    ).toFixed(2) +
-    " " +
-    units[index];
-
-}
-
-
-/* =========================================================
-   CONNECTION
-========================================================= */
-
-async function checkConnection() {
-
-    const status = $("connectionStatus");
-    const text = $("connectionText");
-
-    try {
-
-        const { error } = await supabase
-            .from(STOCK_TABLE)
-            .select("id")
-            .limit(1);
-
-        if (error) {
-            throw error;
-        }
-
-        status.classList.add("connected");
-
-        text.textContent =
-            "Base de données connectée";
-
-    } catch (error) {
-
-        console.error(error);
-
-        status.classList.add("error");
-
-        text.textContent =
-            "Erreur connexion";
-
+    if (!text) {
+        return 0;
     }
 
-}
+    /*
+     * Remove common SAP/Excel text suffixes.
+     */
+    text =
+        text
+            .replace(/kg$/i, "")
+            .replace(/kgs$/i, "")
+            .replace(/pcs?$/i, "")
+            .trim();
 
-
-/* =========================================================
-   FILE
-========================================================= */
-
-fileInput.addEventListener(
-    "change",
-    event => {
-
-        const file =
-            event.target.files?.[0];
-
-        if (file) {
-
-            processFile(file);
-
-        }
-
-    }
-);
-
-
-dropZone.addEventListener(
-    "dragover",
-    event => {
-
-        event.preventDefault();
-
-        dropZone.classList.add("dragover");
-
-    }
-);
-
-
-dropZone.addEventListener(
-    "dragleave",
-    () => {
-
-        dropZone.classList.remove("dragover");
-
-    }
-);
-
-
-dropZone.addEventListener(
-    "drop",
-    event => {
-
-        event.preventDefault();
-
-        dropZone.classList.remove("dragover");
-
-        const file =
-            event.dataTransfer.files?.[0];
-
-        if (file) {
-
-            processFile(file);
-
-        }
-
-    }
-);
-
-
-dropZone.addEventListener(
-    "click",
-    event => {
+    /*
+     * 1.234,56
+     */
+    if (
+        text.includes(".") &&
+        text.includes(",")
+    ) {
 
         if (
-            event.target.closest(
-                ".btn-upload"
-            )
+            text.lastIndexOf(",") >
+            text.lastIndexOf(".")
         ) {
 
-            return;
+            text =
+                text
+                    .replace(/\./g, "")
+                    .replace(",", ".");
 
         }
+        else {
 
-        fileInput.click();
-
-    }
-);
-
-
-/* =========================================================
-   READ EXCEL
-========================================================= */
-
-async function processFile(file) {
-
-    const validExtensions =
-        [".xlsx", ".xls", ".csv"];
-
-    const extension =
-        "." +
-        file.name
-            .split(".")
-            .pop()
-            .toLowerCase();
-
-    if (!validExtensions.includes(extension)) {
-
-        alert(
-            "Format non supporté.\n" +
-            "Utilisez XLSX, XLS ou CSV."
-        );
-
-        return;
-
-    }
-
-
-    state.file = file;
-
-
-    $("fileInfoSection").style.display =
-        "block";
-
-    $("summarySection").style.display =
-        "block";
-
-
-    $("fileName").textContent =
-        file.name;
-
-    $("fileSize").textContent =
-        formatFileSize(file.size);
-
-
-    try {
-
-        const buffer =
-            await file.arrayBuffer();
-
-
-        const workbook =
-            XLSX.read(
-                buffer,
-                {
-                    type: "array",
-                    cellDates: true
-                }
-            );
-
-
-        const firstSheet =
-            workbook.SheetNames[0];
-
-        $("sheetName").textContent =
-            firstSheet;
-
-
-        const worksheet =
-            workbook.Sheets[firstSheet];
-
-
-        const rawRows =
-            XLSX.utils.sheet_to_json(
-                worksheet,
-                {
-                    defval: "",
-                    raw: false
-                }
-            );
-
-
-        if (!rawRows.length) {
-
-            throw new Error(
-                "Le fichier ne contient aucune ligne."
-            );
-
+            /*
+             * 1,234.56
+             */
+            text =
+                text.replace(/,/g, "");
         }
+    }
+    else if (text.includes(",")) {
 
-
-        state.rows =
-            rawRows;
-
-
-        state.normalizedRows =
-            rawRows
-                .map(normalizeStockRow)
-                .filter(row =>
-                    row.article ||
-                    row.lot
-                );
-
-
-        renderPreview();
-
-        updateSummary();
-
-        enableImport();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Impossible de lire le fichier Excel.\n\n" +
-            error.message
-        );
-
-        resetPage();
+        /*
+         * 1234,56
+         */
+        text =
+            text.replace(",", ".");
 
     }
 
+    /*
+     * Keep only numeric characters.
+     */
+    text =
+        text.replace(
+            /[^0-9eE+.\-]/g,
+            ""
+        );
+
+    const number =
+        Number(text);
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
 }
 
 
-/* =========================================================
-   MAP EXCEL → STOCK
-========================================================= */
+/* ============================================================
+   VALUE FROM ROW
+============================================================ */
 
-function getValue(row, names) {
+function valueOf(row, names) {
 
     const keys =
-        Object.keys(row);
+        Object.keys(row || {});
 
-    for (const wanted of names) {
+    const map =
+        new Map();
 
-        const normalizedWanted =
-            normalize(wanted);
+    for (const key of keys) {
 
-        const key =
-            keys.find(k =>
-                normalize(k) ===
-                normalizedWanted
+        const normalized =
+            normalizeKey(key);
+
+        if (!map.has(normalized)) {
+
+            map.set(
+                normalized,
+                {
+                    key,
+                    value: row[key]
+                }
             );
-
-        if (key !== undefined) {
-
-            return row[key];
-
         }
+    }
 
+    for (const name of names) {
+
+        const normalized =
+            normalizeKey(name);
+
+        const found =
+            map.get(normalized);
+
+        if (
+            found &&
+            found.value !== undefined &&
+            found.value !== null &&
+            String(found.value).trim() !== ""
+        ) {
+            return found.value;
+        }
     }
 
     return "";
-
 }
 
 
-function normalizeStockRow(row) {
+/* ============================================================
+   FIND HEADER
+============================================================ */
+
+function findHeader(row, names) {
+
+    const keys =
+        Object.keys(row || {});
+
+    const wanted =
+        names.map(normalizeKey);
+
+    for (const key of keys) {
+
+        const normalized =
+            normalizeKey(key);
+
+        if (
+            wanted.includes(normalized)
+        ) {
+            return key;
+        }
+    }
+
+    return null;
+}
+
+
+/* ============================================================
+   QUANTITY DETECTION
+   FIX PRINCIPAL
+============================================================ */
+
+function findQuantityValue(raw) {
+
+    /*
+     * 1. Exact / known SAP names.
+     */
+    const exactNames = [
+
+        "quantite",
+        "quantité",
+
+        "qte",
+        "qté",
+
+        "qty",
+        "quantity",
+
+        "quantite totale",
+        "quantité totale",
+
+        "qte totale",
+        "qté totale",
+
+        "quantite stock",
+        "quantité stock",
+
+        "qte stock",
+        "qté stock",
+
+        "quantite de base",
+        "quantité de base",
+
+        "qte de base",
+        "qté de base",
+
+        "quantite en um",
+        "quantité en um",
+
+        "qte en um",
+        "qté en um",
+
+        "quantite um",
+        "quantité um",
+
+        "qte um",
+        "qté um",
+
+        "quantite kg",
+        "quantité kg",
+
+        "qte kg",
+        "qté kg",
+
+        /*
+         * SAP Stock export:
+         * "À utilisation libre" = actual free-use stock quantity.
+         */
+        "à utilisation libre",
+        "a utilisation libre",
+        "utilisation libre",
+        "quantite a utilisation libre",
+        "quantité à utilisation libre",
+
+        "stock total",
+        "stock libre",
+
+        "stock",
+        "poids",
+        "poids kg",
+
+        "kg"
+    ];
+
+    const exact =
+        valueOf(
+            raw,
+            exactNames
+        );
+
+    if (
+        exact !== "" &&
+        exact !== null &&
+        exact !== undefined
+    ) {
+
+        return {
+            value: exact,
+            source: findHeader(
+                raw,
+                exactNames
+            )
+        };
+    }
+
+
+    /*
+     * 2. Fuzzy SAP detection.
+     *
+     * IMPORTANT:
+     * Exclude "disponible", "reserve", "qualite"
+     * because those are separate fields.
+     */
+    const keys =
+        Object.keys(raw || {});
+
+    const candidates = [];
+
+    for (const key of keys) {
+
+        const normalized =
+            normalizeKey(key);
+
+        const excluded =
+            normalized.includes("disponible") ||
+            normalized.includes("reserve") ||
+            normalized.includes("reserved") ||
+            normalized.includes("qualite") ||
+            normalized.includes("qualitecontrole");
+
+        if (excluded) {
+            continue;
+        }
+
+        let score = 0;
+
+        if (
+            normalized.includes("quantite")
+        ) {
+            score += 100;
+        }
+
+        if (
+            normalized.includes("qte")
+        ) {
+            score += 95;
+        }
+
+        if (
+            normalized.includes("qty")
+        ) {
+            score += 90;
+        }
+
+        if (
+            normalized.includes("quantity")
+        ) {
+            score += 90;
+        }
+
+        if (
+            normalized.includes("autilisationlibre") ||
+            normalized.includes("utilisationlibre")
+        ) {
+            score += 120;
+        }
+
+        if (
+            normalized.includes("stock")
+        ) {
+            score += 40;
+        }
+
+        if (
+            normalized.includes("poids")
+        ) {
+            score += 30;
+        }
+
+        if (
+            normalized.includes("kg")
+        ) {
+            score += 20;
+        }
+
+        if (
+            normalized.includes("base")
+        ) {
+            score += 15;
+        }
+
+        if (score > 0) {
+
+            const numeric =
+                toNumber(
+                    raw[key]
+                );
+
+            if (
+                Number.isFinite(numeric)
+            ) {
+
+                candidates.push({
+                    key,
+                    value: raw[key],
+                    score,
+                    numeric
+                });
+            }
+        }
+    }
+
+    candidates.sort(
+        (a,b) =>
+            b.score - a.score
+    );
+
+    if (candidates.length) {
+
+        return {
+            value:
+                candidates[0].value,
+            source:
+                candidates[0].key
+        };
+    }
+
+
+    /*
+     * 3. Last-resort:
+     * if SAP exported a numeric quantity column with
+     * an unexpected name, inspect numeric columns.
+     *
+     * We deliberately do NOT blindly choose a numeric
+     * column if there are several.
+     */
+    const numericColumns =
+        keys
+            .map(
+                key => ({
+                    key,
+                    value:
+                        raw[key],
+                    number:
+                        toNumber(
+                            raw[key]
+                        )
+                })
+            )
+            .filter(
+                x =>
+                    x.value !== "" &&
+                    x.value !== null &&
+                    x.value !== undefined &&
+                    Number.isFinite(x.number)
+            );
+
+    if (
+        numericColumns.length === 1
+    ) {
+
+        return {
+            value:
+                numericColumns[0].value,
+            source:
+                numericColumns[0].key
+        };
+    }
+
+    return {
+        value: 0,
+        source: null
+    };
+}
+
+
+/* ============================================================
+   AVAILABLE DETECTION
+============================================================ */
+
+function findAvailableValue(raw) {
+
+    const names = [
+
+        "stock_disponible",
+        "stock disponible",
+
+        "disponible",
+        "available",
+
+        "quantite disponible",
+        "quantité disponible",
+
+        "qte disponible",
+        "qté disponible",
+
+        "stock libre",
+
+        "à utilisation libre",
+        "a utilisation libre",
+        "utilisation libre"
+    ];
+
+    const value =
+        valueOf(
+            raw,
+            names
+        );
+
+    if (
+        value === "" ||
+        value === null ||
+        value === undefined
+    ) {
+        return {
+            value: null,
+            source: null
+        };
+    }
+
+    return {
+        value:
+            toNumber(value),
+        source:
+            findHeader(
+                raw,
+                names
+            )
+    };
+}
+
+
+/* ============================================================
+   RESERVED DETECTION
+============================================================ */
+
+function findReservedValue(raw) {
+
+    const names = [
+
+        "stock_reserve",
+        "stock réservé",
+
+        "reserve",
+        "réserve",
+
+        "reserved",
+
+        "quantite reservee",
+        "quantité réservée",
+
+        "qte reservee",
+        "qté réservée"
+    ];
+
+    const value =
+        valueOf(
+            raw,
+            names
+        );
+
+    if (
+        value === "" ||
+        value === null ||
+        value === undefined
+    ) {
+        return {
+            value: 0,
+            source: null
+        };
+    }
+
+    return {
+        value:
+            toNumber(value),
+        source:
+            findHeader(
+                raw,
+                names
+            )
+    };
+}
+
+
+/* ============================================================
+   NORMALIZE STOCK ROW
+============================================================ */
+
+function normalizeStockRow(raw, rowIndex) {
+
+    const quantityInfo =
+        findQuantityValue(raw);
+
+    const quantity =
+        Math.max(
+            0,
+            toNumber(
+                quantityInfo.value
+            )
+        );
+
+    const availableInfo =
+        findAvailableValue(raw);
+
+    const reservedInfo =
+        findReservedValue(raw);
+
+    const controleQualite =
+        toNumber(
+            valueOf(
+                raw,
+                [
+                    "controle_qualite",
+                    "contrôle qualité",
+                    "controle qualite",
+                    "stock qualite",
+                    "qualite"
+                ]
+            )
+        );
+
+    const stockReserve =
+        Math.max(
+            0,
+            reservedInfo.value
+        );
+
+    /*
+     * If Excel explicitly contains a valid available
+     * quantity, use it.
+     *
+     * Otherwise calculate:
+     * quantity - reserve - QC
+     */
+    const stockDisponible =
+        availableInfo.value !== null
+            ? Math.max(
+                0,
+                availableInfo.value
+            )
+            : Math.max(
+                0,
+                quantity -
+                stockReserve -
+                controleQualite
+            );
+
 
     const article =
-        getValue(
-            row,
-            [
-                "article",
-                "Article",
-                "Code article",
-                "Code Article",
-                "ARTICLE"
-            ]
-        );
+        String(
+            valueOf(
+                raw,
+                [
+                    "article",
+                    "code article",
+                    "code_article",
+                    "article code",
+                    "material",
+                    "matériel",
+                    "matnr"
+                ]
+            ) || ""
+        ).trim();
 
 
     const designation =
-        getValue(
-            row,
-            [
-                "designation_article",
-                "Designation article",
-                "Désignation article",
-                "Designation",
-                "Désignation",
-                "libelle"
-            ]
-        );
-
-
-    const magasin =
-        getValue(
-            row,
-            [
-                "magasin",
-                "Magasin",
-                "MAGASIN"
-            ]
-        );
-
-
-    const emplacement =
-        getValue(
-            row,
-            [
-                "emplacement",
-                "Emplacement",
-                "EMPLACEMENT"
-            ]
-        );
+        String(
+            valueOf(
+                raw,
+                [
+                    "designation_article",
+                    "désignation article",
+                    "designation",
+                    "désignation",
+                    "libelle",
+                    "libellé",
+                    "description",
+                    "material description",
+                    "texte article"
+                ]
+            ) || ""
+        ).trim();
 
 
     const lot =
-        getValue(
-            row,
-            [
-                "lot",
-                "Lot",
-                "LOT"
-            ]
-        );
+        String(
+            valueOf(
+                raw,
+                [
+                    "lot",
+                    "batch",
+                    "numero lot",
+                    "numéro lot",
+                    "charg"
+                ]
+            ) || ""
+        ).trim();
 
 
-    const quantite =
-        getValue(
-            row,
-            [
-                "quantite",
-                "Quantite",
-                "Quantité",
-                "Qte",
-                "QTE",
-                "Quantité KG"
-            ]
-        );
+    const magasin =
+        String(
+            valueOf(
+                raw,
+                [
+                    "magasin",
+                    "warehouse",
+                    "store",
+                    "site",
+                    "plant",
+                    "sloc",
+                    "storage location"
+                ]
+            ) || ""
+        ).trim();
 
 
-    const division =
-        getValue(
-            row,
-            [
-                "division",
-                "Division"
-            ]
-        );
+    const emplacement =
+        String(
+            valueOf(
+                raw,
+                [
+                    "emplacement",
+                    "location",
+                    "bin",
+                    "position",
+                    "storage bin"
+                ]
+            ) || ""
+        ).trim();
 
 
     const unite =
-        getValue(
-            row,
-            [
-                "unite",
-                "Unite",
-                "Unité"
-            ]
-        ) || "KG";
+        String(
+            valueOf(
+                raw,
+                [
+                    "unite",
+                    "unité",
+                    "unit",
+                    "uom",
+                    "unité de base"
+                ]
+            ) || "KG"
+        ).trim();
+
+
+    const division =
+        String(
+            valueOf(
+                raw,
+                [
+                    "division",
+                    "division sap"
+                ]
+            ) || ""
+        ).trim();
 
 
     const typeArticle =
-        getValue(
-            row,
-            [
-                "type_article",
-                "Type article",
-                "Type"
-            ]
-        );
+        String(
+            valueOf(
+                raw,
+                [
+                    "type_article",
+                    "type article",
+                    "type"
+                ]
+            ) || ""
+        ).trim();
 
 
     const groupeArticle =
-        getValue(
-            row,
-            [
-                "groupe_article",
-                "Groupe article",
-                "Groupe"
-            ]
-        );
+        String(
+            valueOf(
+                raw,
+                [
+                    "groupe_article",
+                    "groupe article",
+                    "article group"
+                ]
+            ) || ""
+        ).trim();
 
 
     const familleArticle =
-        getValue(
-            row,
-            [
-                "famille_article",
-                "Famille article"
-            ]
-        );
+        String(
+            valueOf(
+                raw,
+                [
+                    "famille_article",
+                    "famille article",
+                    "family"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const statut =
+        String(
+            valueOf(
+                raw,
+                [
+                    "statut",
+                    "status"
+                ]
+            ) || "DISPONIBLE"
+        ).trim();
 
 
     return {
 
         division:
-            String(division || "").trim(),
+            division || null,
 
         magasin:
-            String(magasin || "").trim(),
+            magasin || null,
 
         emplacement:
-            String(emplacement || "").trim(),
+            emplacement || null,
 
         article:
-            String(article || "").trim(),
+            article || null,
 
         designation_article:
-            String(designation || "").trim(),
+            designation ||
+            article ||
+            null,
 
         lot:
-            String(lot || "").trim(),
+            lot || null,
 
         quantite:
-            numberValue(quantite),
+            quantity,
 
         unite:
-            String(unite || "KG").trim(),
+            unite || "KG",
 
         type_article:
-            String(typeArticle || "").trim(),
+            typeArticle || null,
 
         groupe_article:
-            String(groupeArticle || "").trim(),
+            groupeArticle || null,
 
         famille_article:
-            String(familleArticle || "").trim(),
+            familleArticle || null,
 
-        controle_qualite: 0,
+        controle_qualite:
+            Math.max(
+                0,
+                controleQualite
+            ),
 
-        stock_reserve: 0,
+        stock_reserve:
+            stockReserve,
 
         stock_disponible:
-            numberValue(quantite),
+            stockDisponible,
 
-        statut: "DISPONIBLE"
+        statut:
+            statut ||
+            "DISPONIBLE",
 
+        /*
+         * Internal diagnostic information.
+         * Removed before API POST.
+         */
+        __quantity_source:
+            quantityInfo.source,
+
+        __available_source:
+            availableInfo.source,
+
+        __row_index:
+            rowIndex
     };
-
 }
 
 
-/* =========================================================
+/* ============================================================
+   VALIDATION
+============================================================ */
+
+function validateRows(inputRows) {
+
+    const valid = [];
+    const errors = [];
+
+    inputRows.forEach(
+        (raw, index) => {
+
+            const row =
+                normalizeStockRow(
+                    raw,
+                    index + 2
+                );
+
+            if (!row.article) {
+
+                errors.push(
+                    `Ligne ${index + 2}: article manquant.`
+                );
+
+                return;
+            }
+
+            if (!row.magasin) {
+
+                errors.push(
+                    `Ligne ${index + 2}: magasin manquant.`
+                );
+
+                return;
+            }
+
+            if (!row.lot) {
+
+                errors.push(
+                    `Ligne ${index + 2}: lot manquant.`
+                );
+
+                return;
+            }
+
+            valid.push(row);
+        }
+    );
+
+    return {
+        valid,
+        errors
+    };
+}
+
+
+/* ============================================================
+   SHEETJS READ
+============================================================ */
+
+async function readFile(file) {
+
+    if (
+        typeof XLSX ===
+        "undefined"
+    ) {
+
+        throw new Error(
+            "SheetJS (XLSX) n'est pas chargé."
+        );
+    }
+
+    const buffer =
+        await file.arrayBuffer();
+
+    const workbook =
+        XLSX.read(
+            buffer,
+            {
+                type: "array",
+                cellDates: false,
+                raw: true
+            }
+        );
+
+    if (
+        !workbook.SheetNames ||
+        !workbook.SheetNames.length
+    ) {
+
+        throw new Error(
+            "Aucune feuille Excel trouvée."
+        );
+    }
+
+    /*
+     * First non-empty sheet.
+     */
+    let sheetName =
+        workbook.SheetNames[0];
+
+    for (
+        const name
+        of workbook.SheetNames
+    ) {
+
+        const sheet =
+            workbook.Sheets[name];
+
+        const range =
+            XLSX.utils.decode_range(
+                sheet["!ref"] || "A1"
+            );
+
+        if (
+            range.e.r >=
+            range.s.r
+        ) {
+
+            sheetName =
+                name;
+
+            break;
+        }
+    }
+
+    const sheet =
+        workbook.Sheets[
+            sheetName
+        ];
+
+    if (!sheet) {
+
+        throw new Error(
+            "Impossible de lire la feuille Excel."
+        );
+    }
+
+    const rawRows =
+        XLSX.utils.sheet_to_json(
+            sheet,
+            {
+                defval: "",
+                raw: true,
+                blankrows: false
+            }
+        );
+
+    /*
+     * Debug information.
+     */
+    const first =
+        rawRows[0] || {};
+
+    console.log(
+        "[SMTG IMPORT STOCK] Feuille:",
+        sheetName
+    );
+
+    console.log(
+        "[SMTG IMPORT STOCK] Colonnes détectées:",
+        Object.keys(first)
+    );
+
+    return rawRows;
+}
+
+
+/* ============================================================
+   FORMAT
+============================================================ */
+
+function formatNumber(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "fr-FR",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 3
+        }
+    );
+}
+
+
+/* ============================================================
+   FILE STATE
+============================================================ */
+
+function setFileState(
+    ok,
+    message
+) {
+
+    const badge =
+        $("fileBadge");
+
+    const card =
+        $("fileCard");
+
+    const fileName =
+        $("fileName");
+
+    const dropText =
+        $("dropText");
+
+    if (ok) {
+
+        badge.textContent =
+            "OK";
+
+        badge.classList.add(
+            "ok"
+        );
+
+        badge.classList.remove(
+            "error"
+        );
+
+        card.classList.add(
+            "ready"
+        );
+
+        fileName.textContent =
+            message;
+
+        fileName.classList.remove(
+            "hidden"
+        );
+
+        if (dropText) {
+
+            dropText.textContent =
+                "Fichier sélectionné";
+        }
+
+    }
+    else {
+
+        badge.textContent =
+            "En attente";
+
+        badge.classList.remove(
+            "ok",
+            "error"
+        );
+
+        card.classList.remove(
+            "ready"
+        );
+
+        if (dropText) {
+
+            dropText.textContent =
+                "Sélectionner le fichier Stock";
+        }
+    }
+}
+
+
+/* ============================================================
    PREVIEW
-========================================================= */
+============================================================ */
 
 function renderPreview() {
 
-    if (!state.normalizedRows.length) {
+    const body =
+        $("previewBody");
 
-        previewBody.innerHTML = `
+    if (!rows.length) {
 
+        body.innerHTML = `
             <tr>
-
                 <td
-                    colspan="11"
-                    class="empty-table">
-
-                    <i class="fas fa-file-excel"></i>
-
-                    Aucune donnée valide
-
+                    colspan="9"
+                    style="
+                        text-align:center;
+                        color:#66718d;
+                        padding:35px;
+                    ">
+                    Aucune donnée.
                 </td>
-
             </tr>
-
         `;
 
         return;
-
     }
 
+    const preview =
+        rows.slice(
+            0,
+            200
+        );
 
-    const maxRows = 300;
+    body.innerHTML =
+        preview
+            .map(
+                row => {
 
+                    const warning =
+                        Number(
+                            row.quantite
+                        ) === 0;
 
-    previewBody.innerHTML =
-        state.normalizedRows
-            .slice(0, maxRows)
-            .map(row => `
+                    return `
+                        <tr
+                            class="${
+                                warning
+                                    ? "warning-row"
+                                    : ""
+                            }">
 
-                <tr>
+                            <td class="num">
+                                ${escapeHtml(
+                                    row.article
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.division)}
-                    </td>
+                            <td>
+                                ${escapeHtml(
+                                    row.designation_article
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.magasin)}
-                    </td>
+                            <td>
+                                ${escapeHtml(
+                                    row.lot
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.emplacement)}
-                    </td>
+                            <td>
+                                ${escapeHtml(
+                                    row.magasin
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.article)}
-                    </td>
+                            <td>
+                                ${escapeHtml(
+                                    row.emplacement ||
+                                    "-"
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.designation_article)}
-                    </td>
+                            <td class="qty">
+                                ${formatNumber(
+                                    row.quantite
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.lot)}
-                    </td>
+                            <td>
+                                ${escapeHtml(
+                                    row.unite
+                                )}
+                            </td>
 
-                    <td>
-                        ${formatNumber(row.quantite)}
-                    </td>
+                            <td class="available">
+                                ${formatNumber(
+                                    row.stock_disponible
+                                )}
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.unite)}
-                    </td>
+                            <td>
+                                <span class="status-pill">
+                                    ${escapeHtml(
+                                        row.statut
+                                    )}
+                                </span>
+                            </td>
 
-                    <td>
-                        ${escapeHtml(row.type_article)}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(row.groupe_article)}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(row.famille_article)}
-                    </td>
-
-                </tr>
-
-            `)
+                        </tr>
+                    `;
+                }
+            )
             .join("");
+
+
+    $("tableCount").textContent =
+        `${rows.length.toLocaleString(
+            "fr-FR"
+        )} ligne(s)`;
 
 }
 
 
-/* =========================================================
-   SUMMARY
-========================================================= */
+/* ============================================================
+   STATS
+============================================================ */
 
-function updateSummary() {
-
-    const rows =
-        state.normalizedRows;
-
+function updateStats() {
 
     const articles =
         new Set(
             rows
-                .map(r => normalize(r.article))
+                .map(
+                    row =>
+                        row.article
+                )
                 .filter(Boolean)
         );
 
-
-    const lots =
+    const magasins =
         new Set(
             rows
-                .map(r => normalize(r.lot))
+                .map(
+                    row =>
+                        row.magasin
+                )
                 .filter(Boolean)
         );
-
 
     const quantity =
         rows.reduce(
             (sum, row) =>
                 sum +
-                numberValue(row.quantite),
-            0
-        );
-
-
-    $("rowCount").textContent =
-        rows.length.toLocaleString("fr-FR");
-
-
-    $("summaryRows").textContent =
-        rows.length.toLocaleString("fr-FR");
-
-
-    $("summaryArticles").textContent =
-        articles.size.toLocaleString("fr-FR");
-
-
-    $("summaryLots").textContent =
-        lots.size.toLocaleString("fr-FR");
-
-
-    $("summaryQuantity").textContent =
-        formatNumber(quantity) +
-        " KG";
-
-
-    $("readyRows").textContent =
-        rows.length.toLocaleString("fr-FR");
-
-}
-
-
-/* =========================================================
-   MODE
-========================================================= */
-
-document
-    .querySelectorAll(
-        'input[name="importMode"]'
-    )
-    .forEach(input => {
-
-        input.addEventListener(
-            "change",
-            updateSelectedMode
-        );
-
-    });
-
-
-function updateSelectedMode() {
-
-    const selected =
-        document.querySelector(
-            'input[name="importMode"]:checked'
-        );
-
-
-    const labels = {
-
-        REMPLACER:
-            "REMPLACER",
-
-        MISE_A_JOUR:
-            "MISE À JOUR",
-
-        SYNCHRONISATION:
-            "SYNCHRONISATION"
-
-    };
-
-
-    $("selectedMode").textContent =
-        labels[selected?.value] ||
-        "-";
-
-}
-
-
-/* =========================================================
-   ENABLE BUTTON
-========================================================= */
-
-function enableImport() {
-
-    const enabled =
-        state.normalizedRows.length > 0;
-
-
-    importButton.disabled =
-        !enabled;
-
-    importButtonBottom.disabled =
-        !enabled;
-
-}
-
-
-/* =========================================================
-   IMPORT
-========================================================= */
-
-importButton.addEventListener(
-    "click",
-    executeImport
-);
-
-
-importButtonBottom.addEventListener(
-    "click",
-    executeImport
-);
-
-
-async function executeImport() {
-
-    if (
-        !state.normalizedRows.length
-    ) {
-
-        alert(
-            "Aucune donnée à importer."
-        );
-
-        return;
-
-    }
-
-
-    const mode =
-        document.querySelector(
-            'input[name="importMode"]:checked'
-        )?.value;
-
-
-    if (!mode) {
-
-        alert(
-            "Veuillez sélectionner un mode d'importation."
-        );
-
-        return;
-
-    }
-
-
-    let confirmation = true;
-
-
-    if (mode === "REMPLACER") {
-
-        confirmation =
-            confirm(
-                "ATTENTION !\n\n" +
-                "Le mode REMPLACER va supprimer " +
-                "le stock actuel avant l'importation.\n\n" +
-                "Voulez-vous continuer ?"
-            );
-
-    }
-
-
-    if (!confirmation) return;
-
-
-    disableButtons(true);
-
-    showProgress();
-
-    resetReport();
-
-
-    try {
-
-        const result =
-            await importDirectSupabase(
-                state.normalizedRows,
-                mode
-            );
-
-
-        showReport(result);
-
-        state.imported = true;
-
-
-        alert(
-            "Importation terminée avec succès."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "IMPORT ERROR:",
-            error
-        );
-
-
-        alert(
-            "Erreur pendant l'importation :\n\n" +
-            error.message
-        );
-
-    } finally {
-
-        disableButtons(false);
-
-        hideProgress();
-
-    }
-
-}
-
-
-/* =========================================================
-   DIRECT SUPABASE IMPORT
-========================================================= */
-
-async function importDirectSupabase(
-    rows,
-    mode
-) {
-
-    const startedAt =
-        Date.now();
-
-
-    let newCount = 0;
-    let updatedCount = 0;
-    let deletedCount = 0;
-    let sameCount = 0;
-
-
-    /* ==============================================
-       USER
-    ============================================== */
-
-    const {
-        data: {
-            user
-        }
-    } =
-        await supabase.auth.getUser();
-
-
-    if (!user) {
-
-        throw new Error(
-            "Utilisateur non authentifié."
-        );
-
-    }
-
-
-    /* ==============================================
-       IMPORT HISTORY
-    ============================================== */
-
-    const {
-        data: profile,
-        error: profileError
-    } =
-        await supabase
-            .from("user_profiles")
-            .select("id")
-            .eq("id", user.id)
-            .maybeSingle();
-
-
-    if (profileError) {
-
-        throw profileError;
-
-    }
-
-
-    /* ==============================================
-       REMPLACER
-    ============================================== */
-
-    if (mode === "REMPLACER") {
-
-        updateProgress(
-            5,
-            "Suppression du stock actuel..."
-        );
-
-
-        const {
-            error
-        } =
-            await supabase
-                .from(STOCK_TABLE)
-                .delete()
-                .neq(
-                    "id",
-                    0
-                );
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        deletedCount = 0;
-
-    }
-
-
-    /* ==============================================
-       EXISTING STOCK
-    ============================================== */
-
-    let existing = [];
-
-
-    if (
-        mode === "MISE_A_JOUR" ||
-        mode === "SYNCHRONISATION"
-    ) {
-
-        updateProgress(
-            10,
-            "Lecture du stock actuel..."
-        );
-
-
-        const {
-            data,
-            error
-        } =
-            await supabase
-                .from(STOCK_TABLE)
-                .select(
-                    `
-                    id,
-                    division,
-                    magasin,
-                    emplacement,
-                    article,
-                    designation_article,
-                    lot,
-                    quantite,
-                    unite,
-                    type_article,
-                    groupe_article,
-                    famille_article,
-                    controle_qualite,
-                    stock_reserve,
-                    stock_disponible,
-                    statut
-                    `
-                );
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        existing =
-            data || [];
-
-    }
-
-
-    /* ==============================================
-       INDEX
-    ============================================== */
-
-    const existingMap =
-        new Map();
-
-
-    existing.forEach(row => {
-
-        const key =
-            makeStockKey(row);
-
-
-        existingMap.set(
-            key,
-            row
-        );
-
-    });
-
-
-    const importKeys =
-        new Set();
-
-
-    /* ==============================================
-       PROCESS ROWS
-    ============================================== */
-
-    const total =
-        rows.length;
-
-
-    for (
-        let i = 0;
-        i < total;
-        i++
-    ) {
-
-        const row =
-            rows[i];
-
-
-        const key =
-            makeStockKey(row);
-
-
-        importKeys.add(key);
-
-
-        const old =
-            existingMap.get(key);
-
-
-        if (old) {
-
-            if (
-                rowsAreEqual(
-                    old,
-                    row
-                )
-            ) {
-
-                sameCount++;
-
-            } else {
-
-                const {
-                    error
-                } =
-                    await supabase
-                        .from(STOCK_TABLE)
-                        .update({
-
-                            division:
-                                row.division,
-
-                            magasin:
-                                row.magasin,
-
-                            emplacement:
-                                row.emplacement,
-
-                            article:
-                                row.article,
-
-                            designation_article:
-                                row.designation_article,
-
-                            lot:
-                                row.lot,
-
-                            quantite:
-                                row.quantite,
-
-                            unite:
-                                row.unite,
-
-                            type_article:
-                                row.type_article,
-
-                            groupe_article:
-                                row.groupe_article,
-
-                            famille_article:
-                                row.famille_article,
-
-                            stock_disponible:
-                                row.quantite,
-
-                            updated_at:
-                                new Date().toISOString()
-
-                        })
-                        .eq(
-                            "id",
-                            old.id
-                        );
-
-
-                if (error) {
-
-                    throw error;
-
-                }
-
-
-                updatedCount++;
-
-            }
-
-        } else {
-
-            const {
-                error
-            } =
-                await supabase
-                    .from(STOCK_TABLE)
-                    .insert({
-
-                        division:
-                            row.division,
-
-                        magasin:
-                            row.magasin,
-
-                        emplacement:
-                            row.emplacement,
-
-                        article:
-                            row.article,
-
-                        designation_article:
-                            row.designation_article,
-
-                        lot:
-                            row.lot,
-
-                        quantite:
-                            row.quantite,
-
-                        unite:
-                            row.unite,
-
-                        type_article:
-                            row.type_article,
-
-                        groupe_article:
-                            row.groupe_article,
-
-                        famille_article:
-                            row.famille_article,
-
-                        controle_qualite:
-                            0,
-
-                        stock_reserve:
-                            0,
-
-                        stock_disponible:
-                            row.quantite,
-
-                        statut:
-                            "DISPONIBLE"
-
-                    });
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            newCount++;
-
-        }
-
-
-        const percent =
-            15 +
-            Math.round(
-                ((i + 1) / total) *
-                70
-            );
-
-
-        updateProgress(
-            percent,
-            `Traitement de la ligne ${i + 1} / ${total}`
-        );
-
-
-        /*
-         * Petite pause pour garder
-         * l'interface réactive.
-         */
-        if (
-            i % 25 === 0
-        ) {
-
-            await sleep(0);
-
-        }
-
-    }
-
-
-    /* ==============================================
-       SYNCHRONISATION
-    ============================================== */
-
-    if (
-        mode === "SYNCHRONISATION"
-    ) {
-
-        updateProgress(
-            88,
-            "Suppression des lignes absentes..."
-        );
-
-
-        for (
-            const old
-            of existing
-        ) {
-
-            const key =
-                makeStockKey(old);
-
-
-            if (
-                !importKeys.has(key)
-            ) {
-
-                const {
-                    error
-                } =
-                    await supabase
-                        .from(STOCK_TABLE)
-                        .delete()
-                        .eq(
-                            "id",
-                            old.id
-                        );
-
-
-                if (error) {
-
-                    throw error;
-
-                }
-
-
-                deletedCount++;
-
-            }
-
-        }
-
-    }
-
-
-    /* ==============================================
-       HISTORIQUE
-    ============================================== */
-
-    updateProgress(
-        95,
-        "Enregistrement de l'historique..."
-    );
-
-
-    const duration =
-        Math.round(
-            (Date.now() - startedAt) /
-            1000
-        );
-
-
-    const totalQuantity =
-        rows.reduce(
-            (sum, row) =>
-                sum +
-                numberValue(
+                toNumber(
                     row.quantite
                 ),
             0
         );
 
-
-    const articles =
-        new Set(
-            rows.map(
-                r =>
-                    normalize(
-                        r.article
-                    )
-            )
+    $("statRows")
+        .textContent =
+        rows.length.toLocaleString(
+            "fr-FR"
         );
 
-
-    const lots =
-        new Set(
-            rows.map(
-                r =>
-                    normalize(
-                        r.lot
-                    )
-            )
+    $("statArticles")
+        .textContent =
+        articles.size.toLocaleString(
+            "fr-FR"
         );
 
-
-    const magasins =
-        new Set(
-            rows.map(
-                r =>
-                    normalize(
-                        r.magasin
-                    )
-            )
+    $("statMagasins")
+        .textContent =
+        magasins.size.toLocaleString(
+            "fr-FR"
         );
 
+    $("statQuantity")
+        .textContent =
+        formatNumber(
+            quantity
+        );
 
-    const historyData = {
-
-        type_import:
-            "STOCK",
-
-        mode_import:
-            mode,
-
-        nom_fichier:
-            state.file?.name ||
-            "import_stock.xlsx",
-
-        utilisateur:
-            profile?.id ||
-            user.id,
-
-        duree_import:
-            duration,
-
-        total_lignes:
-            rows.length,
-
-        nouvelles_lignes:
-            newCount,
-
-        lignes_modifiees:
-            updatedCount,
-
-        lignes_supprimees:
-            deletedCount,
-
-        lignes_inchangees:
-            sameCount,
-
-        total_articles:
-            articles.size,
-
-        total_lots:
-            lots.size,
-
-        total_magasins:
-            magasins.size,
-
-        total_quantite:
-            totalQuantity,
-
-        statut:
-            "SUCCESS",
-
-        message:
-            `Import direct Supabase - ${mode}`
-
-    };
+    $("analysisMessage")
+        .textContent =
+        `${rows.length.toLocaleString(
+            "fr-FR"
+        )} ligne(s) prêtes à être enregistrées dans Supabase.`;
+}
 
 
-    const {
-        error:
-        historyError
-    } =
-        await supabase
-            .from(IMPORT_TABLE)
-            .insert(
-                historyData
+/* ============================================================
+   QUANTITY DIAGNOSTIC
+============================================================ */
+
+function quantityDiagnostic() {
+
+    if (!rows.length) {
+        return null;
+    }
+
+    const total =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                Number(
+                    row.quantite || 0
+                ),
+            0
+        );
+
+    const sources =
+        new Map();
+
+    rows
+        .forEach(
+            row => {
+
+                const source =
+                    row.__quantity_source ||
+                    "(aucune)";
+
+                sources.set(
+                    source,
+                    (
+                        sources.get(
+                            source
+                        ) || 0
+                    ) + 1
+                );
+            }
+        );
+
+    const sorted =
+        [...sources.entries()]
+            .sort(
+                (a,b) =>
+                    b[1] - a[1]
             );
 
+    return {
+        total,
+        sources: sorted
+    };
+}
 
-    if (historyError) {
 
-        console.warn(
-            "Historique import:",
-            historyError
+/* ============================================================
+   ANALYZE LOCAL
+============================================================ */
+
+async function analyzeFile() {
+
+    if (!selectedFile) {
+
+        showModal(
+            "Fichier manquant",
+            "Veuillez sélectionner un fichier Stock.",
+            true
         );
 
+        return;
+    }
+
+    if (busy) {
+        return;
+    }
+
+    try {
+
+        busy = true;
+
+        $("btnAnalyze")
+            .disabled =
+            true;
+
+        showLoader(
+            "Analyse du fichier",
+            "Lecture et validation du fichier SAP..."
+        );
+
+        const rawRows =
+            await readFile(
+                selectedFile
+            );
+
+        if (
+            !rawRows.length
+        ) {
+
+            throw new Error(
+                "Le fichier ne contient aucune ligne."
+            );
+        }
+
+        const result =
+            validateRows(
+                rawRows
+            );
+
+        if (
+            !result.valid.length
+        ) {
+
+            throw new Error(
+                result.errors
+                    .slice(0, 10)
+                    .join("\n") ||
+                "Aucune ligne valide trouvée."
+            );
+        }
+
+        rows =
+            result.valid;
+
+        analysisDone =
+            true;
+
+        renderPreview();
+
+        updateStats();
+
+        $("emptyState")
+            .style.display =
+            "none";
+
+        $("resultSection")
+            .classList.add(
+                "show"
+            );
+
+        $("btnSave")
+            .disabled =
+            false;
+
+
+        /*
+         * IMPORTANT:
+         * Diagnostic visible if quantity is zero.
+         */
+        const diagnostic =
+            quantityDiagnostic();
+
+        console.log(
+            "[SMTG IMPORT STOCK] Diagnostic quantité:",
+            diagnostic
+        );
+
+        if (
+            diagnostic &&
+            diagnostic.total === 0
+        ) {
+
+            const sourceText =
+                diagnostic.sources
+                    .slice(0, 8)
+                    .map(
+                        ([source,count]) =>
+                            `${source}: ${count} ligne(s)`
+                    )
+                    .join("\n");
+
+            showModal(
+                "Quantités introuvables",
+                "Le fichier a bien été lu, mais toutes les quantités détectées sont à 0.\n\nColonnes utilisées :\n" +
+                sourceText +
+                "\n\nVérifiez le nom de la colonne quantité dans le fichier SAP.",
+                true
+            );
+
+        }
+        else if (
+            result.errors.length
+        ) {
+
+            showModal(
+                "Analyse terminée avec avertissements",
+                `${rows.length} ligne(s) valides.\n\n` +
+                result.errors
+                    .slice(0, 10)
+                    .join("\n"),
+                false
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "[SMTG IMPORT STOCK] Analyse:",
+            error
+        );
+
+        showModal(
+            "Erreur d'analyse",
+            error.message ||
+            "Impossible d'analyser le fichier.",
+            true
+        );
+
+        analysisDone =
+            false;
+
+    }
+    finally {
+
+        busy = false;
+
+        $("btnAnalyze")
+            .disabled =
+            !selectedFile;
+
+        hideLoader();
+    }
+}
+
+
+/* ============================================================
+   SUPABASE HELPERS
+============================================================ */
+
+function makeStockKey(row) {
+    return [
+        normalizeKey(row.division),
+        normalizeKey(row.magasin),
+        normalizeKey(row.emplacement),
+        normalizeKey(row.article),
+        normalizeKey(row.lot)
+    ].join("|");
+}
+
+function cleanRow(row) {
+    return {
+        division: row.division,
+        magasin: row.magasin,
+        emplacement: row.emplacement,
+        article: row.article,
+        designation_article: row.designation_article,
+        lot: row.lot,
+        quantite: Number(row.quantite || 0),
+        unite: row.unite || "KG",
+        type_article: row.type_article,
+        groupe_article: row.groupe_article,
+        famille_article: row.famille_article,
+        controle_qualite: Number(row.controle_qualite || 0),
+        stock_reserve: Number(row.stock_reserve || 0),
+        stock_disponible: Number(row.stock_disponible || 0),
+        statut: row.statut || "DISPONIBLE"
+    };
+}
+
+async function readExistingStock() {
+    const { data, error } = await supabase
+        .from(STOCK_TABLE)
+        .select(`id, division, magasin, emplacement, article, designation_article, lot, quantite, unite, type_article, groupe_article, famille_article, controle_qualite, stock_reserve, stock_disponible, statut`);
+
+    if (error) throw error;
+    return data || [];
+}
+
+async function deleteAllStock(existing) {
+    const ids = existing.map(r => r.id).filter(v => v !== null && v !== undefined);
+    const chunkSize = 500;
+
+    for (let i = 0; i < ids.length; i += chunkSize) {
+        const chunk = ids.slice(i, i + chunkSize);
+        const { error } = await supabase
+            .from(STOCK_TABLE)
+            .delete()
+            .in("id", chunk);
+        if (error) throw error;
+        setLoaderProgress(10 + Math.round((i / Math.max(ids.length, 1)) * 20), "Suppression du stock actuel...");
+    }
+}
+
+function rowsEqual(a, b) {
+    const fields = [
+        "division", "magasin", "emplacement", "article",
+        "designation_article", "lot", "quantite", "unite",
+        "type_article", "groupe_article", "famille_article",
+        "controle_qualite", "stock_reserve", "stock_disponible", "statut"
+    ];
+
+    return fields.every(field => {
+        if (["quantite", "controle_qualite", "stock_reserve", "stock_disponible"].includes(field)) {
+            return Number(a?.[field] || 0) === Number(b?.[field] || 0);
+        }
+        return normalizeKey(a?.[field]) === normalizeKey(b?.[field]);
+    });
+}
+
+async function saveToSupabase() {
+    if (busy) return;
+
+    if (!analysisDone || !rows.length) {
+        showModal("Analyse obligatoire", "Analysez d'abord le fichier avant de lancer l'enregistrement.", true);
+        return;
+    }
+
+    const mode = $("importMode").value;
+    const modeLabel = getModeLabel(mode);
+    const totalQuantity = rows.reduce((sum, row) => sum + Number(row.quantite || 0), 0);
+
+    if (totalQuantity === 0) {
+        showModal("Enregistrement bloqué", "La quantité totale est 0. Vérifiez la colonne quantité dans le fichier SAP.", true);
+        return;
+    }
+
+    const confirmed = window.confirm(
+        `Confirmer l'import Stock ?\n\n` +
+        `Mode : ${modeLabel}\n` +
+        `Lignes : ${rows.length}\n` +
+        `Quantité totale : ${formatNumber(totalQuantity)}\n\n` +
+        `Les données seront enregistrées directement dans Supabase.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        busy = true;
+        $("btnSave").disabled = true;
+        $("btnAnalyze").disabled = true;
+
+        showLoader("Enregistrement Supabase", `Préparation de ${rows.length.toLocaleString("fr-FR")} ligne(s)...`);
+        startProgressSimulation();
+
+        const existing = await readExistingStock();
+        const existingMap = new Map(existing.map(row => [makeStockKey(row), row]));
+        const importKeys = new Set();
+
+        let added = 0;
+        let updated = 0;
+        let unchanged = 0;
+        let deleted = 0;
+        let errors = 0;
+        const errorMessages = [];
+
+        if (mode === "REMPLACER") {
+            await deleteAllStock(existing);
+            existingMap.clear();
+        }
+
+        const insertRows = [];
+        const updateRows = [];
+
+        rows.forEach(row => {
+            const clean = cleanRow(row);
+            const key = makeStockKey(clean);
+            importKeys.add(key);
+            const old = existingMap.get(key);
+
+            if (old && mode !== "REMPLACER") {
+                if (rowsEqual(old, clean)) {
+                    unchanged++;
+                } else {
+                    updateRows.push({ id: old.id, values: clean });
+                }
+            } else {
+                insertRows.push(clean);
+            }
+        });
+
+        const insertChunk = 300;
+        for (let i = 0; i < insertRows.length; i += insertChunk) {
+            const chunk = insertRows.slice(i, i + insertChunk);
+            const { error } = await supabase.from(STOCK_TABLE).insert(chunk);
+            if (error) throw error;
+            added += chunk.length;
+            setLoaderProgress(25 + Math.round(((i + chunk.length) / Math.max(insertRows.length, 1)) * 30), `Ajout de ${i + chunk.length} / ${insertRows.length} ligne(s)...`);
+        }
+
+        for (let i = 0; i < updateRows.length; i++) {
+            const item = updateRows[i];
+            const { error } = await supabase
+                .from(STOCK_TABLE)
+                .update(item.values)
+                .eq("id", item.id);
+            if (error) throw error;
+            updated++;
+            setLoaderProgress(55 + Math.round(((i + 1) / Math.max(updateRows.length, 1)) * 25), `Mise à jour de ${i + 1} / ${updateRows.length} ligne(s)...`);
+        }
+
+        if (mode === "SYNCHRONISATION") {
+            const toDelete = existing.filter(old => !importKeys.has(makeStockKey(old)));
+            const deleteChunk = 300;
+            for (let i = 0; i < toDelete.length; i += deleteChunk) {
+                const chunk = toDelete.slice(i, i + deleteChunk);
+                const ids = chunk.map(r => r.id);
+                const { error } = await supabase.from(STOCK_TABLE).delete().in("id", ids);
+                if (error) throw error;
+                deleted += chunk.length;
+                setLoaderProgress(80 + Math.round(((i + chunk.length) / Math.max(toDelete.length, 1)) * 10), `Suppression de ${i + chunk.length} / ${toDelete.length} ligne(s)...`);
+            }
+        }
+
+        setLoaderProgress(94, "Vérification de la base Supabase...");
+        const { count, error: countError } = await supabase
+            .from(STOCK_TABLE)
+            .select("id", { count: "exact", head: true });
+        if (countError) throw countError;
+
+        setLoaderProgress(97, "Finalisation...");
+
+        // Historique : best effort, sans bloquer l'import si RLS/schema refuse l'insertion.
+        try {
+            const { data: userData } = await supabase.auth.getUser();
+            const userId = userData?.user?.id || null;
+            const history = {
+                type_import: "STOCK",
+                mode_import: mode,
+                nom_fichier: selectedFile?.name || "import_stock.xlsx",
+                utilisateur: userId,
+                total_lignes: rows.length,
+                nouvelles_lignes: added,
+                lignes_modifiees: updated,
+                lignes_supprimees: deleted,
+                lignes_inchangees: unchanged,
+                total_quantite: totalQuantity,
+                statut: "SUCCESS",
+                message: `Import direct Supabase - ${mode}`
+            };
+            await supabase.from(HISTORY_TABLE).insert(history);
+        } catch (historyError) {
+            console.warn("Historique import non enregistré:", historyError);
+        }
+
+        stopProgressSimulation();
+        setLoaderProgress(100, "Import Supabase terminé avec succès.");
+
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+        showModal(
+            "Import terminé",
+            `Enregistrement direct Supabase terminé avec succès.\n\n` +
+            `Mode : ${modeLabel}\n` +
+            `Lignes fichier : ${rows.length}\n` +
+            `Quantité : ${formatNumber(totalQuantity)}\n` +
+            `Ajoutées : ${added}\n` +
+            `Modifiées : ${updated}\n` +
+            `Inchangées : ${unchanged}\n` +
+            `Supprimées : ${deleted}\n` +
+            `Stock actuel : ${Number(count || 0).toLocaleString("fr-FR")} ligne(s)`,
+            false
+        );
+
+        $("apiDot").classList.add("online");
+        $("apiStatusText").textContent = "Supabase connecté";
+
+    } catch (error) {
+        console.error("[SMTG IMPORT STOCK] Supabase:", error);
+        stopProgressSimulation();
+        $("apiDot").classList.remove("online");
+        $("apiDot").classList.add("error");
+        $("apiStatusText").textContent = "Erreur Supabase";
+        showModal("Erreur d'enregistrement", error.message || "Impossible d'enregistrer le stock dans Supabase.", true);
+    } finally {
+        busy = false;
+        $("btnAnalyze").disabled = !selectedFile;
+        $("btnSave").disabled = !analysisDone || !rows.length;
+        hideLoader();
+    }
+}
+
+async function checkSupabase() {
+    const dot = $("apiDot");
+    const text = $("apiStatusText");
+    dot.classList.remove("online", "error");
+    text.textContent = "Supabase : test...";
+
+    try {
+        const { error } = await supabase.from(STOCK_TABLE).select("id").limit(1);
+        if (error) throw error;
+        dot.classList.add("online");
+        text.textContent = "Supabase disponible";
+    } catch (error) {
+        console.warn("[SMTG IMPORT STOCK] Supabase check:", error);
+        dot.classList.add("error");
+        text.textContent = "Supabase à vérifier";
+    }
+}
+
+/* ============================================================
+   MODE
+============================================================ */
+
+function getModeLabel(mode) {
+
+    switch (mode) {
+
+        case "REMPLACER":
+            return "Remplacer";
+
+        case "SYNCHRONISATION":
+            return "Synchronisation";
+
+        default:
+            return "Mise à jour";
+    }
+}
+
+
+function updateMode() {
+
+    const mode =
+        $("importMode").value;
+
+    const label =
+        getModeLabel(
+            mode
+        );
+
+    $("modeLabel")
+        .textContent =
+        label;
+
+    $("mainModeLabel")
+        .textContent =
+        label;
+
+    $("modeDescription")
+        .textContent =
+        mode === "REMPLACER"
+
+            ? "Remplace complètement le stock"
+
+            : mode === "SYNCHRONISATION"
+
+                ? "Synchronise le stock avec SAP"
+
+                : "Met à jour et ajoute les lignes";
+}
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+function resetAll() {
+
+    if (busy) {
+        return;
+    }
+
+    selectedFile =
+        null;
+
+    rows =
+        [];
+
+    analysisDone =
+        false;
+
+    $("excelFile")
+        .value =
+        "";
+
+    $("fileName")
+        .textContent =
+        "";
+
+    $("fileName")
+        .classList.add(
+            "hidden"
+        );
+
+    $("fileBadge")
+        .textContent =
+        "En attente";
+
+    $("fileBadge")
+        .classList.remove(
+            "ok",
+            "error"
+        );
+
+    $("fileCard")
+        .classList.remove(
+            "ready"
+        );
+
+    $("dropText")
+        .textContent =
+        "Sélectionner le fichier Stock";
+
+    $("btnAnalyze")
+        .disabled =
+        true;
+
+    $("btnSave")
+        .disabled =
+        true;
+
+    $("resultSection")
+        .classList.remove(
+            "show"
+        );
+
+    $("emptyState")
+        .style.display =
+        "flex";
+
+    $("previewBody")
+        .innerHTML =
+        "";
+
+    $("tableCount")
+        .textContent =
+        "0 ligne";
+
+    $("statRows")
+        .textContent =
+        "0";
+
+    $("statArticles")
+        .textContent =
+        "0";
+
+    $("statMagasins")
+        .textContent =
+        "0";
+
+    $("statQuantity")
+        .textContent =
+        "0";
+
+    $("analysisMessage")
+        .textContent =
+        "Fichier prêt";
+
+    console.log(
+        "[SMTG IMPORT STOCK] Réinitialisé."
+    );
+}
+
+
+/* ============================================================
+   FILE SELECT
+============================================================ */
+
+async function handleFile(file) {
+
+    if (!file) {
+        return;
+    }
+
+    const extension =
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+    if (
+        ![
+            "xlsx",
+            "xls",
+            "csv"
+        ].includes(
+            extension
+        )
+    ) {
+
+        showModal(
+            "Fichier invalide",
+            "Veuillez sélectionner un fichier Excel (.xlsx, .xls) ou CSV.",
+            true
+        );
+
+        return;
     }
 
 
-    updateProgress(
-        100,
-        "Importation terminée"
+    selectedFile =
+        file;
+
+    rows =
+        [];
+
+    analysisDone =
+        false;
+
+
+    $("fileName")
+        .textContent =
+        file.name;
+
+    $("fileName")
+        .classList.remove(
+            "hidden"
+        );
+
+
+    setFileState(
+        true,
+        file.name
     );
 
 
-    return {
+    $("btnAnalyze")
+        .disabled =
+        false;
 
-        newCount,
-
-        updatedCount,
-
-        deletedCount,
-
-        sameCount
-
-    };
-
-}
+    $("btnSave")
+        .disabled =
+        true;
 
 
-/* =========================================================
-   STOCK KEY
-========================================================= */
+    $("resultSection")
+        .classList.remove(
+            "show"
+        );
 
-function makeStockKey(row) {
-
-    return [
-
-        normalize(row.division),
-
-        normalize(row.magasin),
-
-        normalize(row.emplacement),
-
-        normalize(row.article),
-
-        normalize(row.lot)
-
-    ].join("|");
-
-}
+    $("emptyState")
+        .style.display =
+        "flex";
 
 
-/* =========================================================
-   COMPARE
-========================================================= */
-
-function rowsAreEqual(
-    old,
-    row
-) {
-
-    return (
-
-        normalize(old.division) ===
-        normalize(row.division)
-
-        &&
-
-        normalize(old.magasin) ===
-        normalize(row.magasin)
-
-        &&
-
-        normalize(old.emplacement) ===
-        normalize(row.emplacement)
-
-        &&
-
-        normalize(old.article) ===
-        normalize(row.article)
-
-        &&
-
-        normalize(old.designation_article) ===
-        normalize(row.designation_article)
-
-        &&
-
-        normalize(old.lot) ===
-        normalize(row.lot)
-
-        &&
-
-        Number(old.quantite || 0) ===
-        Number(row.quantite || 0)
-
-        &&
-
-        normalize(old.unite) ===
-        normalize(row.unite)
-
-        &&
-
-        normalize(old.type_article) ===
-        normalize(row.type_article)
-
-        &&
-
-        normalize(old.groupe_article) ===
-        normalize(row.groupe_article)
-
-        &&
-
-        normalize(old.famille_article) ===
-        normalize(row.famille_article)
-
+    console.log(
+        "[SMTG IMPORT STOCK] Fichier:",
+        file.name,
+        file.size,
+        "bytes"
     );
-
 }
 
 
-/* =========================================================
-   PROGRESS
-========================================================= */
-
-function showProgress() {
-
-    progressSection.style.display =
-        "block";
-
-}
-
-
-function hideProgress() {
-
-    setTimeout(
-        () => {
-
-            progressSection.style.display =
-                "none";
-
-        },
-        800
-    );
-
-}
-
-
-function updateProgress(
-    percent,
-    text
-) {
-
-    $("progressPercent")
-        .textContent =
-        `${percent}%`;
-
-
-    $("progressBar")
-        .style.width =
-        `${percent}%`;
-
-
-    $("progressText")
-        .textContent =
-        text;
-
-
-    $("progressCount")
-        .textContent =
-        `${Math.round(percent)}%`;
-
-}
-
-
-/* =========================================================
-   REPORT
-========================================================= */
-
-function resetReport() {
-
-    reportSection.style.display =
-        "none";
-
-}
-
-
-function showReport(result) {
-
-    $("reportNew").textContent =
-        result.newCount;
-
-
-    $("reportUpdated").textContent =
-        result.updatedCount;
-
-
-    $("reportDeleted").textContent =
-        result.deletedCount;
-
-
-    $("reportSame").textContent =
-        result.sameCount;
-
-
-    reportSection.style.display =
-        "block";
-
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-function disableButtons(
-    disabled
-) {
-
-    importButton.disabled =
-        disabled ||
-        !state.normalizedRows.length;
-
-    importButtonBottom.disabled =
-        disabled ||
-        !state.normalizedRows.length;
-
-}
-
-
-/* =========================================================
-   RESET
-========================================================= */
-
-clearPreview.addEventListener(
-    "click",
-    resetPage
-);
-
-
-resetButton.addEventListener(
-    "click",
-    resetPage
-);
-
-
-function resetPage() {
-
-    state.file = null;
-
-    state.rows = [];
-
-    state.normalizedRows = [];
-
-    state.imported = false;
-
-
-    fileInput.value = "";
-
-
-    $("fileInfoSection").style.display =
-        "none";
-
-
-    $("summarySection").style.display =
-        "none";
-
-
-    reportSection.style.display =
-        "none";
-
-
-    previewBody.innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="11"
-                class="empty-table">
-
-                <i class="fas fa-file-excel"></i>
-
-                Aucune donnée à afficher
-
-            </td>
-
-        </tr>
-
-    `;
-
-
-    $("progressBar")
-        .style.width =
-        "0%";
-
-
-    $("progressPercent")
-        .textContent =
-        "0%";
-
-
-    $("progressText")
-        .textContent =
-        "Préparation...";
-
-
-    $("progressCount")
-        .textContent =
-        "0 / 0";
-
-
-    enableImport();
-
-}
-
-
-/* =========================================================
-   SLEEP
-========================================================= */
-
-function sleep(
-    ms
-) {
-
-    return new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                ms
+/* ============================================================
+   LOADER
+============================================================ */
+
+function setLoaderProgress(value, message = null) {
+
+    progressValue =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(value) || 0
             )
-    );
+        );
 
+    const bar = $("syncProgressBar");
+    const percent = $("syncProgressPercent");
+
+    if (bar) {
+        bar.style.width = `${progressValue}%`;
+    }
+
+    if (percent) {
+        percent.textContent =
+            `${Math.round(progressValue)}%`;
+    }
+
+    if (message !== null) {
+        $("loaderMessage")
+            .textContent =
+            message;
+    }
 }
 
 
-/* =========================================================
-   MOBILE
-========================================================= */
+function startProgressSimulation() {
 
-$("mobileMenu")
-    ?.addEventListener(
+    stopProgressSimulation();
+
+    /*
+     * Monte rapidement jusqu'à 80%, puis très doucement jusqu'à 96%.
+     * Le 100% est réservé à la réponse API réussie.
+     */
+    progressValue = 8;
+    setLoaderProgress(
+        progressValue,
+        "Préparation des données..."
+    );
+
+    progressTimer =
+        setInterval(
+            () => {
+
+                if (progressValue < 35) {
+
+                    progressValue += 3;
+
+                    setLoaderProgress(
+                        progressValue,
+                        "Envoi des lignes vers l'API SMTG..."
+                    );
+
+                }
+                else if (progressValue < 80) {
+
+                    progressValue += 2;
+
+                    setLoaderProgress(
+                        progressValue,
+                        "Traitement massif PostgreSQL..."
+                    );
+
+                }
+                else if (progressValue < 96) {
+
+                    progressValue += .35;
+
+                    setLoaderProgress(
+                        progressValue,
+                        "Synchronisation du stock en cours..."
+                    );
+                }
+
+            },
+            250
+        );
+}
+
+
+function stopProgressSimulation() {
+
+    if (progressTimer) {
+
+        clearInterval(
+            progressTimer
+        );
+
+        progressTimer =
+            null;
+    }
+}
+
+
+function showLoader(
+    title,
+    message
+) {
+
+    $("loaderTitle")
+        .textContent =
+        title;
+
+    $("loaderMessage")
+        .textContent =
+        message;
+
+    setLoaderProgress(
+        0,
+        message
+    );
+
+    $("loader")
+        .classList.add(
+            "show"
+        );
+}
+
+
+function hideLoader() {
+
+    stopProgressSimulation();
+
+    $("loader")
+        .classList.remove(
+            "show"
+        );
+
+    setLoaderProgress(
+        0,
+        "Traitement..."
+    );
+}
+
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+function showModal(
+    title,
+    message,
+    error = false
+) {
+
+    $("modalTitle")
+        .textContent =
+        title;
+
+    $("modalMessage")
+        .textContent =
+        message;
+
+
+    const icon =
+        $("modalIcon");
+
+    const symbol =
+        $("modalIconSymbol");
+
+
+    icon.classList.toggle(
+        "error",
+        error
+    );
+
+
+    symbol.className =
+        error
+            ? "fa-solid fa-triangle-exclamation"
+            : "fa-solid fa-check";
+
+
+    $("modal")
+        .classList.add(
+            "show"
+        );
+}
+
+
+function hideModal() {
+
+    $("modal")
+        .classList.remove(
+            "show"
+        );
+}
+
+
+/* ============================================================
+   CLOCK
+============================================================ */
+
+function updateClock() {
+
+    const now =
+        new Date();
+
+
+    $("currentDate")
+        .textContent =
+        now.toLocaleDateString(
+            "fr-FR",
+            {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+
+    $("currentTime")
+        .textContent =
+        now.toLocaleTimeString(
+            "fr-FR",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+}
+
+
+/* ============================================================
+   EVENTS
+============================================================ */
+
+$("btnBrowse")
+    .addEventListener(
         "click",
-        () => {
+        () =>
+            $("excelFile").click()
+    );
 
-            $("sidebar")
-                ?.classList
-                .toggle("open");
 
+$("dropZone")
+    .addEventListener(
+        "click",
+        () =>
+            $("excelFile").click()
+    );
+
+
+$("excelFile")
+    .addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files?.[0];
+
+            handleFile(file);
         }
     );
 
 
-$("sidebarToggle")
-    ?.addEventListener(
-        "click",
-        () => {
+$("dropZone")
+    .addEventListener(
+        "dragover",
+        event => {
 
-            $("sidebar")
-                ?.classList
-                .toggle("collapsed");
+            event.preventDefault();
 
+            $("dropZone")
+                .classList.add(
+                    "dragover"
+                );
         }
     );
 
 
-/* =========================================================
+$("dropZone")
+    .addEventListener(
+        "dragleave",
+        () => {
+
+            $("dropZone")
+                .classList.remove(
+                    "dragover"
+                );
+        }
+    );
+
+
+$("dropZone")
+    .addEventListener(
+        "drop",
+        event => {
+
+            event.preventDefault();
+
+            $("dropZone")
+                .classList.remove(
+                    "dragover"
+                );
+
+            const file =
+                event.dataTransfer.files?.[0];
+
+            handleFile(file);
+        }
+    );
+
+
+$("btnAnalyze")
+    .addEventListener(
+        "click",
+        analyzeFile
+    );
+
+
+$("btnSave")
+    .addEventListener(
+        "click",
+        saveToSupabase
+    );
+
+
+$("btnReset")
+    .addEventListener(
+        "click",
+        resetAll
+    );
+
+
+$("importMode")
+    .addEventListener(
+        "change",
+        updateMode
+    );
+
+
+$("modalOk")
+    .addEventListener(
+        "click",
+        hideModal
+    );
+
+
+$("modal")
+    .addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                $("modal")
+            ) {
+
+                hideModal();
+            }
+        }
+    );
+
+
+/* ============================================================
+   PUBLIC DEBUG
+============================================================ */
+
+window.SMTGImportStock = {
+
+    getSupabaseTable:
+        () => STOCK_TABLE,
+
+    getRows:
+        () => rows,
+
+    getSelectedFile:
+        () => selectedFile,
+
+    analyze:
+        analyzeFile,
+
+    save:
+        saveToSupabase,
+
+    reset:
+        resetAll,
+
+    checkSupabase,
+
+    diagnoseQuantity:
+        quantityDiagnostic
+
+};
+
+
+/* ============================================================
    INIT
-========================================================= */
+============================================================ */
 
-updateSelectedMode();
+updateClock();
 
-checkConnection();
+setInterval(
+    updateClock,
+    1000
+);
+
+updateMode();
+
+checkSupabase();
+
+
+console.log(
+    "[SMTG IMPORT STOCK] SOURCE:",
+    "Supabase direct / stock"
+);
+
+console.log(
+    "[SMTG IMPORT STOCK] Mode:",
+    $("importMode").value
+);
 
 </script>
 
