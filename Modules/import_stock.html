@@ -361,11 +361,16 @@
         }
 
         .actions {
-            margin-top: 4px;
-            padding-top: 10px;
+            margin-top: auto;
+            padding: 10px 0 4px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+            background: #060817;
+            flex: 0 0 auto;
         }
 
         .sidebar .actions {
@@ -3832,33 +3837,46 @@ function hideModal() {
 
 function updateClock() {
 
-    const now =
-        new Date();
+    const dateElement =
+        document.getElementById("currentDate");
 
+    const timeElement =
+        document.getElementById("currentTime");
 
-    $("currentDate")
-        .textContent =
-        now.toLocaleDateString(
-            "fr-FR",
-            {
-                weekday: "short",
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }
-        );
+    // Le Dashboard SMTG possède déjà son propre horloge.
+    // Quand import_stock.html est chargé dans le SPA, ces éléments
+    // peuvent ne pas être présents dans #main-screen-content.
+    // Dans ce cas, on ne doit surtout pas interrompre l'initialisation.
+    if (!dateElement && !timeElement) {
+        return;
+    }
 
+    const now = new Date();
 
-    $("currentTime")
-        .textContent =
-        now.toLocaleTimeString(
-            "fr-FR",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }
-        );
+    if (dateElement) {
+        dateElement.textContent =
+            now.toLocaleDateString(
+                "fr-FR",
+                {
+                    weekday: "short",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
+            );
+    }
+
+    if (timeElement) {
+        timeElement.textContent =
+            now.toLocaleTimeString(
+                "fr-FR",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            );
+    }
 }
 
 
