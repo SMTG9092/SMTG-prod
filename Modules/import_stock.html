@@ -1,585 +1,4370 @@
 <!DOCTYPE html>
 <html lang="fr" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importation & Entrée Stock Excel - SoufStock Enterprise ERP/WMS</title>
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- SheetJS (XLSX) Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Import Stock - SMTG WMS</title>
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            950: '#020617',
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155',
-                            400: '#94a3b8',
-                            300: '#cbd5e1',
-                            100: '#f1f5f9'
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            600: '#059669',
-                            400: '#34d399',
-                            300: '#6ee7b7'
-                        }
-                    }
-                }
-            }
-        }
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+    <!-- SheetJS -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
     </script>
 
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        body { background-color: #020617; color: #f1f5f9; font-family: ui-sans-serif, system-ui, sans-serif; }
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Inter, Arial, sans-serif;
+            background: #060817;
+            color: #e8edf7;
+        }
+
+        body {
+            font-size: 12px;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #080a19;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #252b47;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #34405f;
+        }
+
+        .page {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(
+                    circle at 70% 10%,
+                    rgba(16,185,129,.035),
+                    transparent 28%
+                ),
+                #060817;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+            height: 82px;
+            min-height: 82px;
+            padding: 12px 18px;
+            border: 1px solid #1d2540;
+            border-radius: 12px;
+            margin: 8px 10px 0;
+            background: #101426;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(16,185,129,.35);
+            background: rgba(16,185,129,.08);
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: .3px;
+        }
+
+        .brand-subtitle {
+            margin-top: 3px;
+            color: #8290ad;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+        }
+
+        .clock-box {
+            min-width: 150px;
+            padding: 9px 14px;
+            border: 1px solid #242c49;
+            border-radius: 10px;
+            background: #0d1022;
+            text-align: right;
+        }
+
+        .clock-date {
+            color: #d8deea;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .clock-time {
+            color: #10d69a;
+            font-size: 10px;
+            font-weight: 800;
+            margin-top: 3px;
+            font-family: Consolas, monospace;
+        }
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
+        .body {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            overflow: hidden;
+            margin: 0 10px 10px;
+        }
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            width: 345px;
+            min-width: 345px;
+            padding: 18px 12px 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            border-right: 1px solid #1b2139;
+        }
+
+        .panel-title {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #20263e;
+            padding: 0 5px 9px;
+        }
+
+        .panel-title strong {
+            color: #dce3ef;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .reset-link {
+            border: 0;
+            background: transparent;
+            color: #9aa6c1;
+            font-size: 10px;
+            text-decoration: underline;
+        }
+
+        .reset-link:hover {
+            color: #10d69a;
+        }
+
+        .file-card {
+            border: 1px solid #252c48;
+            background: #111528;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .file-card.ready {
+            border-color: rgba(16,185,129,.42);
+        }
+
+        .file-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .file-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: rgba(16,185,129,.10);
+            border: 1px solid rgba(16,185,129,.25);
+            color: #10c990;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+        }
+
+        .file-title strong {
+            display: block;
+            font-size: 11px;
+            color: #edf2fa;
+        }
+
+        .file-title span {
+            display: block;
+            margin-top: 3px;
+            color: #8793ad;
+            font-size: 9px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 10px;
+            border: 1px solid #303a58;
+            color: #91a0bd;
+            background: #1a2035;
+            font-size: 8px;
+            white-space: nowrap;
+        }
+
+        .badge.ok {
+            color: #19d69c;
+            border-color: rgba(16,185,129,.30);
+            background: rgba(16,185,129,.08);
+        }
+
+        .badge.error {
+            color: #fb7185;
+            border-color: rgba(244,63,94,.30);
+            background: rgba(244,63,94,.08);
+        }
+
+        .drop-zone {
+            margin-top: 12px;
+            min-height: 72px;
+            border: 1px dashed #29324f;
+            border-radius: 9px;
+            background: #0a0d1f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            color: #dce3ef;
+            transition: .15s;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: #10b981;
+            background: rgba(16,185,129,.045);
+        }
+
+        .file-name {
+            color: #18d89d;
+            font-size: 9px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .browse-btn {
+            width: 100%;
+            height: 38px;
+            margin-top: 9px;
+            border: 0;
+            border-radius: 8px;
+            background: #222a42;
+            color: #eef3fb;
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .browse-btn:hover {
+            background: #2b3552;
+        }
+
+        .mode-description {
+            margin-bottom: 8px;
+        }
+
+        .mode-description strong {
+            display: block;
+            font-size: 11px;
+        }
+
+        .mode-description span {
+            display: block;
+            color: #7f8ca7;
+            margin-top: 3px;
+            font-size: 9px;
+        }
+
+        #importMode {
+            width: 100%;
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 8px;
+            border: 1px solid #29324e;
+            background: #090c1c;
+            color: #e5ebf6;
+            outline: none;
+            font-size: 10px;
+        }
+
+        #importMode:focus {
+            border-color: #10b981;
+        }
+
+        .actions {
+            margin-top: auto;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 40px;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .btn:disabled {
+            opacity: .42;
+            cursor: not-allowed;
+        }
+
+        .btn-analyze {
+            background: #12152b;
+            border-color: #6a5921;
+            color: #f5c84a;
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            background: #1a1c34;
+        }
+
+        .btn-save {
+            background: #08b987;
+            color: white;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            background: #0aca95;
+        }
+
+        .api-status {
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            color: #8390aa;
+            font-size: 9px;
+        }
+
+        .api-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #68738d;
+            box-shadow: 0 0 8px rgba(104,115,141,.4);
+        }
+
+        .api-dot.online {
+            background: #10d69a;
+            box-shadow: 0 0 8px rgba(16,214,154,.55);
+        }
+
+        .api-dot.error {
+            background: #fb7185;
+            box-shadow: 0 0 8px rgba(251,113,133,.45);
+        }
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 14px 0 0 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main-top {
+            min-height: 62px;
+            border-bottom: 1px solid #1c233b;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+        }
+
+        .main-title {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-title h1 {
+            margin: 0;
+            font-size: 17px;
+            color: #f0f4fb;
+        }
+
+        .main-title p {
+            margin: 4px 0 0;
+            color: #7f8ca8;
+            font-size: 9px;
+        }
+
+        .main-status {
+            padding: 8px 12px;
+            border: 1px solid #252d49;
+            border-radius: 9px;
+            background: #0e1123;
+            color: #8591aa;
+            font-size: 9px;
+        }
+
+        .main-status strong {
+            color: #15d49a;
+        }
+
+        .content {
+            flex: 1;
+            min-height: 0;
+            padding: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =====================================================
+           EMPTY
+        ===================================================== */
+
+        .empty-state {
+            flex: 1;
+            min-height: 0;
+            border: 1px dashed #202742;
+            border-radius: 12px;
+            background: rgba(3,5,18,.36);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .empty-inner {
+            max-width: 520px;
+            padding: 30px;
+        }
+
+        .empty-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(16,185,129,.30);
+            background: rgba(16,185,129,.08);
+            color: #10c990;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .empty-inner h2 {
+            margin: 0;
+            font-size: 13px;
+            color: #edf2f9;
+        }
+
+        .empty-inner p {
+            margin: 8px 0 0;
+            color: #77849f;
+            line-height: 1.5;
+            font-size: 10px;
+        }
+
+        /* =====================================================
+           RESULT
+        ===================================================== */
+
+        .result {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result.show {
+            display: flex;
+        }
+
+        .result-header {
+            min-height: 46px;
+            border: 1px solid #252c48;
+            background: #111528;
+            border-radius: 10px;
+            padding: 0 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .result-header strong {
+            font-size: 10px;
+            color: #dce4f0;
+        }
+
+        .result-header span {
+            color: #8793ad;
+            font-size: 9px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap: 10px;
+        }
+
+        .stat {
+            min-height: 62px;
+            border: 1px solid #252c48;
+            border-radius: 10px;
+            background: #101327;
+            padding: 11px 13px;
+        }
+
+        .stat small {
+            display: block;
+            color: #7986a2;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: .45px;
+        }
+
+        .stat strong {
+            display: block;
+            margin-top: 5px;
+            color: #e9eef7;
+            font-size: 17px;
+        }
+
+        .stat.green strong {
+            color: #16d79c;
+        }
+
+        .stat.blue strong {
+            color: #4ba8ff;
+        }
+
+        .stat.yellow strong {
+            color: #f3c84a;
+        }
+
+        .table-card {
+            flex: 1;
+            min-height: 0;
+            border: 1px solid #252c48;
+            border-radius: 10px;
+            background: #0f1226;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .table-head {
+            min-height: 42px;
+            padding: 0 13px;
+            border-bottom: 1px solid #20263f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-head strong {
+            color: #dce4f1;
+            font-size: 10px;
+        }
+
+        .table-head span {
+            color: #78859f;
+            font-size: 9px;
+        }
+
+        .table-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #07091a;
+        }
+
+        th {
+            padding: 9px 8px;
+            color: #7e8ba6;
+            font-size: 7px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: .45px;
+            white-space: nowrap;
+            border-bottom: 1px solid #1c233b;
+        }
+
+        td {
+            padding: 9px 8px;
+            color: #d9dfeb;
+            font-size: 8px;
+            border-bottom: 1px solid rgba(37,44,72,.55);
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background: rgba(30,41,70,.20);
+        }
+
+        td.num {
+            color: #10d69a;
+            font-weight: 800;
+            font-family: Consolas, monospace;
+        }
+
+        td.qty {
+            color: #10d69a;
+            font-weight: 800;
+            text-align: right;
+            font-family: Consolas, monospace;
+        }
+
+        td.available {
+            color: #10d69a;
+            font-weight: 800;
+            text-align: right;
+            font-family: Consolas, monospace;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 7px;
+            border-radius: 9px;
+            border: 1px solid rgba(16,185,129,.28);
+            background: rgba(16,185,129,.07);
+            color: #12d69a;
+            font-size: 7px;
+            font-weight: 800;
+        }
+
+        .warning-row td.qty,
+        .warning-row td.available {
+            color: #f4c94f;
+        }
+
+        /* =====================================================
+           MODALS
+        ===================================================== */
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2,4,14,.78);
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(480px, calc(100vw - 30px));
+            border: 1px solid #29314e;
+            border-radius: 13px;
+            background: #111528;
+            box-shadow: 0 25px 80px rgba(0,0,0,.55);
+            padding: 20px;
+        }
+
+        .modal-icon {
+            width: 45px;
+            height: 45px;
+            margin: 0 auto 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(16,185,129,.30);
+            background: rgba(16,185,129,.08);
+            color: #12d69a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .modal-icon.error {
+            border-color: rgba(244,63,94,.35);
+            background: rgba(244,63,94,.08);
+            color: #fb7185;
+        }
+
+        .modal-box h3 {
+            margin: 0;
+            text-align: center;
+            color: #edf2fa;
+            font-size: 13px;
+        }
+
+        .modal-message {
+            margin-top: 10px;
+            color: #8b97b0;
+            font-size: 9px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            text-align: center;
+            max-height: 260px;
+            overflow: auto;
+        }
+
+        .modal-btn {
+            width: 100%;
+            height: 35px;
+            margin-top: 16px;
+            border: 0;
+            border-radius: 8px;
+            background: #08b987;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        /* =====================================================
+           LOADER
+        ===================================================== */
+
+        .loader-box {
+            width: min(400px, calc(100vw - 30px));
+            border: 1px solid #29314e;
+            border-radius: 13px;
+            background: #111528;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .sync-progress {
+            width: 100%;
+            height: 7px;
+            margin: 0 auto 10px;
+            border-radius: 99px;
+            overflow: hidden;
+            background: #080b1c;
+            border: 1px solid #242b46;
+        }
+
+        .sync-progress-bar {
+            width: 0%;
+            height: 100%;
+            border-radius: 99px;
+            background: #10d69a;
+            transition: width .25s ease;
+        }
+
+        .sync-progress-percent {
+            margin-top: 5px;
+            color: #10d69a;
+            font-size: 9px;
+            font-family: Consolas, monospace;
+            font-weight: 800;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            border: 3px solid #27304b;
+            border-top-color: #10d69a;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-box strong {
+            display: block;
+            color: #edf2f9;
+            font-size: 12px;
+        }
+
+        .loader-box p {
+            margin: 7px 0 0;
+            color: #818da7;
+            font-size: 9px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 280px;
+                min-width: 280px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2,1fr);
+            }
+        }
+
+        @media (max-width: 680px) {
+            html,
+            body {
+                overflow: auto;
+            }
+
+            .page {
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .body {
+                overflow: visible;
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: 0;
+                border-right: 0;
+                border-bottom: 1px solid #1b2139;
+            }
+
+            .main {
+                min-height: 700px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen p-4 select-none shrink-0">
-        <div class="flex items-center gap-3 px-2 mb-6">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
-                <i class="fas fa-snowflake text-lg"></i>
+<body>
+
+<div class="page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <i class="fa-solid fa-cubes"></i>
             </div>
+
             <div>
-                <span class="font-bold text-base tracking-wide block text-slate-100">SoufStock</span>
-                <span class="text-[10px] text-slate-400 tracking-wider uppercase block">Enterprise ERP</span>
-            </div>
-        </div>
-        
-        <nav id="sidebarNav" class="flex-1 overflow-y-auto pr-1">
-            <!-- Dynamic Sidebar -->
-        </nav>
+                <div class="brand-title">
+                    SMTG
+                </div>
 
-        <div class="pt-4 mt-auto border-t border-slate-800/80">
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 mb-2">
-                <span id="sidebarUserName" class="block text-xs font-bold text-slate-200 truncate uppercase">...</span>
-                <span id="sidebarUserRole" class="block text-[10px] text-emerald-400 font-medium mt-0.5">Chargement...</span>
-            </div>
-            <button id="logoutBtn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl py-2 px-3 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer">
-                <i class="fas fa-sign-out-alt"></i> Déconnexion
-            </button>
-        </div>
-    </aside>
-
-    <!-- MAIN CONTAINER -->
-    <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden relative">
-        
-        <!-- HEADER -->
-        <header class="h-20 bg-slate-900/40 border-b border-slate-800/80 px-8 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-4">
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-100">Importation & Entrée Stock Excel</h1>
-                    <div class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                        <span>Accueil</span>
-                        <span>/</span>
-                        <strong class="text-slate-300">Gestion Stock Excel</strong>
-                    </div>
+                <div class="brand-subtitle">
+                    Traçabilité globale
                 </div>
             </div>
-            
-            <div class="flex items-center gap-4 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-xl">
-                <div class="text-right">
-                    <span id="currentDate" class="text-xs font-medium text-slate-300 block">Chargement...</span>
-                    <span id="currentTime" class="text-[10px] text-emerald-400 font-mono block">00:00:00</span>
-                </div>
+
+        </div>
+
+        <div class="clock-box">
+
+            <div
+                id="currentDate"
+                class="clock-date">
+                -
             </div>
-        </header>
 
-        <!-- PAGE BODY -->
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div class="max-w-6xl mx-auto flex flex-col gap-6">
-                
-                <!-- UPLOAD & MODE CARD -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center relative">
-                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mb-4">
-                        <i class="fas fa-file-excel"></i>
-                    </div>
-                    <h2 class="text-lg font-bold text-slate-100">Glissez-déposez votre fichier Excel</h2>
-                    <p class="text-xs text-slate-400 mt-1 max-w-md">
-                        Sélectionnez un fichier de données pour l'intégrer au système[cite: 5].
-                    </p>
+            <div
+                id="currentTime"
+                class="clock-time">
+                -
+            </div>
 
-                    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden">
-                    
-                    <div class="flex items-center gap-4 mt-6">
-                        <button onclick="document.getElementById('excelFile').click()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-3 rounded-xl text-xs transition flex items-center gap-2 shadow-lg cursor-pointer">
-                            <i class="fas fa-folder-open"></i> Choisir le fichier Excel
-                        </button>
-                    </div>
+        </div>
 
-                    <span id="fileNameDisplay" class="text-xs text-emerald-400 font-mono mt-3 block"></span>
+    </header>
 
-                    <!-- OPTIONS DE TRAITEMENT -->
-                    <div id="importOptionsBox" class="hidden w-full max-w-xl mt-6 p-5 bg-slate-950/60 border border-slate-800 rounded-xl text-left flex flex-col gap-4">
-                        <span class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Mode d'opération :</span>
-                        
-                        <div class="flex flex-col gap-3">
-                            <!-- Option 1: Remplacer Tout (Réservé Admin) -->
-                            <label id="replaceOptionContainer" class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
-                                <input type="radio" name="operationMode" value="replace" class="accent-emerald-500" checked>
-                                <span><strong class="text-slate-100">Remplacer tout le stock</strong> (Supprimer l'ancien et insérer le nouveau fichier)[cite: 5]</span>
-                            </label>
 
-                            <!-- Option 2: Ajouter au Stock (Entrée) (Accessible par tous) -->
-                            <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
-                                <input type="radio" name="operationMode" value="add_stock" class="accent-emerald-500">
-                                <span><strong class="text-slate-100">Ajouter / Entrée de stock</strong> (Cumuler les quantités avec le stock existant sans supprimer)[cite: 5]</span>
-                            </label>
+    <!-- =====================================================
+         BODY
+    ====================================================== -->
+
+    <div class="body">
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="panel-title">
+
+                <strong>
+                    <i class="fa-solid fa-file-arrow-up"
+                       style="color:#10d69a;margin-right:5px">
+                    </i>
+                    Panneau d'importation
+                </strong>
+
+                <button
+                    id="btnReset"
+                    class="reset-link"
+                    type="button">
+                    Tout réinitialiser
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 FILE STOCK
+            ================================================== -->
+
+            <div
+                id="fileCard"
+                class="file-card">
+
+                <input
+                    type="file"
+                    id="excelFile"
+                    class="hidden"
+                    accept=".xlsx,.xls,.csv">
+
+                <div class="file-head">
+
+                    <div class="file-title">
+
+                        <div class="file-icon">
+                            <i class="fa-solid fa-file-excel"></i>
                         </div>
 
-                        <button id="processBtn" onclick="confirmOperation()" class="w-full mt-3 bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg cursor-pointer">
-                            <i class="fas fa-cloud-upload-alt"></i> Exécuter l'opération
-                        </button>
+                        <div>
+                            <strong>
+                                Fichier Stock
+                            </strong>
+
+                            <span>
+                                Fichier SAP Stock
+                            </span>
+                        </div>
+
                     </div>
+
+                    <span
+                        id="fileBadge"
+                        class="badge">
+                        En attente
+                    </span>
+
                 </div>
 
-                <!-- STATS CARDS -->
-                <div id="statsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-4 hidden">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Total Quantité</span>
-                        <span id="statQty" class="text-xl font-mono font-bold text-emerald-400 mt-2">0</span>
+
+                <div
+                    id="dropZone"
+                    class="drop-zone">
+
+                    <div>
+
+                        <div
+                            id="fileName"
+                            class="file-name hidden">
+                        </div>
+
+                        <div
+                            id="dropText"
+                            style="
+                                color:#cfd7e7;
+                                font-size:9px;
+                                font-weight:700;
+                            ">
+                            Sélectionner le fichier Stock
+                        </div>
+
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Nombre de Lignes</span>
-                        <span id="statLines" class="text-xl font-mono font-bold text-sky-400 mt-2">0</span>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Articles Uniques</span>
-                        <span id="statArticles" class="text-xl font-mono font-bold text-indigo-400 mt-2">0</span>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Lots Uniques</span>
-                        <span id="statLots" class="text-xl font-mono font-bold text-amber-400 mt-2">0</span>
-                    </div>
+
                 </div>
 
-                <!-- PREVIEW TABLE -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-                    <div class="p-4 bg-slate-950/40 border-b border-slate-800 flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                            <i class="fas fa-table text-emerald-400"></i> Aperçu des données (Premières lignes valides)
-                        </h3>
-                        <span id="rowCountBadge" class="text-[10px] font-mono bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg">0 lignes détectées</span>
+
+                <button
+                    id="btnBrowse"
+                    class="browse-btn"
+                    type="button">
+
+                    <i class="fa-solid fa-folder-open"></i>
+                    Parcourir Stock
+
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 MODE
+            ================================================== -->
+
+            <div class="file-card">
+
+                <div class="file-head">
+
+                    <div class="file-title">
+
+                        <div class="file-icon">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+
+                        <div>
+                            <strong>
+                                Mode d'import
+                            </strong>
+
+                            <span>
+                                Mise à jour et ajout des lignes
+                            </span>
+                        </div>
+
                     </div>
-                    <div class="overflow-x-auto max-h-96">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 font-semibold sticky top-0">
-                                    <th class="p-3">Magasin</th>
-                                    <th class="p-3">Article</th>
-                                    <th class="p-3">Désignation</th>
-                                    <th class="p-3">Lot</th>
-                                    <th class="p-3 text-center">Quantité Libre</th>
-                                    <th class="p-3">Unité</th>
-                                    <th class="p-3 text-center">Contrôle Qualité</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewTableBody" class="divide-y divide-slate-800/50">
-                                <tr>
-                                    <td colspan="7" class="p-8 text-center text-slate-500">Aucun fichier sélectionné.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
+                </div>
+
+                <div
+                    class="mode-description"
+                    style="margin-top:12px">
+
+                    <strong id="modeLabel">
+                        Mise à jour
+                    </strong>
+
+                    <span id="modeDescription">
+                        Met à jour et ajoute les lignes
+                    </span>
+
+                </div>
+
+                <select id="importMode">
+
+                    <option value="MISE_A_JOUR">
+                        Mise à jour
+                    </option>
+
+                    <option value="REMPLACER">
+                        Remplacer
+                    </option>
+
+                    <option value="SYNCHRONISATION">
+                        Synchronisation
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
+            <div class="actions">
+
+                <button
+                    id="btnAnalyze"
+                    class="btn btn-analyze"
+                    type="button"
+                    disabled>
+
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+
+                    Analyser le fichier
+
+                </button>
+
+
+                <button
+                    id="btnSave"
+                    class="btn btn-save"
+                    type="button"
+                    disabled>
+
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                    Enregistrer & Synchroniser
+
+                </button>
+
+
+                <div class="api-status">
+
+                    <span
+                        id="apiDot"
+                        class="api-dot">
+                    </span>
+
+                    <span id="apiStatusText">
+                        API non testée
+                    </span>
+
                 </div>
 
             </div>
+
+        </aside>
+
+
+        <!-- =================================================
+             MAIN
+        ================================================== -->
+
+        <main class="main">
+
+            <div class="main-top">
+
+                <div class="main-title">
+
+                    <div>
+
+                        <h1>
+                            Import Stock
+                        </h1>
+
+                        <p>
+                            Importation du stock SAP et synchronisation avec la base SMTG.
+                        </p>
+
+                    </div>
+
+                    <div class="main-status">
+
+                        Mode :
+                        <strong id="mainModeLabel">
+                            Mise à jour
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="content">
+
+                <!-- =================================================
+                     EMPTY
+                ================================================== -->
+
+                <section
+                    id="emptyState"
+                    class="empty-state">
+
+                    <div class="empty-inner">
+
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+
+                        <h2>
+                            Prêt pour l'importation synchronisée API SMTG
+                        </h2>
+
+                        <p>
+                            Importez votre fichier Stock SAP pour analyser,
+                            contrôler et envoyer les données au serveur SMTG.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     RESULT
+                ================================================== -->
+
+                <section
+                    id="resultSection"
+                    class="result">
+
+                    <div class="result-header">
+
+                        <strong>
+                            Résultat de l'analyse
+                        </strong>
+
+                        <span id="analysisMessage">
+                            Fichier prêt
+                        </span>
+
+                    </div>
+
+
+                    <div class="stats">
+
+                        <div class="stat green">
+
+                            <small>
+                                Lignes valides
+                            </small>
+
+                            <strong id="statRows">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat blue">
+
+                            <small>
+                                Articles
+                            </small>
+
+                            <strong id="statArticles">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat yellow">
+
+                            <small>
+                                Magasins
+                            </small>
+
+                            <strong id="statMagasins">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat green">
+
+                            <small>
+                                Quantité totale
+                            </small>
+
+                            <strong id="statQuantity">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-card">
+
+                        <div class="table-head">
+
+                            <strong>
+                                Prévisualisation du stock
+                            </strong>
+
+                            <span id="tableCount">
+                                0 ligne
+                            </span>
+
+                        </div>
+
+
+                        <div class="table-wrap">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Article
+                                        </th>
+
+                                        <th>
+                                            Désignation
+                                        </th>
+
+                                        <th>
+                                            Lot
+                                        </th>
+
+                                        <th>
+                                            Magasin
+                                        </th>
+
+                                        <th>
+                                            Emplacement
+                                        </th>
+
+                                        <th style="text-align:right">
+                                            Quantité
+                                        </th>
+
+                                        <th>
+                                            Unité
+                                        </th>
+
+                                        <th style="text-align:right">
+                                            Disponible
+                                        </th>
+
+                                        <th>
+                                            Statut
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="previewBody">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
         </main>
+
     </div>
 
-    <!-- CUSTOM MODAL DIALOG -->
-    <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
-            <div id="modalIconContainer" class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl mb-4">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 id="modalTitle" class="text-base font-bold text-slate-100">Confirmation</h3>
-            <p id="modalMessage" class="text-xs text-slate-400 mt-2 leading-relaxed">...</p>
-            <div class="flex items-center gap-3 w-full mt-6">
-                <button id="modalCancelBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl text-xs transition cursor-pointer">
-                    Annuler
-                </button>
-                <button id="modalConfirmBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg">
-                    Confirmer
-                </button>
+</div>
+
+
+<!-- ============================================================
+     LOADER
+============================================================= -->
+
+<div
+    id="loader"
+    class="overlay">
+
+    <div class="loader-box">
+
+        <div class="spinner"></div>
+
+        <strong id="loaderTitle">
+            Analyse
+        </strong>
+
+        <div class="sync-progress">
+            <div
+                id="syncProgressBar"
+                class="sync-progress-bar">
             </div>
         </div>
+
+        <div
+            id="syncProgressPercent"
+            class="sync-progress-percent">
+            0%
+        </div>
+
+        <p id="loaderMessage">
+            Traitement...
+        </p>
+
     </div>
 
-    <!-- SCRIPTS -->
-    <script type="module">
-        import Navigation from '../assets/js/core/navigation.js';
-        import supabase from '../assets/js/core/supabase.js';
+</div>
 
-        let parsedExcelData = [];
-        let isUserAdmin = false; // متغير لتخزين حالة الصلاحية
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            await Navigation.init();
-            initLiveClock();
-            await checkUserRoleAndPermissions();
+<!-- ============================================================
+     MODAL
+============================================================= -->
 
-            const fileInput = document.getElementById("excelFile");
-            fileInput.addEventListener("change", handleFileSelect);
+<div
+    id="modal"
+    class="overlay">
 
-            const logoutBtn = document.getElementById("logoutBtn");
-            if (logoutBtn) {
-                logoutBtn.addEventListener("click", async () => {
-                    await supabase.auth.signOut();
-                    window.location.href = "login.html";
+    <div class="modal-box">
+
+        <div
+            id="modalIcon"
+            class="modal-icon">
+
+            <i
+                id="modalIconSymbol"
+                class="fa-solid fa-check">
+            </i>
+
+        </div>
+
+        <h3 id="modalTitle">
+            Information
+        </h3>
+
+        <div
+            id="modalMessage"
+            class="modal-message">
+        </div>
+
+        <button
+            id="modalOk"
+            class="modal-btn"
+            type="button">
+            ✓ OK, Compris
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+"use strict";
+
+/* ============================================================
+   API
+============================================================ */
+
+const API_BASE_URL =
+    window.SMTG_API_BASE_URL ||
+    window.location.origin;
+
+const API_IMPORT_ENDPOINT =
+    window.SMTG_IMPORT_STOCK_ENDPOINT ||
+    "/api/import-stock";
+
+const API_URL =
+    `${API_BASE_URL}${API_IMPORT_ENDPOINT}`;
+
+
+/* ============================================================
+   STATE
+============================================================ */
+
+let selectedFile = null;
+let rows = [];
+let analysisDone = false;
+let busy = false;
+
+/*
+ * Progression visuelle de synchronisation.
+ * Le serveur traite le POST en une seule requête, donc le navigateur
+ * ne peut pas connaître le pourcentage SQL exact sans un système de job.
+ * On affiche une progression par phases et on ne bloque plus à 80%.
+ */
+let progressTimer = null;
+let progressValue = 0;
+
+
+/* ============================================================
+   DOM
+============================================================ */
+
+const $ =
+    id => document.getElementById(id);
+
+
+/* ============================================================
+   ESCAPE
+============================================================ */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* ============================================================
+   TEXT NORMALIZATION
+============================================================ */
+
+function normalizeKey(value) {
+
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[\s_\-./\\()[\]{}:;]+/g, "")
+        .replace(/['"]/g, "")
+        .trim();
+}
+
+
+/* ============================================================
+   NUMBER PARSER
+   IMPORTANT:
+   Handles:
+       1234
+       1234.50
+       1234,50
+       1.234,50
+       1,234.50
+       12 345,678
+       Excel numeric cells
+============================================================ */
+
+function toNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return 0;
+    }
+
+    if (typeof value === "number") {
+
+        return Number.isFinite(value)
+            ? value
+            : 0;
+    }
+
+    let text =
+        String(value)
+            .trim()
+            .replace(/\u00A0/g, "")
+            .replace(/\s/g, "");
+
+    if (!text) {
+        return 0;
+    }
+
+    /*
+     * Remove common SAP/Excel text suffixes.
+     */
+    text =
+        text
+            .replace(/kg$/i, "")
+            .replace(/kgs$/i, "")
+            .replace(/pcs?$/i, "")
+            .trim();
+
+    /*
+     * 1.234,56
+     */
+    if (
+        text.includes(".") &&
+        text.includes(",")
+    ) {
+
+        if (
+            text.lastIndexOf(",") >
+            text.lastIndexOf(".")
+        ) {
+
+            text =
+                text
+                    .replace(/\./g, "")
+                    .replace(",", ".");
+
+        }
+        else {
+
+            /*
+             * 1,234.56
+             */
+            text =
+                text.replace(/,/g, "");
+        }
+    }
+    else if (text.includes(",")) {
+
+        /*
+         * 1234,56
+         */
+        text =
+            text.replace(",", ".");
+
+    }
+
+    /*
+     * Keep only numeric characters.
+     */
+    text =
+        text.replace(
+            /[^0-9eE+.\-]/g,
+            ""
+        );
+
+    const number =
+        Number(text);
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
+}
+
+
+/* ============================================================
+   VALUE FROM ROW
+============================================================ */
+
+function valueOf(row, names) {
+
+    const keys =
+        Object.keys(row || {});
+
+    const map =
+        new Map();
+
+    for (const key of keys) {
+
+        const normalized =
+            normalizeKey(key);
+
+        if (!map.has(normalized)) {
+
+            map.set(
+                normalized,
+                {
+                    key,
+                    value: row[key]
+                }
+            );
+        }
+    }
+
+    for (const name of names) {
+
+        const normalized =
+            normalizeKey(name);
+
+        const found =
+            map.get(normalized);
+
+        if (
+            found &&
+            found.value !== undefined &&
+            found.value !== null &&
+            String(found.value).trim() !== ""
+        ) {
+            return found.value;
+        }
+    }
+
+    return "";
+}
+
+
+/* ============================================================
+   FIND HEADER
+============================================================ */
+
+function findHeader(row, names) {
+
+    const keys =
+        Object.keys(row || {});
+
+    const wanted =
+        names.map(normalizeKey);
+
+    for (const key of keys) {
+
+        const normalized =
+            normalizeKey(key);
+
+        if (
+            wanted.includes(normalized)
+        ) {
+            return key;
+        }
+    }
+
+    return null;
+}
+
+
+/* ============================================================
+   QUANTITY DETECTION
+   FIX PRINCIPAL
+============================================================ */
+
+function findQuantityValue(raw) {
+
+    /*
+     * 1. Exact / known SAP names.
+     */
+    const exactNames = [
+
+        "quantite",
+        "quantité",
+
+        "qte",
+        "qté",
+
+        "qty",
+        "quantity",
+
+        "quantite totale",
+        "quantité totale",
+
+        "qte totale",
+        "qté totale",
+
+        "quantite stock",
+        "quantité stock",
+
+        "qte stock",
+        "qté stock",
+
+        "quantite de base",
+        "quantité de base",
+
+        "qte de base",
+        "qté de base",
+
+        "quantite en um",
+        "quantité en um",
+
+        "qte en um",
+        "qté en um",
+
+        "quantite um",
+        "quantité um",
+
+        "qte um",
+        "qté um",
+
+        "quantite kg",
+        "quantité kg",
+
+        "qte kg",
+        "qté kg",
+
+        /*
+         * SAP Stock export:
+         * "À utilisation libre" = actual free-use stock quantity.
+         */
+        "à utilisation libre",
+        "a utilisation libre",
+        "utilisation libre",
+        "quantite a utilisation libre",
+        "quantité à utilisation libre",
+
+        "stock total",
+        "stock libre",
+
+        "stock",
+        "poids",
+        "poids kg",
+
+        "kg"
+    ];
+
+    const exact =
+        valueOf(
+            raw,
+            exactNames
+        );
+
+    if (
+        exact !== "" &&
+        exact !== null &&
+        exact !== undefined
+    ) {
+
+        return {
+            value: exact,
+            source: findHeader(
+                raw,
+                exactNames
+            )
+        };
+    }
+
+
+    /*
+     * 2. Fuzzy SAP detection.
+     *
+     * IMPORTANT:
+     * Exclude "disponible", "reserve", "qualite"
+     * because those are separate fields.
+     */
+    const keys =
+        Object.keys(raw || {});
+
+    const candidates = [];
+
+    for (const key of keys) {
+
+        const normalized =
+            normalizeKey(key);
+
+        const excluded =
+            normalized.includes("disponible") ||
+            normalized.includes("reserve") ||
+            normalized.includes("reserved") ||
+            normalized.includes("qualite") ||
+            normalized.includes("qualitecontrole");
+
+        if (excluded) {
+            continue;
+        }
+
+        let score = 0;
+
+        if (
+            normalized.includes("quantite")
+        ) {
+            score += 100;
+        }
+
+        if (
+            normalized.includes("qte")
+        ) {
+            score += 95;
+        }
+
+        if (
+            normalized.includes("qty")
+        ) {
+            score += 90;
+        }
+
+        if (
+            normalized.includes("quantity")
+        ) {
+            score += 90;
+        }
+
+        if (
+            normalized.includes("autilisationlibre") ||
+            normalized.includes("utilisationlibre")
+        ) {
+            score += 120;
+        }
+
+        if (
+            normalized.includes("stock")
+        ) {
+            score += 40;
+        }
+
+        if (
+            normalized.includes("poids")
+        ) {
+            score += 30;
+        }
+
+        if (
+            normalized.includes("kg")
+        ) {
+            score += 20;
+        }
+
+        if (
+            normalized.includes("base")
+        ) {
+            score += 15;
+        }
+
+        if (score > 0) {
+
+            const numeric =
+                toNumber(
+                    raw[key]
+                );
+
+            if (
+                Number.isFinite(numeric)
+            ) {
+
+                candidates.push({
+                    key,
+                    value: raw[key],
+                    score,
+                    numeric
                 });
             }
-        });
-
-        // تشغيل الساعة والتاريخ الحي
-        function initLiveClock() {
-            const updateClock = () => {
-                const now = new Date();
-                const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const dateStr = now.toLocaleDateString('fr-FR', optionsDate);
-                const timeStr = now.toTimeString().split(' ')[0];
-
-                const dateEl = document.getElementById("currentDate");
-                const timeEl = document.getElementById("currentTime");
-
-                if (dateEl) dateEl.innerText = dateStr;
-                if (timeEl) timeEl.innerText = timeStr;
-            };
-
-            updateClock();
-            setInterval(updateClock, 1000);
         }
+    }
 
-        // التحقق من صلاحية المستخدم الحالي (Admin أم لا)
-        async function checkUserRoleAndPermissions() {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) return;
+    candidates.sort(
+        (a,b) =>
+            b.score - a.score
+    );
 
-                // جلب بيانات الملف الشخصي للمستخدم لمعرفة دوره
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role, full_name, nom, prenom')
-                    .eq('id', user.id)
-                    .maybeSingle();
+    if (candidates.length) {
 
-                if (profile) {
-                    const fullName = profile.full_name || `${profile.prenom || ''} ${profile.nom || ''}`.trim() || user.email;
-                    const role = (profile.role || '').toLowerCase();
+        return {
+            value:
+                candidates[0].value,
+            source:
+                candidates[0].key
+        };
+    }
 
-                    document.getElementById("sidebarUserName").textContent = fullName;
-                    
-                    // التحقق هل هو Admin
-                    if (role === 'admin' || role === 'administrateur') {
-                        isUserAdmin = true;
-                        document.getElementById("sidebarUserRole").textContent = "Administrateur";
-                    } else {
-                        isUserAdmin = false;
-                        document.getElementById("sidebarUserRole").textContent = "Utilisateur";
-                        
-                        // إخفاء خيار Remplacer تماماً إذا لم يكن أدمن
-                        const replaceContainer = document.getElementById("replaceOptionContainer");
-                        if (replaceContainer) {
-                            replaceContainer.classList.add("hidden");
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Erreur vérification rôle:", err);
-            }
-        }
 
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+    /*
+     * 3. Last-resort:
+     * if SAP exported a numeric quantity column with
+     * an unexpected name, inspect numeric columns.
+     *
+     * We deliberately do NOT blindly choose a numeric
+     * column if there are several.
+     */
+    const numericColumns =
+        keys
+            .map(
+                key => ({
+                    key,
+                    value:
+                        raw[key],
+                    number:
+                        toNumber(
+                            raw[key]
+                        )
+                })
+            )
+            .filter(
+                x =>
+                    x.value !== "" &&
+                    x.value !== null &&
+                    x.value !== undefined &&
+                    Number.isFinite(x.number)
+            );
 
-            document.getElementById("fileNameDisplay").textContent = `Fichier sélectionné : ${file.name}`;
+    if (
+        numericColumns.length === 1
+    ) {
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                    
-                    if (jsonRows.length === 0) {
-                        showCustomAlert("Erreur", "Le fichier Excel est vide.", "error");
-                        return;
-                    }
+        return {
+            value:
+                numericColumns[0].value,
+            source:
+                numericColumns[0].key
+        };
+    }
 
-                    const validRows = jsonRows.filter(row => {
-                        const article = String(row.Article || row.article || '').trim();
-                        const magasin = String(row.Magasin || row.magasin || '').trim();
-                        
-                        if (!article || !magasin || article.toLowerCase().includes('total') || magasin.toLowerCase().includes('total')) {
-                            return false;
-                        }
-                        return true;
-                    });
+    return {
+        value: 0,
+        source: null
+    };
+}
 
-                    if (validRows.length === 0) {
-                        showCustomAlert("Attention", "Aucune ligne valide trouvée dans le fichier.", "warning");
-                        return;
-                    }
 
-                    parsedExcelData = validRows;
-                    renderPreview(validRows.slice(0, 50));
-                    calculateAndDisplayStats(validRows);
+/* ============================================================
+   AVAILABLE DETECTION
+============================================================ */
 
-                    document.getElementById("importOptionsBox").classList.remove("hidden");
-                    document.getElementById("statsContainer").classList.remove("hidden");
-                    document.getElementById("rowCountBadge").textContent = `${validRows.length} lignes valides détectées`;
+function findAvailableValue(raw) {
 
-                    // إذا لم يكن أدمن، نقوم بضبط الاختيار الإفتراضي تلقائياً على add_stock
-                    if (!isUserAdmin) {
-                        const addStockRadio = document.querySelector('input[name="operationMode"][value="add_stock"]');
-                        if (addStockRadio) addStockRadio.checked = true;
-                    }
+    const names = [
 
-                } catch (err) {
-                    console.error("Erreur lecture Excel:", err);
-                    showCustomAlert("Erreur", "Erreur lors de la lecture du fichier Excel.", "error");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+        "stock_disponible",
+        "stock disponible",
 
-        function calculateAndDisplayStats(rows) {
-            let totalQty = 0;
-            const articlesSet = new Set();
-            const lotsSet = new Set();
+        "disponible",
+        "available",
 
-            rows.forEach(row => {
-                totalQty += parseFloat(row['À utilisation libre'] || row.quantite || 0);
-                const art = String(row.Article || row.article || '').trim().replace(/\.0$/, '');
-                const lot = String(row.Lot || row.lot || '').trim();
-                if (art) articlesSet.add(art);
-                if (lot) lotsSet.add(lot);
-            });
+        "quantite disponible",
+        "quantité disponible",
 
-            document.getElementById("statQty").textContent = totalQty.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
-            document.getElementById("statLines").textContent = rows.length.toLocaleString();
-            document.getElementById("statArticles").textContent = articlesSet.size.toLocaleString();
-            document.getElementById("statLots").textContent = lotsSet.size.toLocaleString();
-        }
+        "qte disponible",
+        "qté disponible",
 
-        function renderPreview(rows) {
-            const tbody = document.getElementById("previewTableBody");
-            let html = "";
+        "stock libre",
 
-            rows.forEach(row => {
-                const magasin = String(row.Magasin || row.magasin || '').trim();
-                const article = String(row.Article || row.article || '').trim().replace(/\.0$/, '');
-                const designation = String(row['Désignation article'] || row.designation_article || '').trim();
-                const lot = String(row.Lot || row.lot || 'STANDARD').trim();
-                const quantite = parseFloat(row['À utilisation libre'] || row.quantite || 0);
-                const unite = String(row['Unité quantité base'] || row.unite || 'KG').trim();
-                const controleQualite = parseFloat(row['Contrôle qualité'] || 0);
+        "à utilisation libre",
+        "a utilisation libre",
+        "utilisation libre"
+    ];
 
-                html += `
-                    <tr class="hover:bg-slate-800/35 transition">
-                        <td class="p-3 font-semibold text-slate-300">${magasin}</td>
-                        <td class="p-3 font-mono text-emerald-400 font-semibold">${article}</td>
-                        <td class="p-3 text-slate-300">${designation}</td>
-                        <td class="p-3 font-mono text-sky-400">${lot}</td>
-                        <td class="p-3 text-center font-bold text-slate-100">${quantite.toLocaleString()}</td>
-                        <td class="p-3 text-slate-400">${unite}</td>
-                        <td class="p-3 text-center text-amber-400 font-mono">${controleQualite}</td>
-                    </tr>
-                `;
-            });
+    const value =
+        valueOf(
+            raw,
+            names
+        );
 
-            tbody.innerHTML = html;
-        }
+    if (
+        value === "" ||
+        value === null ||
+        value === undefined
+    ) {
+        return {
+            value: null,
+            source: null
+        };
+    }
 
-        window.confirmOperation = function() {
-            if (parsedExcelData.length === 0) {
-                showCustomAlert("Attention", "Aucune donnée à traiter.", "warning");
+    return {
+        value:
+            toNumber(value),
+        source:
+            findHeader(
+                raw,
+                names
+            )
+    };
+}
+
+
+/* ============================================================
+   RESERVED DETECTION
+============================================================ */
+
+function findReservedValue(raw) {
+
+    const names = [
+
+        "stock_reserve",
+        "stock réservé",
+
+        "reserve",
+        "réserve",
+
+        "reserved",
+
+        "quantite reservee",
+        "quantité réservée",
+
+        "qte reservee",
+        "qté réservée"
+    ];
+
+    const value =
+        valueOf(
+            raw,
+            names
+        );
+
+    if (
+        value === "" ||
+        value === null ||
+        value === undefined
+    ) {
+        return {
+            value: 0,
+            source: null
+        };
+    }
+
+    return {
+        value:
+            toNumber(value),
+        source:
+            findHeader(
+                raw,
+                names
+            )
+    };
+}
+
+
+/* ============================================================
+   NORMALIZE STOCK ROW
+============================================================ */
+
+function normalizeStockRow(raw, rowIndex) {
+
+    const quantityInfo =
+        findQuantityValue(raw);
+
+    const quantity =
+        Math.max(
+            0,
+            toNumber(
+                quantityInfo.value
+            )
+        );
+
+    const availableInfo =
+        findAvailableValue(raw);
+
+    const reservedInfo =
+        findReservedValue(raw);
+
+    const controleQualite =
+        toNumber(
+            valueOf(
+                raw,
+                [
+                    "controle_qualite",
+                    "contrôle qualité",
+                    "controle qualite",
+                    "stock qualite",
+                    "qualite"
+                ]
+            )
+        );
+
+    const stockReserve =
+        Math.max(
+            0,
+            reservedInfo.value
+        );
+
+    /*
+     * If Excel explicitly contains a valid available
+     * quantity, use it.
+     *
+     * Otherwise calculate:
+     * quantity - reserve - QC
+     */
+    const stockDisponible =
+        availableInfo.value !== null
+            ? Math.max(
+                0,
+                availableInfo.value
+            )
+            : Math.max(
+                0,
+                quantity -
+                stockReserve -
+                controleQualite
+            );
+
+
+    const article =
+        String(
+            valueOf(
+                raw,
+                [
+                    "article",
+                    "code article",
+                    "code_article",
+                    "article code",
+                    "material",
+                    "matériel",
+                    "matnr"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const designation =
+        String(
+            valueOf(
+                raw,
+                [
+                    "designation_article",
+                    "désignation article",
+                    "designation",
+                    "désignation",
+                    "libelle",
+                    "libellé",
+                    "description",
+                    "material description",
+                    "texte article"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const lot =
+        String(
+            valueOf(
+                raw,
+                [
+                    "lot",
+                    "batch",
+                    "numero lot",
+                    "numéro lot",
+                    "charg"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const magasin =
+        String(
+            valueOf(
+                raw,
+                [
+                    "magasin",
+                    "warehouse",
+                    "store",
+                    "site",
+                    "plant",
+                    "sloc",
+                    "storage location"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const emplacement =
+        String(
+            valueOf(
+                raw,
+                [
+                    "emplacement",
+                    "location",
+                    "bin",
+                    "position",
+                    "storage bin"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const unite =
+        String(
+            valueOf(
+                raw,
+                [
+                    "unite",
+                    "unité",
+                    "unit",
+                    "uom",
+                    "unité de base"
+                ]
+            ) || "KG"
+        ).trim();
+
+
+    const division =
+        String(
+            valueOf(
+                raw,
+                [
+                    "division",
+                    "division sap"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const typeArticle =
+        String(
+            valueOf(
+                raw,
+                [
+                    "type_article",
+                    "type article",
+                    "type"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const groupeArticle =
+        String(
+            valueOf(
+                raw,
+                [
+                    "groupe_article",
+                    "groupe article",
+                    "article group"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const familleArticle =
+        String(
+            valueOf(
+                raw,
+                [
+                    "famille_article",
+                    "famille article",
+                    "family"
+                ]
+            ) || ""
+        ).trim();
+
+
+    const statut =
+        String(
+            valueOf(
+                raw,
+                [
+                    "statut",
+                    "status"
+                ]
+            ) || "DISPONIBLE"
+        ).trim();
+
+
+    return {
+
+        division:
+            division || null,
+
+        magasin:
+            magasin || null,
+
+        emplacement:
+            emplacement || null,
+
+        article:
+            article || null,
+
+        designation_article:
+            designation ||
+            article ||
+            null,
+
+        lot:
+            lot || null,
+
+        quantite:
+            quantity,
+
+        unite:
+            unite || "KG",
+
+        type_article:
+            typeArticle || null,
+
+        groupe_article:
+            groupeArticle || null,
+
+        famille_article:
+            familleArticle || null,
+
+        controle_qualite:
+            Math.max(
+                0,
+                controleQualite
+            ),
+
+        stock_reserve:
+            stockReserve,
+
+        stock_disponible:
+            stockDisponible,
+
+        statut:
+            statut ||
+            "DISPONIBLE",
+
+        /*
+         * Internal diagnostic information.
+         * Removed before API POST.
+         */
+        __quantity_source:
+            quantityInfo.source,
+
+        __available_source:
+            availableInfo.source,
+
+        __row_index:
+            rowIndex
+    };
+}
+
+
+/* ============================================================
+   VALIDATION
+============================================================ */
+
+function validateRows(inputRows) {
+
+    const valid = [];
+    const errors = [];
+
+    inputRows.forEach(
+        (raw, index) => {
+
+            const row =
+                normalizeStockRow(
+                    raw,
+                    index + 2
+                );
+
+            if (!row.article) {
+
+                errors.push(
+                    `Ligne ${index + 2}: article manquant.`
+                );
+
                 return;
             }
 
-            const opMode = document.querySelector('input[name="operationMode"]:checked').value;
+            if (!row.magasin) {
 
-            // حماية إضافية من الواجهة البرمجية: منع غير الأدمن من اختيار replace
-            if (opMode === 'replace' && !isUserAdmin) {
-                showCustomAlert("Accès refusé", "Vous n'avez pas les privilèges Administrateur pour effectuer un remplacement total du stock.", "error");
+                errors.push(
+                    `Ligne ${index + 2}: magasin manquant.`
+                );
+
                 return;
             }
 
-            let message = "";
-            if (opMode === 'replace') {
-                message = "ATTENTION : Le mode 'Remplacer' va supprimer tout l'ancien stock et insérer le nouveau fichier à 100%. Continuer ?";
-            } else if (opMode === 'add_stock') {
-                message = "Voulez-vous procéder à l'ajout (entrée) des quantités de ce fichier Excel au stock existant ?";
+            if (!row.lot) {
+
+                errors.push(
+                    `Ligne ${index + 2}: lot manquant.`
+                );
+
+                return;
             }
 
-            const modal = document.getElementById("customModal");
-            document.getElementById("modalTitle").textContent = "Confirmation d'opération";
-            document.getElementById("modalMessage").textContent = message;
-            
-            const confirmBtn = document.getElementById("modalConfirmBtn");
-            const cancelBtn = document.getElementById("modalCancelBtn");
+            valid.push(row);
+        }
+    );
 
-            modal.classList.remove("hidden");
+    return {
+        valid,
+        errors
+    };
+}
 
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 
-            const newCancelBtn = cancelBtn.cloneNode(true);
-            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+/* ============================================================
+   SHEETJS READ
+============================================================ */
 
-            newCancelBtn.addEventListener("click", () => {
-                modal.classList.add("hidden");
-            });
+async function readFile(file) {
 
-            newConfirmBtn.addEventListener("click", () => {
-                modal.classList.add("hidden");
-                executeOperation(opMode);
-            });
+    if (
+        typeof XLSX ===
+        "undefined"
+    ) {
+
+        throw new Error(
+            "SheetJS (XLSX) n'est pas chargé."
+        );
+    }
+
+    const buffer =
+        await file.arrayBuffer();
+
+    const workbook =
+        XLSX.read(
+            buffer,
+            {
+                type: "array",
+                cellDates: false,
+                raw: true
+            }
+        );
+
+    if (
+        !workbook.SheetNames ||
+        !workbook.SheetNames.length
+    ) {
+
+        throw new Error(
+            "Aucune feuille Excel trouvée."
+        );
+    }
+
+    /*
+     * First non-empty sheet.
+     */
+    let sheetName =
+        workbook.SheetNames[0];
+
+    for (
+        const name
+        of workbook.SheetNames
+    ) {
+
+        const sheet =
+            workbook.Sheets[name];
+
+        const range =
+            XLSX.utils.decode_range(
+                sheet["!ref"] || "A1"
+            );
+
+        if (
+            range.e.r >=
+            range.s.r
+        ) {
+
+            sheetName =
+                name;
+
+            break;
+        }
+    }
+
+    const sheet =
+        workbook.Sheets[
+            sheetName
+        ];
+
+    if (!sheet) {
+
+        throw new Error(
+            "Impossible de lire la feuille Excel."
+        );
+    }
+
+    const rawRows =
+        XLSX.utils.sheet_to_json(
+            sheet,
+            {
+                defval: "",
+                raw: true,
+                blankrows: false
+            }
+        );
+
+    /*
+     * Debug information.
+     */
+    const first =
+        rawRows[0] || {};
+
+    console.log(
+        "[SMTG IMPORT STOCK] Feuille:",
+        sheetName
+    );
+
+    console.log(
+        "[SMTG IMPORT STOCK] Colonnes détectées:",
+        Object.keys(first)
+    );
+
+    return rawRows;
+}
+
+
+/* ============================================================
+   FORMAT
+============================================================ */
+
+function formatNumber(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "fr-FR",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 3
+        }
+    );
+}
+
+
+/* ============================================================
+   FILE STATE
+============================================================ */
+
+function setFileState(
+    ok,
+    message
+) {
+
+    const badge =
+        $("fileBadge");
+
+    const card =
+        $("fileCard");
+
+    const fileName =
+        $("fileName");
+
+    const dropText =
+        $("dropText");
+
+    if (ok) {
+
+        badge.textContent =
+            "OK";
+
+        badge.classList.add(
+            "ok"
+        );
+
+        badge.classList.remove(
+            "error"
+        );
+
+        card.classList.add(
+            "ready"
+        );
+
+        fileName.textContent =
+            message;
+
+        fileName.classList.remove(
+            "hidden"
+        );
+
+        if (dropText) {
+
+            dropText.textContent =
+                "Fichier sélectionné";
         }
 
-        function showCustomAlert(title, message, type = 'info') {
-            const modal = document.getElementById("customModal");
-            document.getElementById("modalTitle").textContent = title;
-            document.getElementById("modalMessage").textContent = message;
-            
-            const iconContainer = document.getElementById("modalIconContainer");
-            if (type === 'error') {
-                iconContainer.className = "w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-2xl mb-4";
-                iconContainer.innerHTML = `<i class="fas fa-times-circle"></i>`;
-            } else if (type === 'warning') {
-                iconContainer.className = "w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl mb-4";
-                iconContainer.innerHTML = `<i class="fas fa-exclamation-triangle"></i>`;
-            } else {
-                iconContainer.className = "w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mb-4";
-                iconContainer.innerHTML = `<i class="fas fa-info-circle"></i>`;
+    }
+    else {
+
+        badge.textContent =
+            "En attente";
+
+        badge.classList.remove(
+            "ok",
+            "error"
+        );
+
+        card.classList.remove(
+            "ready"
+        );
+
+        if (dropText) {
+
+            dropText.textContent =
+                "Sélectionner le fichier Stock";
+        }
+    }
+}
+
+
+/* ============================================================
+   PREVIEW
+============================================================ */
+
+function renderPreview() {
+
+    const body =
+        $("previewBody");
+
+    if (!rows.length) {
+
+        body.innerHTML = `
+            <tr>
+                <td
+                    colspan="9"
+                    style="
+                        text-align:center;
+                        color:#66718d;
+                        padding:35px;
+                    ">
+                    Aucune donnée.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    const preview =
+        rows.slice(
+            0,
+            200
+        );
+
+    body.innerHTML =
+        preview
+            .map(
+                row => {
+
+                    const warning =
+                        Number(
+                            row.quantite
+                        ) === 0;
+
+                    return `
+                        <tr
+                            class="${
+                                warning
+                                    ? "warning-row"
+                                    : ""
+                            }">
+
+                            <td class="num">
+                                ${escapeHtml(
+                                    row.article
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    row.designation_article
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    row.lot
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    row.magasin
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    row.emplacement ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td class="qty">
+                                ${formatNumber(
+                                    row.quantite
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    row.unite
+                                )}
+                            </td>
+
+                            <td class="available">
+                                ${formatNumber(
+                                    row.stock_disponible
+                                )}
+                            </td>
+
+                            <td>
+                                <span class="status-pill">
+                                    ${escapeHtml(
+                                        row.statut
+                                    )}
+                                </span>
+                            </td>
+
+                        </tr>
+                    `;
+                }
+            )
+            .join("");
+
+
+    $("tableCount").textContent =
+        `${rows.length.toLocaleString(
+            "fr-FR"
+        )} ligne(s)`;
+
+}
+
+
+/* ============================================================
+   STATS
+============================================================ */
+
+function updateStats() {
+
+    const articles =
+        new Set(
+            rows
+                .map(
+                    row =>
+                        row.article
+                )
+                .filter(Boolean)
+        );
+
+    const magasins =
+        new Set(
+            rows
+                .map(
+                    row =>
+                        row.magasin
+                )
+                .filter(Boolean)
+        );
+
+    const quantity =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                toNumber(
+                    row.quantite
+                ),
+            0
+        );
+
+    $("statRows")
+        .textContent =
+        rows.length.toLocaleString(
+            "fr-FR"
+        );
+
+    $("statArticles")
+        .textContent =
+        articles.size.toLocaleString(
+            "fr-FR"
+        );
+
+    $("statMagasins")
+        .textContent =
+        magasins.size.toLocaleString(
+            "fr-FR"
+        );
+
+    $("statQuantity")
+        .textContent =
+        formatNumber(
+            quantity
+        );
+
+    $("analysisMessage")
+        .textContent =
+        `${rows.length.toLocaleString(
+            "fr-FR"
+        )} ligne(s) prêtes à être envoyées à l'API.`;
+}
+
+
+/* ============================================================
+   QUANTITY DIAGNOSTIC
+============================================================ */
+
+function quantityDiagnostic() {
+
+    if (!rows.length) {
+        return null;
+    }
+
+    const total =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                Number(
+                    row.quantite || 0
+                ),
+            0
+        );
+
+    const sources =
+        new Map();
+
+    rows
+        .forEach(
+            row => {
+
+                const source =
+                    row.__quantity_source ||
+                    "(aucune)";
+
+                sources.set(
+                    source,
+                    (
+                        sources.get(
+                            source
+                        ) || 0
+                    ) + 1
+                );
+            }
+        );
+
+    const sorted =
+        [...sources.entries()]
+            .sort(
+                (a,b) =>
+                    b[1] - a[1]
+            );
+
+    return {
+        total,
+        sources: sorted
+    };
+}
+
+
+/* ============================================================
+   ANALYZE LOCAL
+============================================================ */
+
+async function analyzeFile() {
+
+    if (!selectedFile) {
+
+        showModal(
+            "Fichier manquant",
+            "Veuillez sélectionner un fichier Stock.",
+            true
+        );
+
+        return;
+    }
+
+    if (busy) {
+        return;
+    }
+
+    try {
+
+        busy = true;
+
+        $("btnAnalyze")
+            .disabled =
+            true;
+
+        showLoader(
+            "Analyse du fichier",
+            "Lecture et validation du fichier SAP..."
+        );
+
+        const rawRows =
+            await readFile(
+                selectedFile
+            );
+
+        if (
+            !rawRows.length
+        ) {
+
+            throw new Error(
+                "Le fichier ne contient aucune ligne."
+            );
+        }
+
+        const result =
+            validateRows(
+                rawRows
+            );
+
+        if (
+            !result.valid.length
+        ) {
+
+            throw new Error(
+                result.errors
+                    .slice(0, 10)
+                    .join("\n") ||
+                "Aucune ligne valide trouvée."
+            );
+        }
+
+        rows =
+            result.valid;
+
+        analysisDone =
+            true;
+
+        renderPreview();
+
+        updateStats();
+
+        $("emptyState")
+            .style.display =
+            "none";
+
+        $("resultSection")
+            .classList.add(
+                "show"
+            );
+
+        $("btnSave")
+            .disabled =
+            false;
+
+
+        /*
+         * IMPORTANT:
+         * Diagnostic visible if quantity is zero.
+         */
+        const diagnostic =
+            quantityDiagnostic();
+
+        console.log(
+            "[SMTG IMPORT STOCK] Diagnostic quantité:",
+            diagnostic
+        );
+
+        if (
+            diagnostic &&
+            diagnostic.total === 0
+        ) {
+
+            const sourceText =
+                diagnostic.sources
+                    .slice(0, 8)
+                    .map(
+                        ([source,count]) =>
+                            `${source}: ${count} ligne(s)`
+                    )
+                    .join("\n");
+
+            showModal(
+                "Quantités introuvables",
+                "Le fichier a bien été lu, mais toutes les quantités détectées sont à 0.\n\nColonnes utilisées :\n" +
+                sourceText +
+                "\n\nVérifiez le nom de la colonne quantité dans le fichier SAP.",
+                true
+            );
+
+        }
+        else if (
+            result.errors.length
+        ) {
+
+            showModal(
+                "Analyse terminée avec avertissements",
+                `${rows.length} ligne(s) valides.\n\n` +
+                result.errors
+                    .slice(0, 10)
+                    .join("\n"),
+                false
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "[SMTG IMPORT STOCK] Analyse:",
+            error
+        );
+
+        showModal(
+            "Erreur d'analyse",
+            error.message ||
+            "Impossible d'analyser le fichier.",
+            true
+        );
+
+        analysisDone =
+            false;
+
+    }
+    finally {
+
+        busy = false;
+
+        $("btnAnalyze")
+            .disabled =
+            !selectedFile;
+
+        hideLoader();
+    }
+}
+
+
+/* ============================================================
+   API TOKEN
+============================================================ */
+
+function getApiToken() {
+
+    const candidates = [
+
+        "smtg_token",
+        "soufstock_token",
+        "access_token",
+        "token",
+        "jwt",
+        "auth_token"
+
+    ];
+
+    for (
+        const key
+        of candidates
+    ) {
+
+        const value =
+            localStorage.getItem(
+                key
+            );
+
+        if (
+            value &&
+            value.trim()
+        ) {
+
+            return value.trim();
+        }
+    }
+
+
+    const authKeys = [
+
+        "soufstock_auth",
+        "smtg_auth",
+        "auth"
+
+    ];
+
+    for (
+        const key
+        of authKeys
+    ) {
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+            if (!raw) {
+                continue;
             }
 
-            document.getElementById("modalCancelBtn").classList.add("hidden");
-            const confirmBtn = document.getElementById("modalConfirmBtn");
-            confirmBtn.textContent = "OK";
-            
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            const data =
+                JSON.parse(
+                    raw
+                );
 
-            modal.classList.remove("hidden");
-            newConfirmBtn.addEventListener("click", () => {
-                modal.classList.add("hidden");
-                document.getElementById("modalCancelBtn").classList.remove("hidden");
-                newConfirmBtn.textContent = "Confirmer";
-            });
+            const token =
+                data?.access_token ||
+                data?.token ||
+                data?.jwt ||
+                data?.accessToken;
+
+            if (token) {
+                return token;
+            }
+
+        }
+        catch {
+            // ignore
+        }
+    }
+
+    return null;
+}
+
+
+/* ============================================================
+   API REQUEST
+============================================================ */
+
+async function apiRequest(
+    endpoint,
+    options = {}
+) {
+
+    const token =
+        getApiToken();
+
+    const headers = {
+
+        "Content-Type":
+            "application/json",
+
+        ...(options.headers || {})
+
+    };
+
+    if (token) {
+
+        headers.Authorization =
+            token.startsWith(
+                "Bearer "
+            )
+                ? token
+                : `Bearer ${token}`;
+    }
+
+    const response =
+        await fetch(
+            endpoint,
+            {
+                ...options,
+                headers,
+                cache: "no-cache"
+            }
+        );
+
+    let result = null;
+
+    try {
+
+        result =
+            await response.json();
+
+    }
+    catch {
+        // empty response
+    }
+
+    if (
+        !response.ok
+    ) {
+
+        const message =
+            result?.message ||
+            result?.error ||
+            result?.title ||
+            `Erreur API HTTP ${response.status}`;
+
+        const error =
+            new Error(
+                message
+            );
+
+        error.status =
+            response.status;
+
+        error.data =
+            result;
+
+        throw error;
+    }
+
+    if (
+        result &&
+        result.success === false
+    ) {
+
+        throw new Error(
+            result.message ||
+            result.error ||
+            "L'API a refusé l'import."
+        );
+    }
+
+    return result;
+}
+
+
+/* ============================================================
+   API HEALTH
+============================================================ */
+
+async function checkApi() {
+
+    const dot =
+        $("apiDot");
+
+    const text =
+        $("apiStatusText");
+
+    dot.classList.remove(
+        "online",
+        "error"
+    );
+
+    text.textContent =
+        "API : test...";
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/health`,
+                {
+                    method: "GET",
+                    cache: "no-cache"
+                }
+            );
+
+        if (
+            response.ok
+        ) {
+
+            dot.classList.add(
+                "online"
+            );
+
+            text.textContent =
+                "API SMTG disponible";
+
+            return;
         }
 
-        async function executeOperation(opMode) {
-            const processBtn = document.getElementById("processBtn");
-            processBtn.disabled = true;
-            processBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Traitement en cours...`;
+        throw new Error(
+            `HTTP ${response.status}`
+        );
 
-            try {
-                if (opMode === 'replace') {
-                    // التحقق مرة أخرى داخل التنفيذ الأمني
-                    if (!isUserAdmin) throw new Error("Action non autorisée.");
+    }
+    catch (error) {
 
-                    const { error: deleteErr } = await supabase.from('stock').delete().neq('id', 0);
-                    if (deleteErr) throw deleteErr;
+        console.warn(
+            "[SMTG IMPORT STOCK] API check:",
+            error
+        );
 
-                    const stockPayload = parsedExcelData.map(row => ({
-                        division: String(row.Division || row.division || '').trim() || null,
-                        magasin: String(row.Magasin || row.magasin || 'PRINCIPAL').trim(),
-                        emplacement: null,
-                        article: String(row.Article || row.article || '').trim().replace(/\.0$/, ''),
-                        designation_article: String(row['Désignation article'] || row.designation_article || 'SANS DESIGNATION').trim(),
-                        lot: String(row.Lot || row.lot || 'STANDARD').trim(),
-                        quantite: parseFloat(row['À utilisation libre'] || row.quantite || 0),
-                        unite: String(row['Unité quantité base'] || row.unite || 'KG').trim(),
-                        type_article: String(row["Type d'article"] || row.type_article || '').trim() || null,
-                        groupe_article: String(row["Groupe d'articles"] || row.groupe_article || '').trim() || null,
-                        controle_qualite: parseFloat(row['Contrôle qualité'] || 0),
-                        statut: 'DISPONIBLE',
-                        updated_at: new Date().toISOString()
-                    }));
+        dot.classList.add(
+            "error"
+        );
 
-                    const batchSize = 500;
-                    for (let i = 0; i < stockPayload.length; i += batchSize) {
-                        const batch = stockPayload.slice(i, i + batchSize);
-                        const { error: upsertErr } = await supabase.from('stock').upsert(batch, { onConflict: 'article,lot,magasin,emplacement' });
-                        if (upsertErr) throw upsertErr;
-                    }
+        text.textContent =
+            "API à vérifier";
+    }
+}
 
-                } else if (opMode === 'add_stock') {
-                    // عملية الإضافة Cumul للمخزون الحالي
-                    for (let row of parsedExcelData) {
-                        const mag = String(row.Magasin || row.magasin || 'PRINCIPAL').trim().toUpperCase();
-                        const art = String(row.Article || row.article || '').trim().replace(/\.0$/, '');
-                        const lot = String(row.Lot || row.lot || 'STANDARD').trim().toUpperCase();
-                        const addQty = parseFloat(row['À utilisation libre'] || row.quantite || 0);
-                        const designation = String(row['Désignation article'] || row.designation_article || 'SANS DESIGNATION').trim();
-                        const unite = String(row['Unité quantité base'] || row.unite || 'KG').trim();
 
-                        if (art) {
-                            const { data: existing, error: fetchErr } = await supabase
-                                .from('stock')
-                                .select('*')
-                                .eq('magasin', mag)
-                                .eq('article', art)
-                                .eq('lot', lot)
-                                .maybeSingle();
+/* ============================================================
+   CLEAN ROW BEFORE API
+   IMPORTANT:
+   Internal diagnostic fields are NOT sent.
+============================================================ */
 
-                            if (fetchErr) throw fetchErr;
+function prepareApiRows() {
 
-                            if (existing) {
-                                const newTotal = Number(existing.quantite) + addQty;
-                                await supabase.from('stock')
-                                    .update({ quantite: newTotal, updated_at: new Date().toISOString() })
-                                    .eq('id', existing.id);
-                            } else {
-                                await supabase.from('stock').insert([{
-                                    division: String(row.Division || row.division || '').trim() || null,
-                                    magasin: mag,
-                                    article: art,
-                                    designation_article: designation,
-                                    lot: lot,
-                                    quantite: addQty,
-                                    unite: unite,
-                                    controle_qualite: parseFloat(row['Contrôle qualité'] || 0),
-                                    statut: 'DISPONIBLE',
-                                    updated_at: new Date().toISOString()
-                                }]);
-                            }
-                        }
-                    }
+    return rows.map(
+        row => ({
+
+            division:
+                row.division,
+
+            magasin:
+                row.magasin,
+
+            emplacement:
+                row.emplacement,
+
+            article:
+                row.article,
+
+            designation_article:
+                row.designation_article,
+
+            lot:
+                row.lot,
+
+            quantite:
+                Number(
+                    row.quantite || 0
+                ),
+
+            unite:
+                row.unite || "KG",
+
+            type_article:
+                row.type_article,
+
+            groupe_article:
+                row.groupe_article,
+
+            famille_article:
+                row.famille_article,
+
+            controle_qualite:
+                Number(
+                    row.controle_qualite || 0
+                ),
+
+            stock_reserve:
+                Number(
+                    row.stock_reserve || 0
+                ),
+
+            stock_disponible:
+                Number(
+                    row.stock_disponible || 0
+                ),
+
+            statut:
+                row.statut || "DISPONIBLE"
+
+        })
+    );
+}
+
+
+/* ============================================================
+   SAVE / SYNCHRONISE
+============================================================ */
+
+async function saveToApi() {
+
+    if (busy) {
+        return;
+    }
+
+    if (
+        !analysisDone ||
+        !rows.length
+    ) {
+
+        showModal(
+            "Analyse obligatoire",
+            "Analysez d'abord le fichier avant de lancer la synchronisation.",
+            true
+        );
+
+        return;
+    }
+
+
+    const mode =
+        $("importMode").value;
+
+    const modeLabel =
+        getModeLabel(
+            mode
+        );
+
+
+    const totalQuantity =
+        rows.reduce(
+            (sum,row) =>
+                sum +
+                Number(
+                    row.quantite || 0
+                ),
+            0
+        );
+
+
+    if (
+        totalQuantity === 0
+    ) {
+
+        showModal(
+            "Synchronisation bloquée",
+            "La quantité totale est 0.\n\nLe fichier Stock SAP semble ne pas avoir été correctement lu.\nCorrigez la colonne quantité avant de synchroniser.",
+            true
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            `Confirmer l'import Stock ?\n\n` +
+            `Mode : ${modeLabel}\n` +
+            `Lignes : ${rows.length}\n` +
+            `Quantité totale : ${formatNumber(totalQuantity)}\n\n` +
+            `Les données seront envoyées au serveur SMTG.`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        busy = true;
+
+        $("btnSave")
+            .disabled =
+            true;
+
+        $("btnAnalyze")
+            .disabled =
+            true;
+
+        showLoader(
+            "Synchronisation",
+            `Envoi de ${rows.length.toLocaleString(
+                "fr-FR"
+            )} ligne(s) vers l'API SMTG...`
+        );
+
+        startProgressSimulation();
+
+        const payload = {
+
+            mode:
+
+                mode === "SYNCHRONISATION"
+                    ? "SYNCHRONISATION"
+                    : mode === "REMPLACER"
+                        ? "REMPLACER"
+                        : "MISE_A_JOUR",
+
+            fileName:
+                selectedFile?.name ||
+                "import_stock.xlsx",
+
+            rows:
+                prepareApiRows()
+
+        };
+
+
+        console.log(
+            "[SMTG IMPORT STOCK] POST:",
+            API_URL
+        );
+
+        console.log(
+            "[SMTG IMPORT STOCK] MODE:",
+            payload.mode
+        );
+
+        console.log(
+            "[SMTG IMPORT STOCK] LIGNES:",
+            payload.rows.length
+        );
+
+        console.log(
+            "[SMTG IMPORT STOCK] TOTAL QUANTITE:",
+            totalQuantity
+        );
+
+
+        const result =
+            await apiRequest(
+                API_URL,
+                {
+                    method: "POST",
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
+            );
+
+
+        const data =
+            result?.data ||
+            result ||
+            {};
+
+
+        const added =
+            data.added ??
+            data.inserted ??
+            data.nouvelles ??
+            data.newCount ??
+            0;
+
+
+        const updated =
+            data.updated ??
+            data.modified ??
+            data.modifications ??
+            data.modifiedCount ??
+            0;
+
+
+        const deleted =
+            data.deleted ??
+            data.deletedCount ??
+            data.supprimees ??
+            0;
+
+
+        const errors =
+            data.errors ??
+            data.errorCount ??
+            0;
+
+
+        stopProgressSimulation();
+
+        setLoaderProgress(
+            100,
+            "Synchronisation terminée avec succès."
+        );
+
+        await new Promise(
+            resolve => setTimeout(resolve, 250)
+        );
+
+        showModal(
+            "Import terminé",
+            `Synchronisation API SMTG terminée avec succès.\n\n` +
+            `Lignes : ${rows.length}\n` +
+            `Quantité : ${formatNumber(totalQuantity)}\n` +
+            `Ajoutées : ${added}\n` +
+            `Modifiées : ${updated}\n` +
+            `Supprimées : ${deleted}\n` +
+            `Erreurs : ${errors}`,
+            false
+        );
+
+
+        $("apiDot")
+            .classList.add(
+                "online"
+            );
+
+        $("apiStatusText")
+            .textContent =
+            "Synchronisation réussie";
+
+    }
+    catch (error) {
+
+        console.error(
+            "[SMTG IMPORT STOCK] Synchronisation:",
+            error
+        );
+
+        $("apiDot")
+            .classList.remove(
+                "online"
+            );
+
+        $("apiDot")
+            .classList.add(
+                "error"
+            );
+
+        $("apiStatusText")
+            .textContent =
+            "Erreur API";
+
+        showModal(
+            "Erreur de synchronisation",
+            error.message ||
+            "Impossible de terminer la synchronisation.",
+            true
+        );
+
+    }
+    finally {
+
+        busy = false;
+
+        $("btnAnalyze")
+            .disabled =
+            !selectedFile;
+
+        $("btnSave")
+            .disabled =
+            !analysisDone ||
+            !rows.length;
+
+        hideLoader();
+    }
+}
+
+
+/* ============================================================
+   MODE
+============================================================ */
+
+function getModeLabel(mode) {
+
+    switch (mode) {
+
+        case "REMPLACER":
+            return "Remplacer";
+
+        case "SYNCHRONISATION":
+            return "Synchronisation";
+
+        default:
+            return "Mise à jour";
+    }
+}
+
+
+function updateMode() {
+
+    const mode =
+        $("importMode").value;
+
+    const label =
+        getModeLabel(
+            mode
+        );
+
+    $("modeLabel")
+        .textContent =
+        label;
+
+    $("mainModeLabel")
+        .textContent =
+        label;
+
+    $("modeDescription")
+        .textContent =
+        mode === "REMPLACER"
+
+            ? "Remplace complètement le stock"
+
+            : mode === "SYNCHRONISATION"
+
+                ? "Synchronise le stock avec SAP"
+
+                : "Met à jour et ajoute les lignes";
+}
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+function resetAll() {
+
+    if (busy) {
+        return;
+    }
+
+    selectedFile =
+        null;
+
+    rows =
+        [];
+
+    analysisDone =
+        false;
+
+    $("excelFile")
+        .value =
+        "";
+
+    $("fileName")
+        .textContent =
+        "";
+
+    $("fileName")
+        .classList.add(
+            "hidden"
+        );
+
+    $("fileBadge")
+        .textContent =
+        "En attente";
+
+    $("fileBadge")
+        .classList.remove(
+            "ok",
+            "error"
+        );
+
+    $("fileCard")
+        .classList.remove(
+            "ready"
+        );
+
+    $("dropText")
+        .textContent =
+        "Sélectionner le fichier Stock";
+
+    $("btnAnalyze")
+        .disabled =
+        true;
+
+    $("btnSave")
+        .disabled =
+        true;
+
+    $("resultSection")
+        .classList.remove(
+            "show"
+        );
+
+    $("emptyState")
+        .style.display =
+        "flex";
+
+    $("previewBody")
+        .innerHTML =
+        "";
+
+    $("tableCount")
+        .textContent =
+        "0 ligne";
+
+    $("statRows")
+        .textContent =
+        "0";
+
+    $("statArticles")
+        .textContent =
+        "0";
+
+    $("statMagasins")
+        .textContent =
+        "0";
+
+    $("statQuantity")
+        .textContent =
+        "0";
+
+    $("analysisMessage")
+        .textContent =
+        "Fichier prêt";
+
+    console.log(
+        "[SMTG IMPORT STOCK] Réinitialisé."
+    );
+}
+
+
+/* ============================================================
+   FILE SELECT
+============================================================ */
+
+async function handleFile(file) {
+
+    if (!file) {
+        return;
+    }
+
+    const extension =
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+    if (
+        ![
+            "xlsx",
+            "xls",
+            "csv"
+        ].includes(
+            extension
+        )
+    ) {
+
+        showModal(
+            "Fichier invalide",
+            "Veuillez sélectionner un fichier Excel (.xlsx, .xls) ou CSV.",
+            true
+        );
+
+        return;
+    }
+
+
+    selectedFile =
+        file;
+
+    rows =
+        [];
+
+    analysisDone =
+        false;
+
+
+    $("fileName")
+        .textContent =
+        file.name;
+
+    $("fileName")
+        .classList.remove(
+            "hidden"
+        );
+
+
+    setFileState(
+        true,
+        file.name
+    );
+
+
+    $("btnAnalyze")
+        .disabled =
+        false;
+
+    $("btnSave")
+        .disabled =
+        true;
+
+
+    $("resultSection")
+        .classList.remove(
+            "show"
+        );
+
+    $("emptyState")
+        .style.display =
+        "flex";
+
+
+    console.log(
+        "[SMTG IMPORT STOCK] Fichier:",
+        file.name,
+        file.size,
+        "bytes"
+    );
+}
+
+
+/* ============================================================
+   LOADER
+============================================================ */
+
+function setLoaderProgress(value, message = null) {
+
+    progressValue =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(value) || 0
+            )
+        );
+
+    const bar = $("syncProgressBar");
+    const percent = $("syncProgressPercent");
+
+    if (bar) {
+        bar.style.width = `${progressValue}%`;
+    }
+
+    if (percent) {
+        percent.textContent =
+            `${Math.round(progressValue)}%`;
+    }
+
+    if (message !== null) {
+        $("loaderMessage")
+            .textContent =
+            message;
+    }
+}
+
+
+function startProgressSimulation() {
+
+    stopProgressSimulation();
+
+    /*
+     * Monte rapidement jusqu'à 80%, puis très doucement jusqu'à 96%.
+     * Le 100% est réservé à la réponse API réussie.
+     */
+    progressValue = 8;
+    setLoaderProgress(
+        progressValue,
+        "Préparation des données..."
+    );
+
+    progressTimer =
+        setInterval(
+            () => {
+
+                if (progressValue < 35) {
+
+                    progressValue += 3;
+
+                    setLoaderProgress(
+                        progressValue,
+                        "Envoi des lignes vers l'API SMTG..."
+                    );
+
+                }
+                else if (progressValue < 80) {
+
+                    progressValue += 2;
+
+                    setLoaderProgress(
+                        progressValue,
+                        "Traitement massif PostgreSQL..."
+                    );
+
+                }
+                else if (progressValue < 96) {
+
+                    progressValue += .35;
+
+                    setLoaderProgress(
+                        progressValue,
+                        "Synchronisation du stock en cours..."
+                    );
                 }
 
-                showCustomAlert("Succès", "Opération et synchronisation par Excel effectuées avec succès !", "success");
-                setTimeout(() => window.location.reload(), 2000);
+            },
+            250
+        );
+}
 
-            } catch (err) {
-                console.error("Erreur:", err);
-                showCustomAlert("Erreur", "Erreur lors du traitement : " + (err.message || JSON.stringify(err)), "error");
-                processBtn.disabled = false;
-                processBtn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Exécuter l'opération`;
+
+function stopProgressSimulation() {
+
+    if (progressTimer) {
+
+        clearInterval(
+            progressTimer
+        );
+
+        progressTimer =
+            null;
+    }
+}
+
+
+function showLoader(
+    title,
+    message
+) {
+
+    $("loaderTitle")
+        .textContent =
+        title;
+
+    $("loaderMessage")
+        .textContent =
+        message;
+
+    setLoaderProgress(
+        0,
+        message
+    );
+
+    $("loader")
+        .classList.add(
+            "show"
+        );
+}
+
+
+function hideLoader() {
+
+    stopProgressSimulation();
+
+    $("loader")
+        .classList.remove(
+            "show"
+        );
+
+    setLoaderProgress(
+        0,
+        "Traitement..."
+    );
+}
+
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+function showModal(
+    title,
+    message,
+    error = false
+) {
+
+    $("modalTitle")
+        .textContent =
+        title;
+
+    $("modalMessage")
+        .textContent =
+        message;
+
+
+    const icon =
+        $("modalIcon");
+
+    const symbol =
+        $("modalIconSymbol");
+
+
+    icon.classList.toggle(
+        "error",
+        error
+    );
+
+
+    symbol.className =
+        error
+            ? "fa-solid fa-triangle-exclamation"
+            : "fa-solid fa-check";
+
+
+    $("modal")
+        .classList.add(
+            "show"
+        );
+}
+
+
+function hideModal() {
+
+    $("modal")
+        .classList.remove(
+            "show"
+        );
+}
+
+
+/* ============================================================
+   CLOCK
+============================================================ */
+
+function updateClock() {
+
+    const now =
+        new Date();
+
+
+    $("currentDate")
+        .textContent =
+        now.toLocaleDateString(
+            "fr-FR",
+            {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+
+    $("currentTime")
+        .textContent =
+        now.toLocaleTimeString(
+            "fr-FR",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+}
+
+
+/* ============================================================
+   EVENTS
+============================================================ */
+
+$("btnBrowse")
+    .addEventListener(
+        "click",
+        () =>
+            $("excelFile").click()
+    );
+
+
+$("dropZone")
+    .addEventListener(
+        "click",
+        () =>
+            $("excelFile").click()
+    );
+
+
+$("excelFile")
+    .addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files?.[0];
+
+            handleFile(file);
+        }
+    );
+
+
+$("dropZone")
+    .addEventListener(
+        "dragover",
+        event => {
+
+            event.preventDefault();
+
+            $("dropZone")
+                .classList.add(
+                    "dragover"
+                );
+        }
+    );
+
+
+$("dropZone")
+    .addEventListener(
+        "dragleave",
+        () => {
+
+            $("dropZone")
+                .classList.remove(
+                    "dragover"
+                );
+        }
+    );
+
+
+$("dropZone")
+    .addEventListener(
+        "drop",
+        event => {
+
+            event.preventDefault();
+
+            $("dropZone")
+                .classList.remove(
+                    "dragover"
+                );
+
+            const file =
+                event.dataTransfer.files?.[0];
+
+            handleFile(file);
+        }
+    );
+
+
+$("btnAnalyze")
+    .addEventListener(
+        "click",
+        analyzeFile
+    );
+
+
+$("btnSave")
+    .addEventListener(
+        "click",
+        saveToApi
+    );
+
+
+$("btnReset")
+    .addEventListener(
+        "click",
+        resetAll
+    );
+
+
+$("importMode")
+    .addEventListener(
+        "change",
+        updateMode
+    );
+
+
+$("modalOk")
+    .addEventListener(
+        "click",
+        hideModal
+    );
+
+
+$("modal")
+    .addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                $("modal")
+            ) {
+
+                hideModal();
             }
         }
-    </script>
+    );
+
+
+/* ============================================================
+   PUBLIC DEBUG
+============================================================ */
+
+window.SMTGImportStock = {
+
+    getApiUrl:
+        () => API_URL,
+
+    getRows:
+        () => rows,
+
+    getSelectedFile:
+        () => selectedFile,
+
+    analyze:
+        analyzeFile,
+
+    save:
+        saveToApi,
+
+    reset:
+        resetAll,
+
+    checkApi,
+
+    diagnoseQuantity:
+        quantityDiagnostic
+
+};
+
+
+/* ============================================================
+   INIT
+============================================================ */
+
+updateClock();
+
+setInterval(
+    updateClock,
+    1000
+);
+
+updateMode();
+
+checkApi();
+
+
+console.log(
+    "[SMTG IMPORT STOCK] API:",
+    API_URL
+);
+
+console.log(
+    "[SMTG IMPORT STOCK] Mode:",
+    $("importMode").value
+);
+
+</script>
+
 </body>
 </html>
