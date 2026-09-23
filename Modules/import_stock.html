@@ -361,11 +361,22 @@
         }
 
         .actions {
-            margin-top: auto;
+            margin-top: 4px;
             padding-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+
+        .sidebar .actions {
+            flex: 0 0 auto;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .sidebar .actions .btn {
+            display: flex !important;
+            visibility: visible !important;
         }
 
         .btn {
@@ -1199,7 +1210,7 @@
              MAIN
         ================================================== -->
 
-        <main class="main">
+        <section class="main">
 
             <div class="main-top">
 
@@ -1414,7 +1425,7 @@
 
             </div>
 
-        </main>
+        </section>
 
     </div>
 
