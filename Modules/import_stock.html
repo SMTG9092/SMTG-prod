@@ -48,6 +48,16 @@
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
         body { background-color: #020617; color: #f1f5f9; font-family: ui-sans-serif, system-ui, sans-serif; }
     </style>
+
+<style id="no-sidebar-layout">
+    body { overflow-x: hidden; }
+    main, .main-content, .content-area {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+    }
+</style>
+
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex overflow-hidden">
 
@@ -103,7 +113,7 @@
         </header>
 
         <!-- PAGE BODY -->
-        <main class="flex-1 p-8 overflow-y-auto">
+        <main class=" flex-1 p-8 overflow-y-auto">
             <div class="max-w-6xl mx-auto flex flex-col gap-6">
                 
                 <!-- UPLOAD & MODE CARD -->
@@ -605,25 +615,28 @@
             });
         }
 
+        function showCustomAlertFallback(message) {
+            // Fallback minimal si le modal HTML n'est pas présent.
+            window.alert(message);
+        }
+
         function showCustomAlert(title, message, type = 'info') {
             const modal = document.getElementById("customModal");
             document.getElementById("modalTitle").textContent = title;
             document.getElementById("modalMessage").textContent = message;
             
-            const iconContainer = document.getElementById("modalIconContainer");
-            if (type === 'error') {
+            if (iconContainer && type === 'error') {
                 iconContainer.className = "w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-2xl mb-4";
                 iconContainer.innerHTML = `<i class="fas fa-times-circle"></i>`;
-            } else if (type === 'warning') {
+            } else if (iconContainer && type === 'warning') {
                 iconContainer.className = "w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl mb-4";
                 iconContainer.innerHTML = `<i class="fas fa-exclamation-triangle"></i>`;
-            } else {
+            } else if (iconContainer) {
                 iconContainer.className = "w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mb-4";
                 iconContainer.innerHTML = `<i class="fas fa-info-circle"></i>`;
             }
 
-            document.getElementById("modalCancelBtn").classList.add("hidden");
-            const confirmBtn = document.getElementById("modalConfirmBtn");
+            if (cancelBtn) cancelBtn.classList.add("hidden");
             confirmBtn.textContent = "OK";
             
             const newConfirmBtn = confirmBtn.cloneNode(true);
@@ -632,7 +645,7 @@
             modal.classList.remove("hidden");
             newConfirmBtn.addEventListener("click", () => {
                 modal.classList.add("hidden");
-                document.getElementById("modalCancelBtn").classList.remove("hidden");
+                if (cancelBtn) cancelBtn.classList.remove("hidden");
                 newConfirmBtn.textContent = "Confirmer";
             });
         }
