@@ -1,839 +1,2705 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importation & Entrée Stock Excel - SoufStock Enterprise ERP/WMS</title>
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- SheetJS (XLSX) Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Import Stock | SoufStock</title>
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            950: '#020617',
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155',
-                            400: '#94a3b8',
-                            300: '#cbd5e1',
-                            100: '#f1f5f9'
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            600: '#059669',
-                            400: '#34d399',
-                            300: '#6ee7b7'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        body { background-color: #020617; color: #f1f5f9; font-family: ui-sans-serif, system-ui, sans-serif; }
-    </style>
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 
-<style id="no-sidebar-layout">
-    body { overflow-x: hidden; }
-    main, .main-content, .content-area {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        width: 100% !important;
-    }
-</style>
+    <!-- CSS Import Stock -->
+    <link rel="stylesheet" href="assets/css/import_stock.css">
 
+    <!-- SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen p-4 select-none shrink-0">
-        <div class="flex items-center gap-3 px-2 mb-6">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
-                <i class="fas fa-snowflake text-lg"></i>
+<body>
+
+<div class="app-container">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside id="sidebar" class="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="logo-container">
+
+                <img src="assets/img/logo.png"
+                     alt="SoufStock"
+                     class="logo">
+
+                <div>
+                    <strong>SoufStock</strong>
+                    <span>Enterprise ERP</span>
+                </div>
+
             </div>
-            <div>
-                <span class="font-bold text-base tracking-wide block text-slate-100">SoufStock</span>
-                <span class="text-[10px] text-slate-400 tracking-wider uppercase block">Enterprise ERP</span>
-            </div>
+
+            <button id="sidebarToggle"
+                    class="sidebar-toggle"
+                    type="button">
+
+                <i class="fas fa-bars"></i>
+
+            </button>
+
         </div>
-        
-        <nav id="sidebarNav" class="flex-1 overflow-y-auto pr-1">
-            <!-- Dynamic Sidebar -->
+
+        <nav id="sidebarNav" class="sidebar-nav">
+
+            <a href="dashboard.html"
+               class="nav-item">
+
+                <i class="fas fa-chart-pie"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+            <a href="import_stock.html"
+               class="nav-item active">
+
+                <i class="fas fa-file-import"></i>
+
+                <span>Import Stock</span>
+
+            </a>
+
         </nav>
 
-        <div class="pt-4 mt-auto border-t border-slate-800/80">
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 mb-2">
-                <span id="sidebarUserName" class="block text-xs font-bold text-slate-200 truncate uppercase">...</span>
-                <span id="sidebarUserRole" class="block text-[10px] text-emerald-400 font-medium mt-0.5">Chargement...</span>
-            </div>
-            <button id="logoutBtn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl py-2 px-3 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer">
-                <i class="fas fa-sign-out-alt"></i> Déconnexion
-            </button>
-        </div>
     </aside>
 
-    <!-- MAIN CONTAINER -->
-    <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden relative">
-        
-        <!-- HEADER -->
-        <header class="h-20 bg-slate-900/40 border-b border-slate-800/80 px-8 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-4">
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-100">Importation & Entrée Stock Excel</h1>
-                    <div class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                        <span>Accueil</span>
-                        <span>/</span>
-                        <strong class="text-slate-300">Gestion Stock Excel</strong>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-4 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-xl">
-                <div class="text-right">
-                    <span id="currentDate" class="text-xs font-medium text-slate-300 block">Chargement...</span>
-                    <span id="currentTime" class="text-[10px] text-emerald-400 font-mono block">00:00:00</span>
-                </div>
-            </div>
-        </header>
 
-        <!-- PAGE BODY -->
-        <main class=" flex-1 p-8 overflow-y-auto">
-            <div class="max-w-6xl mx-auto flex flex-col gap-6">
-                
-                <!-- UPLOAD & MODE CARD -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center relative">
-                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mb-4">
-                        <i class="fas fa-file-excel"></i>
-                    </div>
-                    <h2 class="text-lg font-bold text-slate-100">Glissez-déposez votre fichier Excel</h2>
-                    <p class="text-xs text-slate-400 mt-1 max-w-md">
-                        Sélectionnez un fichier de données pour l'intégrer au système.
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button id="mobileMenu"
+                        class="mobile-menu"
+                        type="button">
+
+                    <i class="fas fa-bars"></i>
+
+                </button>
+
+                <div>
+
+                    <h1>Import Stock</h1>
+
+                    <p>
+                        Importation directe du stock depuis Excel
                     </p>
 
-                    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden">
-                    
-                    <div class="flex items-center gap-4 mt-6">
-                        <button onclick="document.getElementById('excelFile').click()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-3 rounded-xl text-xs transition flex items-center gap-2 shadow-lg cursor-pointer">
-                            <i class="fas fa-folder-open"></i> Choisir le fichier Excel
-                        </button>
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="connection-status"
+                     id="connectionStatus">
+
+                    <span class="status-dot"></span>
+
+                    <span id="connectionText">
+                        Connexion...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
+        <div class="page-content">
+
+
+            <!-- =================================================
+                 IMPORT SECTION
+            ================================================== -->
+
+            <section class="import-section">
+
+                <div class="import-card">
+
+                    <div class="import-header">
+
+                        <h3>
+
+                            <i class="fas fa-file-excel"></i>
+
+                            Importer un fichier Excel
+
+                        </h3>
+
+                        <p>
+                            Sélectionnez votre fichier Excel contenant
+                            les données du stock.
+                        </p>
+
                     </div>
 
-                    <span id="fileNameDisplay" class="text-xs text-emerald-400 font-mono mt-3 block"></span>
 
-                    <!-- OPTIONS DE TRAITEMENT -->
-                    <div id="importOptionsBox" class="hidden w-full max-w-xl mt-6 p-5 bg-slate-950/60 border border-slate-800 rounded-xl text-left flex flex-col gap-4">
-                        <span class="block text-xs font-bold text-slate-300 uppercase tracking-wider">Mode d'opération :</span>
-                        
-                        <div class="flex flex-col gap-3">
-                            <!-- Option 1: Remplacer Tout (Réservé Admin) -->
-                            <label id="replaceOptionContainer" class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
-                                <input type="radio" name="operationMode" value="replace" class="accent-emerald-500" checked>
-                                <span><strong class="text-slate-100">Remplacer tout le stock</strong> (Supprimer l'ancien et insérer le nouveau fichier)</span>
-                            </label>
+                    <!-- DROP ZONE -->
 
-                            <!-- Option 2: Ajouter au Stock (Entrée) (Accessible par tous) -->
-                            <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
-                                <input type="radio" name="operationMode" value="add_stock" class="accent-emerald-500">
-                                <span><strong class="text-slate-100">Ajouter / Entrée de stock</strong> (Cumuler les quantités avec le stock existant sans supprimer)</span>
-                            </label>
+                    <div id="dropZone"
+                         class="drop-zone">
+
+                        <div class="drop-icon">
+
+                            <i class="fas fa-cloud-upload-alt"></i>
+
                         </div>
 
-                        <button id="processBtn" onclick="confirmOperation()" class="w-full mt-3 bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg cursor-pointer">
-                            <i class="fas fa-cloud-upload-alt"></i> Exécuter l'opération
-                        </button>
-                    </div>
-                </div>
-
-                <!-- STATS CARDS -->
-                <div id="statsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-4 hidden">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Total Quantité</span>
-                        <span id="statQty" class="text-xl font-mono font-bold text-emerald-400 mt-2">0</span>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Nombre de Lignes</span>
-                        <span id="statLines" class="text-xl font-mono font-bold text-sky-400 mt-2">0</span>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Articles Uniques</span>
-                        <span id="statArticles" class="text-xl font-mono font-bold text-indigo-400 mt-2">0</span>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-400">Lots Uniques</span>
-                        <span id="statLots" class="text-xl font-mono font-bold text-amber-400 mt-2">0</span>
-                    </div>
-                </div>
-
-                <!-- PREVIEW TABLE -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-                    <div class="p-4 bg-slate-950/40 border-b border-slate-800 flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                            <i class="fas fa-table text-emerald-400"></i> Aperçu des données (Premières lignes valides)
+                        <h3>
+                            Déposez votre fichier ici
                         </h3>
-                        <span id="rowCountBadge" class="text-[10px] font-mono bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg">0 lignes détectées</span>
+
+                        <p>
+                            ou sélectionnez un fichier depuis votre ordinateur
+                        </p>
+
+
+                        <label class="btn-upload">
+
+                            <i class="fas fa-folder-open"></i>
+
+                            Choisir un fichier
+
+                            <input
+                                type="file"
+                                id="fileInput"
+                                accept=".xlsx,.xls,.csv"
+                                hidden>
+
+                        </label>
+
+
+                        <small>
+                            Formats acceptés : XLSX, XLS, CSV
+                        </small>
+
                     </div>
-                    <div class="overflow-x-auto max-h-96">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 font-semibold sticky top-0">
-                                    <th class="p-3">Magasin</th>
-                                    <th class="p-3">Article</th>
-                                    <th class="p-3">Désignation</th>
-                                    <th class="p-3">Lot</th>
-                                    <th class="p-3 text-center">Quantité Libre</th>
-                                    <th class="p-3">Unité</th>
-                                    <th class="p-3 text-center">Contrôle Qualité</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewTableBody" class="divide-y divide-slate-800/50">
-                                <tr>
-                                    <td colspan="7" class="p-8 text-center text-slate-500">Aucun fichier sélectionné.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
                 </div>
 
-            </div>
-        </main>
-    </div>
+            </section>
 
-    <!-- CUSTOM MODAL DIALOG -->
-    <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
-            <div id="modalIconContainer" class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl mb-4">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 id="modalTitle" class="text-base font-bold text-slate-100">Confirmation</h3>
-            <p id="modalMessage" class="text-xs text-slate-400 mt-2 leading-relaxed">...</p>
-            <div class="flex items-center gap-3 w-full mt-6">
-                <button id="modalCancelBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl text-xs transition cursor-pointer">
-                    Annuler
-                </button>
-                <button id="modalConfirmBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer shadow-lg">
-                    Confirmer
-                </button>
-            </div>
+
+            <!-- =================================================
+                 FILE INFO
+            ================================================== -->
+
+            <section class="file-info-section"
+                     id="fileInfoSection"
+                     style="display:none;">
+
+                <div class="info-grid">
+
+
+                    <div class="info-card">
+
+                        <span>
+                            <i class="fas fa-file"></i>
+                            Fichier
+                        </span>
+
+                        <strong id="fileName">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-card">
+
+                        <span>
+                            <i class="fas fa-weight-hanging"></i>
+                            Taille
+                        </span>
+
+                        <strong id="fileSize">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-card">
+
+                        <span>
+                            <i class="fas fa-table"></i>
+                            Feuille
+                        </span>
+
+                        <strong id="sheetName">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-card">
+
+                        <span>
+                            <i class="fas fa-list"></i>
+                            Lignes
+                        </span>
+
+                        <strong id="rowCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SUMMARY
+            ================================================== -->
+
+            <section class="summary-section"
+                     id="summarySection"
+                     style="display:none;">
+
+                <div class="summary-grid">
+
+
+                    <div class="summary-card">
+
+                        <i class="fas fa-list"></i>
+
+                        <span>
+                            Total lignes
+                        </span>
+
+                        <strong id="summaryRows">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <i class="fas fa-box"></i>
+
+                        <span>
+                            Articles
+                        </span>
+
+                        <strong id="summaryArticles">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <i class="fas fa-layer-group"></i>
+
+                        <span>
+                            Lots
+                        </span>
+
+                        <strong id="summaryLots">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-card">
+
+                        <i class="fas fa-weight-hanging"></i>
+
+                        <span>
+                            Quantité totale
+                        </span>
+
+                        <strong id="summaryQuantity">
+                            0 KG
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PREVIEW
+            ================================================== -->
+
+            <section class="preview-section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h3>
+
+                            <i class="fas fa-eye"></i>
+
+                            Prévisualisation
+
+                        </h3>
+
+                        <p>
+                            Vérifiez les données avant l'enregistrement.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        id="clearPreview"
+                        class="btn-secondary"
+                        type="button">
+
+                        <i class="fas fa-trash"></i>
+
+                        Effacer
+
+                    </button>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table class="preview-table">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>Division</th>
+
+                            <th>Magasin</th>
+
+                            <th>Emplacement</th>
+
+                            <th>Article</th>
+
+                            <th>Désignation</th>
+
+                            <th>Lot</th>
+
+                            <th>Quantité</th>
+
+                            <th>Unité</th>
+
+                            <th>Type</th>
+
+                            <th>Groupe</th>
+
+                            <th>Famille</th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody id="previewBody">
+
+                        <tr>
+
+                            <td colspan="11"
+                                class="empty-table">
+
+                                <i class="fas fa-file-excel"></i>
+
+                                Aucune donnée à afficher
+
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 IMPORT MODE
+            ================================================== -->
+
+            <section class="import-mode-section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h3>
+
+                            <i class="fas fa-cogs"></i>
+
+                            Mode d'importation
+
+                        </h3>
+
+                        <p>
+                            Choisissez comment les données doivent
+                            être enregistrées dans le stock.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mode-grid">
+
+
+                    <!-- REMPLACER -->
+
+                    <label class="mode-card replace">
+
+                        <input
+                            type="radio"
+                            name="importMode"
+                            value="REMPLACER">
+
+                        <div class="mode-icon">
+
+                            <i class="fas fa-trash-restore"></i>
+
+                        </div>
+
+                        <h3>
+                            Remplacer
+                        </h3>
+
+                        <p>
+
+                            Supprime le stock existant puis importe
+                            toutes les lignes du fichier.
+
+                        </p>
+
+                    </label>
+
+
+                    <!-- MISE A JOUR -->
+
+                    <label class="mode-card update">
+
+                        <input
+                            type="radio"
+                            name="importMode"
+                            value="MISE_A_JOUR"
+                            checked>
+
+                        <div class="mode-icon">
+
+                            <i class="fas fa-edit"></i>
+
+                        </div>
+
+                        <h3>
+                            Mise à jour
+                        </h3>
+
+                        <p>
+
+                            Met à jour les lignes existantes et ajoute
+                            les nouvelles lignes.
+
+                        </p>
+
+                    </label>
+
+
+                    <!-- SYNCHRONISATION -->
+
+                    <label class="mode-card sync">
+
+                        <input
+                            type="radio"
+                            name="importMode"
+                            value="SYNCHRONISATION">
+
+                        <div class="mode-icon">
+
+                            <i class="fas fa-sync-alt"></i>
+
+                        </div>
+
+                        <h3>
+                            Synchronisation
+                        </h3>
+
+                        <p>
+
+                            Compare le fichier avec le stock actuel,
+                            ajoute les nouvelles lignes et supprime
+                            les lignes absentes du fichier.
+
+                        </p>
+
+                    </label>
+
+                </div>
+
+
+                <!-- SUMMARY -->
+
+                <div class="import-summary">
+
+                    <div class="summary-box">
+
+
+                        <div class="summary-item">
+
+                            <span>
+                                Mode sélectionné
+                            </span>
+
+                            <strong id="selectedMode">
+                                MISE À JOUR
+                            </strong>
+
+                        </div>
+
+
+                        <div class="summary-item">
+
+                            <span>
+                                Lignes prêtes
+                            </span>
+
+                            <strong id="readyRows">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <button
+                            id="importButton"
+                            class="btn-import"
+                            type="button"
+                            disabled>
+
+                            <i class="fas fa-database"></i>
+
+                            Enregistrer dans le stock
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROGRESS
+            ================================================== -->
+
+            <section class="progress-section"
+                     id="progressSection"
+                     style="display:none;">
+
+                <div class="progress-card">
+
+                    <div class="progress-header">
+
+                        <span>
+                            Importation en cours
+                        </span>
+
+                        <strong id="progressPercent">
+                            0%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress-bar-container">
+
+                        <div
+                            id="progressBar"
+                            class="progress-bar">
+                        </div>
+
+                    </div>
+
+
+                    <div class="progress-footer">
+
+                        <span id="progressText">
+                            Préparation...
+                        </span>
+
+                        <span id="progressCount">
+                            0 / 0
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 REPORT
+            ================================================== -->
+
+            <section class="report-section"
+                     id="reportSection"
+                     style="display:none;">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h3>
+
+                            <i class="fas fa-chart-bar"></i>
+
+                            Rapport d'importation
+
+                        </h3>
+
+                        <p>
+                            Résultat de l'opération.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-grid">
+
+
+                    <div class="report-card success">
+
+                        <i class="fas fa-plus-circle"></i>
+
+                        <span>
+                            Nouvelles lignes
+                        </span>
+
+                        <h2 id="reportNew">
+                            0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="report-card warning">
+
+                        <i class="fas fa-edit"></i>
+
+                        <span>
+                            Modifiées
+                        </span>
+
+                        <h2 id="reportUpdated">
+                            0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="report-card danger">
+
+                        <i class="fas fa-trash"></i>
+
+                        <span>
+                            Supprimées
+                        </span>
+
+                        <h2 id="reportDeleted">
+                            0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="report-card info">
+
+                        <i class="fas fa-check-circle"></i>
+
+                        <span>
+                            Inchangées
+                        </span>
+
+                        <h2 id="reportSame">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
+            <section class="action-section">
+
+                <div class="action-buttons">
+
+                    <button
+                        id="resetButton"
+                        class="btn-secondary"
+                        type="button">
+
+                        <i class="fas fa-redo"></i>
+
+                        Réinitialiser
+
+                    </button>
+
+
+                    <button
+                        id="importButtonBottom"
+                        class="btn-primary"
+                        type="button"
+                        disabled>
+
+                        <i class="fas fa-database"></i>
+
+                        Enregistrer
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
         </div>
-    </div>
 
-    <!-- SCRIPTS -->
-    <script type="module">
-        import Navigation from '../assets/js/core/navigation.js';
-        import supabase from '../assets/js/core/supabase.js';
+    </main>
 
-        let parsedExcelData = [];
-        let isUserAdmin = false; // متغير لتخزين حالة الصلاحية
+</div>
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            await Navigation.init();
-            initLiveClock();
-            await checkUserRoleAndPermissions();
 
-            const fileInput = document.getElementById("excelFile");
-            fileInput.addEventListener("change", handleFileSelect);
+<!-- =========================================================
+     SCRIPT
+========================================================== -->
 
-            const logoutBtn = document.getElementById("logoutBtn");
-            if (logoutBtn) {
-                logoutBtn.addEventListener("click", async () => {
-                    await supabase.auth.signOut();
-                    window.location.href = "login.html";
-                });
-            }
-        });
+<script type="module">
 
-        // تشغيل الساعة والتاريخ الحي
-        function initLiveClock() {
-            const updateClock = () => {
-                const now = new Date();
-                const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const dateStr = now.toLocaleDateString('fr-FR', optionsDate);
-                const timeStr = now.toTimeString().split(' ')[0];
+import supabase from "./assets/js/core/supabase.js";
 
-                const dateEl = document.getElementById("currentDate");
-                const timeEl = document.getElementById("currentTime");
 
-                if (dateEl) dateEl.innerText = dateStr;
-                if (timeEl) timeEl.innerText = timeStr;
-            };
+/* =========================================================
+   CONFIGURATION
+========================================================= */
 
-            updateClock();
-            setInterval(updateClock, 1000);
+const STOCK_TABLE = "stock";
+const IMPORT_TABLE = "historique_imports";
+
+const state = {
+
+    file: null,
+
+    rows: [],
+
+    normalizedRows: [],
+
+    imported: false
+
+};
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const $ = id => document.getElementById(id);
+
+const fileInput = $("fileInput");
+const dropZone = $("dropZone");
+const previewBody = $("previewBody");
+
+const importButton = $("importButton");
+const importButtonBottom = $("importButtonBottom");
+
+const clearPreview = $("clearPreview");
+const resetButton = $("resetButton");
+
+const progressSection = $("progressSection");
+const reportSection = $("reportSection");
+
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function normalize(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .trim()
+        .toUpperCase();
+
+}
+
+
+function numberValue(value) {
+
+    if (value === null || value === undefined || value === "") {
+        return 0;
+    }
+
+    if (typeof value === "number") {
+        return value;
+    }
+
+    let valueString = String(value)
+        .trim()
+        .replace(/\s/g, "")
+        .replace(",", ".");
+
+    const result = Number(valueString);
+
+    return Number.isFinite(result)
+        ? result
+        : 0;
+
+}
+
+
+function formatNumber(value) {
+
+    return Number(value || 0).toLocaleString(
+        "fr-FR",
+        {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        }
+    );
+
+}
+
+
+function formatFileSize(bytes) {
+
+    if (!bytes) return "0 KB";
+
+    const units = ["Bytes", "KB", "MB", "GB"];
+
+    const index = Math.floor(
+        Math.log(bytes) / Math.log(1024)
+    );
+
+    return (
+        bytes /
+        Math.pow(1024, index)
+    ).toFixed(2) +
+    " " +
+    units[index];
+
+}
+
+
+/* =========================================================
+   CONNECTION
+========================================================= */
+
+async function checkConnection() {
+
+    const status = $("connectionStatus");
+    const text = $("connectionText");
+
+    try {
+
+        const { error } = await supabase
+            .from(STOCK_TABLE)
+            .select("id")
+            .limit(1);
+
+        if (error) {
+            throw error;
         }
 
-        // التحقق من صلاحية المستخدم الحالي (Admin أم لا)
-        async function checkUserRoleAndPermissions() {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) return;
+        status.classList.add("connected");
 
-                // جلب بيانات الملف الشخصي للمستخدم لمعرفة دوره
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role, full_name, nom, prenom')
-                    .eq('id', user.id)
-                    .maybeSingle();
+        text.textContent =
+            "Base de données connectée";
 
-                if (profile) {
-                    const fullName = profile.full_name || `${profile.prenom || ''} ${profile.nom || ''}`.trim() || user.email;
-                    const role = (profile.role || '').toLowerCase();
+    } catch (error) {
 
-                    document.getElementById("sidebarUserName").textContent = fullName;
-                    
-                    // التحقق هل هو Admin
-                    if (role === 'admin' || role === 'administrateur') {
-                        isUserAdmin = true;
-                        document.getElementById("sidebarUserRole").textContent = "Administrateur";
-                    } else {
-                        isUserAdmin = false;
-                        document.getElementById("sidebarUserRole").textContent = "Utilisateur";
-                        
-                        // إخفاء خيار Remplacer تماماً إذا لم يكن أدمن
-                        const replaceContainer = document.getElementById("replaceOptionContainer");
-                        if (replaceContainer) {
-                            replaceContainer.classList.add("hidden");
-                        }
-                    }
+        console.error(error);
+
+        status.classList.add("error");
+
+        text.textContent =
+            "Erreur connexion";
+
+    }
+
+}
+
+
+/* =========================================================
+   FILE
+========================================================= */
+
+fileInput.addEventListener(
+    "change",
+    event => {
+
+        const file =
+            event.target.files?.[0];
+
+        if (file) {
+
+            processFile(file);
+
+        }
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add("dragover");
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "dragleave",
+    () => {
+
+        dropZone.classList.remove("dragover");
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove("dragover");
+
+        const file =
+            event.dataTransfer.files?.[0];
+
+        if (file) {
+
+            processFile(file);
+
+        }
+
+    }
+);
+
+
+dropZone.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target.closest(
+                ".btn-upload"
+            )
+        ) {
+
+            return;
+
+        }
+
+        fileInput.click();
+
+    }
+);
+
+
+/* =========================================================
+   READ EXCEL
+========================================================= */
+
+async function processFile(file) {
+
+    const validExtensions =
+        [".xlsx", ".xls", ".csv"];
+
+    const extension =
+        "." +
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+    if (!validExtensions.includes(extension)) {
+
+        alert(
+            "Format non supporté.\n" +
+            "Utilisez XLSX, XLS ou CSV."
+        );
+
+        return;
+
+    }
+
+
+    state.file = file;
+
+
+    $("fileInfoSection").style.display =
+        "block";
+
+    $("summarySection").style.display =
+        "block";
+
+
+    $("fileName").textContent =
+        file.name;
+
+    $("fileSize").textContent =
+        formatFileSize(file.size);
+
+
+    try {
+
+        const buffer =
+            await file.arrayBuffer();
+
+
+        const workbook =
+            XLSX.read(
+                buffer,
+                {
+                    type: "array",
+                    cellDates: true
                 }
-            } catch (err) {
-                console.error("Erreur vérification rôle:", err);
-            }
-        }
+            );
 
-        // ============================================================
-        // FORMAT EXCEL UTILISÉ
-        // A = Magasin
-        // B = Article
-        // C = Désignation article
-        // D = Lot
-        // E = À utilisation libre (Quantité)
-        // F = Unité quantité base
-        //
-        // G, H, I... = ignorées. Elles ne bloquent jamais l'import.
-        // ============================================================
 
-        function normalizeHeader(value) {
-            return String(value ?? '')
-                .trim()
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '');
-        }
+        const firstSheet =
+            workbook.SheetNames[0];
 
-        function parseQty(value) {
-            if (value === null || value === undefined || value === '') return 0;
-            if (typeof value === 'number') {
-                return Number.isFinite(value) ? value : 0;
-            }
+        $("sheetName").textContent =
+            firstSheet;
 
-            let s = String(value).trim().replace(/\s/g, '');
 
-            if (s.includes(',') && s.includes('.')) {
-                if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
-                    s = s.replace(/\./g, '').replace(',', '.');
-                } else {
-                    s = s.replace(/,/g, '');
+        const worksheet =
+            workbook.Sheets[firstSheet];
+
+
+        const rawRows =
+            XLSX.utils.sheet_to_json(
+                worksheet,
+                {
+                    defval: "",
+                    raw: false
                 }
-            } else if (s.includes(',')) {
-                s = s.replace(',', '.');
-            }
+            );
 
-            const n = Number(s);
-            return Number.isFinite(n) ? n : 0;
+
+        if (!rawRows.length) {
+
+            throw new Error(
+                "Le fichier ne contient aucune ligne."
+            );
+
         }
 
-        function cleanArticle(value) {
-            return String(value ?? '').trim().replace(/\.0$/, '');
+
+        state.rows =
+            rawRows;
+
+
+        state.normalizedRows =
+            rawRows
+                .map(normalizeStockRow)
+                .filter(row =>
+                    row.article ||
+                    row.lot
+                );
+
+
+        renderPreview();
+
+        updateSummary();
+
+        enableImport();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Impossible de lire le fichier Excel.\n\n" +
+            error.message
+        );
+
+        resetPage();
+
+    }
+
+}
+
+
+/* =========================================================
+   MAP EXCEL → STOCK
+========================================================= */
+
+function getValue(row, names) {
+
+    const keys =
+        Object.keys(row);
+
+    for (const wanted of names) {
+
+        const normalizedWanted =
+            normalize(wanted);
+
+        const key =
+            keys.find(k =>
+                normalize(k) ===
+                normalizedWanted
+            );
+
+        if (key !== undefined) {
+
+            return row[key];
+
         }
 
-        function cleanText(value, fallback = '') {
-            const v = String(value ?? '').trim();
-            return v || fallback;
+    }
+
+    return "";
+
+}
+
+
+function normalizeStockRow(row) {
+
+    const article =
+        getValue(
+            row,
+            [
+                "article",
+                "Article",
+                "Code article",
+                "Code Article",
+                "ARTICLE"
+            ]
+        );
+
+
+    const designation =
+        getValue(
+            row,
+            [
+                "designation_article",
+                "Designation article",
+                "Désignation article",
+                "Designation",
+                "Désignation",
+                "libelle"
+            ]
+        );
+
+
+    const magasin =
+        getValue(
+            row,
+            [
+                "magasin",
+                "Magasin",
+                "MAGASIN"
+            ]
+        );
+
+
+    const emplacement =
+        getValue(
+            row,
+            [
+                "emplacement",
+                "Emplacement",
+                "EMPLACEMENT"
+            ]
+        );
+
+
+    const lot =
+        getValue(
+            row,
+            [
+                "lot",
+                "Lot",
+                "LOT"
+            ]
+        );
+
+
+    const quantite =
+        getValue(
+            row,
+            [
+                "quantite",
+                "Quantite",
+                "Quantité",
+                "Qte",
+                "QTE",
+                "Quantité KG"
+            ]
+        );
+
+
+    const division =
+        getValue(
+            row,
+            [
+                "division",
+                "Division"
+            ]
+        );
+
+
+    const unite =
+        getValue(
+            row,
+            [
+                "unite",
+                "Unite",
+                "Unité"
+            ]
+        ) || "KG";
+
+
+    const typeArticle =
+        getValue(
+            row,
+            [
+                "type_article",
+                "Type article",
+                "Type"
+            ]
+        );
+
+
+    const groupeArticle =
+        getValue(
+            row,
+            [
+                "groupe_article",
+                "Groupe article",
+                "Groupe"
+            ]
+        );
+
+
+    const familleArticle =
+        getValue(
+            row,
+            [
+                "famille_article",
+                "Famille article"
+            ]
+        );
+
+
+    return {
+
+        division:
+            String(division || "").trim(),
+
+        magasin:
+            String(magasin || "").trim(),
+
+        emplacement:
+            String(emplacement || "").trim(),
+
+        article:
+            String(article || "").trim(),
+
+        designation_article:
+            String(designation || "").trim(),
+
+        lot:
+            String(lot || "").trim(),
+
+        quantite:
+            numberValue(quantite),
+
+        unite:
+            String(unite || "KG").trim(),
+
+        type_article:
+            String(typeArticle || "").trim(),
+
+        groupe_article:
+            String(groupeArticle || "").trim(),
+
+        famille_article:
+            String(familleArticle || "").trim(),
+
+        controle_qualite: 0,
+
+        stock_reserve: 0,
+
+        stock_disponible:
+            numberValue(quantite),
+
+        statut: "DISPONIBLE"
+
+    };
+
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+function renderPreview() {
+
+    if (!state.normalizedRows.length) {
+
+        previewBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="11"
+                    class="empty-table">
+
+                    <i class="fas fa-file-excel"></i>
+
+                    Aucune donnée valide
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    const maxRows = 300;
+
+
+    previewBody.innerHTML =
+        state.normalizedRows
+            .slice(0, maxRows)
+            .map(row => `
+
+                <tr>
+
+                    <td>
+                        ${escapeHtml(row.division)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.magasin)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.emplacement)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.article)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.designation_article)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.lot)}
+                    </td>
+
+                    <td>
+                        ${formatNumber(row.quantite)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.unite)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.type_article)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.groupe_article)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.famille_article)}
+                    </td>
+
+                </tr>
+
+            `)
+            .join("");
+
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+function updateSummary() {
+
+    const rows =
+        state.normalizedRows;
+
+
+    const articles =
+        new Set(
+            rows
+                .map(r => normalize(r.article))
+                .filter(Boolean)
+        );
+
+
+    const lots =
+        new Set(
+            rows
+                .map(r => normalize(r.lot))
+                .filter(Boolean)
+        );
+
+
+    const quantity =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                numberValue(row.quantite),
+            0
+        );
+
+
+    $("rowCount").textContent =
+        rows.length.toLocaleString("fr-FR");
+
+
+    $("summaryRows").textContent =
+        rows.length.toLocaleString("fr-FR");
+
+
+    $("summaryArticles").textContent =
+        articles.size.toLocaleString("fr-FR");
+
+
+    $("summaryLots").textContent =
+        lots.size.toLocaleString("fr-FR");
+
+
+    $("summaryQuantity").textContent =
+        formatNumber(quantity) +
+        " KG";
+
+
+    $("readyRows").textContent =
+        rows.length.toLocaleString("fr-FR");
+
+}
+
+
+/* =========================================================
+   MODE
+========================================================= */
+
+document
+    .querySelectorAll(
+        'input[name="importMode"]'
+    )
+    .forEach(input => {
+
+        input.addEventListener(
+            "change",
+            updateSelectedMode
+        );
+
+    });
+
+
+function updateSelectedMode() {
+
+    const selected =
+        document.querySelector(
+            'input[name="importMode"]:checked'
+        );
+
+
+    const labels = {
+
+        REMPLACER:
+            "REMPLACER",
+
+        MISE_A_JOUR:
+            "MISE À JOUR",
+
+        SYNCHRONISATION:
+            "SYNCHRONISATION"
+
+    };
+
+
+    $("selectedMode").textContent =
+        labels[selected?.value] ||
+        "-";
+
+}
+
+
+/* =========================================================
+   ENABLE BUTTON
+========================================================= */
+
+function enableImport() {
+
+    const enabled =
+        state.normalizedRows.length > 0;
+
+
+    importButton.disabled =
+        !enabled;
+
+    importButtonBottom.disabled =
+        !enabled;
+
+}
+
+
+/* =========================================================
+   IMPORT
+========================================================= */
+
+importButton.addEventListener(
+    "click",
+    executeImport
+);
+
+
+importButtonBottom.addEventListener(
+    "click",
+    executeImport
+);
+
+
+async function executeImport() {
+
+    if (
+        !state.normalizedRows.length
+    ) {
+
+        alert(
+            "Aucune donnée à importer."
+        );
+
+        return;
+
+    }
+
+
+    const mode =
+        document.querySelector(
+            'input[name="importMode"]:checked'
+        )?.value;
+
+
+    if (!mode) {
+
+        alert(
+            "Veuillez sélectionner un mode d'importation."
+        );
+
+        return;
+
+    }
+
+
+    let confirmation = true;
+
+
+    if (mode === "REMPLACER") {
+
+        confirmation =
+            confirm(
+                "ATTENTION !\n\n" +
+                "Le mode REMPLACER va supprimer " +
+                "le stock actuel avant l'importation.\n\n" +
+                "Voulez-vous continuer ?"
+            );
+
+    }
+
+
+    if (!confirmation) return;
+
+
+    disableButtons(true);
+
+    showProgress();
+
+    resetReport();
+
+
+    try {
+
+        const result =
+            await importDirectSupabase(
+                state.normalizedRows,
+                mode
+            );
+
+
+        showReport(result);
+
+        state.imported = true;
+
+
+        alert(
+            "Importation terminée avec succès."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "IMPORT ERROR:",
+            error
+        );
+
+
+        alert(
+            "Erreur pendant l'importation :\n\n" +
+            error.message
+        );
+
+    } finally {
+
+        disableButtons(false);
+
+        hideProgress();
+
+    }
+
+}
+
+
+/* =========================================================
+   DIRECT SUPABASE IMPORT
+========================================================= */
+
+async function importDirectSupabase(
+    rows,
+    mode
+) {
+
+    const startedAt =
+        Date.now();
+
+
+    let newCount = 0;
+    let updatedCount = 0;
+    let deletedCount = 0;
+    let sameCount = 0;
+
+
+    /* ==============================================
+       USER
+    ============================================== */
+
+    const {
+        data: {
+            user
+        }
+    } =
+        await supabase.auth.getUser();
+
+
+    if (!user) {
+
+        throw new Error(
+            "Utilisateur non authentifié."
+        );
+
+    }
+
+
+    /* ==============================================
+       IMPORT HISTORY
+    ============================================== */
+
+    const {
+        data: profile,
+        error: profileError
+    } =
+        await supabase
+            .from("user_profiles")
+            .select("id")
+            .eq("id", user.id)
+            .maybeSingle();
+
+
+    if (profileError) {
+
+        throw profileError;
+
+    }
+
+
+    /* ==============================================
+       REMPLACER
+    ============================================== */
+
+    if (mode === "REMPLACER") {
+
+        updateProgress(
+            5,
+            "Suppression du stock actuel..."
+        );
+
+
+        const {
+            error
+        } =
+            await supabase
+                .from(STOCK_TABLE)
+                .delete()
+                .neq(
+                    "id",
+                    0
+                );
+
+
+        if (error) {
+
+            throw error;
+
         }
 
-        function extractExcelRow(row) {
-            const keys = Object.keys(row);
 
-            // On ne lit que les 6 premières colonnes.
-            const getByIndex = (index) => {
-                const key = keys[index];
-                return key !== undefined ? row[key] : '';
-            };
+        deletedCount = 0;
 
-            const getByName = (names, index) => {
-                const normalizedNames = names.map(normalizeHeader);
+    }
 
-                for (const key of keys) {
-                    if (normalizedNames.includes(normalizeHeader(key))) {
-                        return row[key];
-                    }
-                }
 
-                return getByIndex(index);
-            };
+    /* ==============================================
+       EXISTING STOCK
+    ============================================== */
 
-            return {
-                magasin: cleanText(getByName(['Magasin'], 0)).toUpperCase(),
-                article: cleanArticle(getByName(['Article'], 1)),
-                designation_article: cleanText(
-                    getByName(['Désignation article', 'Designation article', 'designation_article'], 2),
-                    'SANS DESIGNATION'
-                ),
-                lot: cleanText(getByName(['Lot'], 3), 'STANDARD').toUpperCase(),
-                quantite: parseQty(
-                    getByName([
-                        'À utilisation libre',
-                        'A utilisation libre',
-                        'Quantité',
-                        'Quantite',
-                        'quantite'
-                    ], 4)
-                ),
-                unite: cleanText(
-                    getByName([
-                        'Unité quantité base',
-                        'Unite quantite base',
-                        'Unité',
-                        'Unite'
-                    ], 5),
-                    'KG'
-                ).toUpperCase()
-            };
+    let existing = [];
+
+
+    if (
+        mode === "MISE_A_JOUR" ||
+        mode === "SYNCHRONISATION"
+    ) {
+
+        updateProgress(
+            10,
+            "Lecture du stock actuel..."
+        );
+
+
+        const {
+            data,
+            error
+        } =
+            await supabase
+                .from(STOCK_TABLE)
+                .select(
+                    `
+                    id,
+                    division,
+                    magasin,
+                    emplacement,
+                    article,
+                    designation_article,
+                    lot,
+                    quantite,
+                    unite,
+                    type_article,
+                    groupe_article,
+                    famille_article,
+                    controle_qualite,
+                    stock_reserve,
+                    stock_disponible,
+                    statut
+                    `
+                );
+
+
+        if (error) {
+
+            throw error;
+
         }
 
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
 
-            document.getElementById("fileNameDisplay").textContent =
-                `Fichier sélectionné : ${file.name}`;
+        existing =
+            data || [];
 
-            const reader = new FileReader();
+    }
 
-            reader.onload = function(event) {
-                try {
-                    const data = new Uint8Array(event.target.result);
 
-                    const workbook = XLSX.read(data, {
-                        type: 'array',
-                        cellDates: false,
-                        raw: true
-                    });
+    /* ==============================================
+       INDEX
+    ============================================== */
 
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
+    const existingMap =
+        new Map();
 
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, {
-                        defval: "",
-                        raw: true
-                    });
 
-                    if (jsonRows.length === 0) {
-                        showCustomAlert("Erreur", "Le fichier Excel est vide.", "error");
-                        return;
-                    }
+    existing.forEach(row => {
 
-                    // Extraction A-F uniquement.
-                    // Toute colonne supplémentaire est ignorée.
-                    const validRows = jsonRows
-                        .map(extractExcelRow)
-                        .filter(row => {
-                            if (!row.article || !row.magasin) return false;
+        const key =
+            makeStockKey(row);
 
-                            if (row.article.toLowerCase().includes('total')) return false;
-                            if (row.magasin.toLowerCase().includes('total')) return false;
 
-                            // Une quantité négative ou invalide n'est pas importée.
-                            if (!Number.isFinite(row.quantite) || row.quantite < 0) return false;
+        existingMap.set(
+            key,
+            row
+        );
 
-                            return true;
-                        });
+    });
 
-                    if (validRows.length === 0) {
-                        showCustomAlert(
-                            "Attention",
-                            "Aucune ligne valide trouvée. Les colonnes obligatoires sont A = Magasin, B = Article et E = Quantité.",
-                            "warning"
+
+    const importKeys =
+        new Set();
+
+
+    /* ==============================================
+       PROCESS ROWS
+    ============================================== */
+
+    const total =
+        rows.length;
+
+
+    for (
+        let i = 0;
+        i < total;
+        i++
+    ) {
+
+        const row =
+            rows[i];
+
+
+        const key =
+            makeStockKey(row);
+
+
+        importKeys.add(key);
+
+
+        const old =
+            existingMap.get(key);
+
+
+        if (old) {
+
+            if (
+                rowsAreEqual(
+                    old,
+                    row
+                )
+            ) {
+
+                sameCount++;
+
+            } else {
+
+                const {
+                    error
+                } =
+                    await supabase
+                        .from(STOCK_TABLE)
+                        .update({
+
+                            division:
+                                row.division,
+
+                            magasin:
+                                row.magasin,
+
+                            emplacement:
+                                row.emplacement,
+
+                            article:
+                                row.article,
+
+                            designation_article:
+                                row.designation_article,
+
+                            lot:
+                                row.lot,
+
+                            quantite:
+                                row.quantite,
+
+                            unite:
+                                row.unite,
+
+                            type_article:
+                                row.type_article,
+
+                            groupe_article:
+                                row.groupe_article,
+
+                            famille_article:
+                                row.famille_article,
+
+                            stock_disponible:
+                                row.quantite,
+
+                            updated_at:
+                                new Date().toISOString()
+
+                        })
+                        .eq(
+                            "id",
+                            old.id
                         );
-                        return;
-                    }
 
-                    parsedExcelData = validRows;
 
-                    renderPreview(validRows.slice(0, 50));
-                    calculateAndDisplayStats(validRows);
+                if (error) {
 
-                    document.getElementById("importOptionsBox").classList.remove("hidden");
-                    document.getElementById("statsContainer").classList.remove("hidden");
-                    document.getElementById("rowCountBadge").textContent =
-                        `${validRows.length} lignes valides détectées`;
+                    throw error;
 
-                    if (!isUserAdmin) {
-                        const addStockRadio =
-                            document.querySelector('input[name="operationMode"][value="add_stock"]');
-
-                        if (addStockRadio) addStockRadio.checked = true;
-                    }
-
-                } catch (err) {
-                    console.error("Erreur lecture Excel:", err);
-                    showCustomAlert(
-                        "Erreur",
-                        "Erreur lors de la lecture du fichier Excel : " + (err.message || err),
-                        "error"
-                    );
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-
-        function calculateAndDisplayStats(rows) {
-            let totalQty = 0;
-            const articlesSet = new Set();
-            const lotsSet = new Set();
-
-            rows.forEach(row => {
-                totalQty += parseQty(row.quantite);
-
-                if (row.article) articlesSet.add(row.article);
-                if (row.lot) lotsSet.add(row.lot);
-            });
-
-            document.getElementById("statQty").textContent =
-                totalQty.toLocaleString('fr-FR', {
-                    minimumFractionDigits: 3,
-                    maximumFractionDigits: 3
-                });
-
-            document.getElementById("statLines").textContent =
-                rows.length.toLocaleString('fr-FR');
-
-            document.getElementById("statArticles").textContent =
-                articlesSet.size.toLocaleString('fr-FR');
-
-            document.getElementById("statLots").textContent =
-                lotsSet.size.toLocaleString('fr-FR');
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function renderPreview(rows) {
-            const tbody = document.getElementById("previewTableBody");
-            let html = "";
-
-            rows.forEach(row => {
-                const quantite = parseQty(row.quantite);
-
-                html += `
-                    <tr class="hover:bg-slate-800/35 transition">
-                        <td class="p-3 font-semibold text-slate-300">${escapeHtml(row.magasin)}</td>
-                        <td class="p-3 font-mono text-emerald-400 font-semibold">${escapeHtml(row.article)}</td>
-                        <td class="p-3 text-slate-300">${escapeHtml(row.designation_article)}</td>
-                        <td class="p-3 font-mono text-sky-400">${escapeHtml(row.lot)}</td>
-                        <td class="p-3 text-center font-bold text-slate-100">
-                            ${quantite.toLocaleString('fr-FR', {
-                                minimumFractionDigits: 3,
-                                maximumFractionDigits: 3
-                            })}
-                        </td>
-                        <td class="p-3 text-slate-400">${escapeHtml(row.unite)}</td>
-                        <td class="p-3 text-center text-amber-400 font-mono">—</td>
-                    </tr>
-                `;
-            });
-
-            tbody.innerHTML = html;
-        }
-
-        window.confirmOperation = function() {
-            if (parsedExcelData.length === 0) {
-                showCustomAlert("Attention", "Aucune donnée à traiter.", "warning");
-                return;
-            }
-
-            const opMode = document.querySelector('input[name="operationMode"]:checked').value;
-
-            // حماية إضافية من الواجهة البرمجية: منع غير الأدمن من اختيار replace
-            if (opMode === 'replace' && !isUserAdmin) {
-                showCustomAlert("Accès refusé", "Vous n'avez pas les privilèges Administrateur pour effectuer un remplacement total du stock.", "error");
-                return;
-            }
-
-            let message = "";
-            if (opMode === 'replace') {
-                message = "ATTENTION : Le mode 'Remplacer' va supprimer tout l'ancien stock et insérer le nouveau fichier à 100%. Continuer ?";
-            } else if (opMode === 'add_stock') {
-                message = "Voulez-vous procéder à l'ajout (entrée) des quantités de ce fichier Excel au stock existant ?";
-            }
-
-            const modal = document.getElementById("customModal");
-            document.getElementById("modalTitle").textContent = "Confirmation d'opération";
-            document.getElementById("modalMessage").textContent = message;
-            
-            const confirmBtn = document.getElementById("modalConfirmBtn");
-            const cancelBtn = document.getElementById("modalCancelBtn");
-
-            modal.classList.remove("hidden");
-
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-            const newCancelBtn = cancelBtn.cloneNode(true);
-            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-
-            newCancelBtn.addEventListener("click", () => {
-                modal.classList.add("hidden");
-            });
-
-            newConfirmBtn.addEventListener("click", () => {
-                modal.classList.add("hidden");
-                executeOperation(opMode);
-            });
-        }
-
-        function showCustomAlertFallback(message) {
-            // Fallback minimal si le modal HTML n'est pas présent.
-            window.alert(message);
-        }
-
-        function showCustomAlert(title, message, type = 'info') {
-            const modal = document.getElementById("customModal");
-            document.getElementById("modalTitle").textContent = title;
-            document.getElementById("modalMessage").textContent = message;
-            
-            if (iconContainer && type === 'error') {
-                iconContainer.className = "w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-2xl mb-4";
-                iconContainer.innerHTML = `<i class="fas fa-times-circle"></i>`;
-            } else if (iconContainer && type === 'warning') {
-                iconContainer.className = "w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl mb-4";
-                iconContainer.innerHTML = `<i class="fas fa-exclamation-triangle"></i>`;
-            } else if (iconContainer) {
-                iconContainer.className = "w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mb-4";
-                iconContainer.innerHTML = `<i class="fas fa-info-circle"></i>`;
-            }
-
-            if (cancelBtn) cancelBtn.classList.add("hidden");
-            confirmBtn.textContent = "OK";
-            
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-            modal.classList.remove("hidden");
-            newConfirmBtn.addEventListener("click", () => {
-                modal.classList.add("hidden");
-                if (cancelBtn) cancelBtn.classList.remove("hidden");
-                newConfirmBtn.textContent = "Confirmer";
-            });
-        }
-
-        async function executeOperation(opMode) {
-            const processBtn = document.getElementById("processBtn");
-
-            processBtn.disabled = true;
-            processBtn.innerHTML =
-                `<i class="fas fa-spinner fa-spin"></i> Traitement en cours...`;
-
-            try {
-
-                // ========================================================
-                // MODE REMPLACER
-                // ========================================================
-                if (opMode === 'replace') {
-                    if (!isUserAdmin) {
-                        throw new Error("Action non autorisée.");
-                    }
-
-                    const { error: deleteErr } = await supabase
-                        .from('stock')
-                        .delete()
-                        .neq('id', 0);
-
-                    if (deleteErr) throw deleteErr;
-
-                    const stockPayload = parsedExcelData.map(row => ({
-                        division: null,
-                        magasin: row.magasin,
-                        emplacement: null,
-                        article: row.article,
-                        designation_article: row.designation_article,
-                        lot: row.lot,
-                        quantite: row.quantite,
-                        unite: row.unite,
-                        type_article: null,
-                        groupe_article: null,
-                        famille_article: null,
-                        controle_qualite: 0,
-                        stock_reserve: 0,
-                        statut: 'DISPONIBLE',
-                        updated_at: new Date().toISOString()
-                    }));
-
-                    const batchSize = 500;
-
-                    for (let i = 0; i < stockPayload.length; i += batchSize) {
-                        const batch = stockPayload.slice(i, i + batchSize);
-
-                        const { error: upsertErr } = await supabase
-                            .from('stock')
-                            .upsert(batch, {
-                                onConflict: 'article,lot,magasin,emplacement'
-                            });
-
-                        if (upsertErr) throw upsertErr;
-                    }
                 }
 
-                // ========================================================
-                // MODE AJOUT / ENTREE STOCK
-                // ========================================================
-                else if (opMode === 'add_stock') {
 
-                    let lignesTraitees = 0;
-                    let lignesIgnorees = 0;
-                    let quantiteTotaleAjoutee = 0;
+                updatedCount++;
 
-                    for (const row of parsedExcelData) {
+            }
 
-                        const mag = row.magasin;
-                        const art = row.article;
-                        const lot = row.lot;
-                        const addQty = parseQty(row.quantite);
+        } else {
 
-                        // Les lignes invalides sont ignorées sans bloquer
-                        // les autres lignes du fichier.
-                        if (
-                            !mag ||
-                            !art ||
-                            !lot ||
-                            !Number.isFinite(addQty) ||
-                            addQty < 0
-                        ) {
-                            lignesIgnorees++;
-                            continue;
-                        }
+            const {
+                error
+            } =
+                await supabase
+                    .from(STOCK_TABLE)
+                    .insert({
 
-                        // Recherche uniquement du stock général
-                        // (emplacement NULL).
-                        const { data: existingRows, error: fetchErr } =
-                            await supabase
-                                .from('stock')
-                                .select('id, quantite')
-                                .eq('magasin', mag)
-                                .eq('article', art)
-                                .eq('lot', lot)
-                                .is('emplacement', null)
-                                .limit(1);
+                        division:
+                            row.division,
 
-                        if (fetchErr) throw fetchErr;
+                        magasin:
+                            row.magasin,
 
-                        const existing =
-                            existingRows && existingRows.length
-                                ? existingRows[0]
-                                : null;
+                        emplacement:
+                            row.emplacement,
 
-                        if (existing) {
+                        article:
+                            row.article,
 
-                            // IMPORTANT :
-                            // Ancienne quantité + nouvelle entrée.
-                            const oldQty = Number(existing.quantite) || 0;
-                            const newTotal = oldQty + addQty;
+                        designation_article:
+                            row.designation_article,
 
-                            const { error: updateErr } =
-                                await supabase
-                                    .from('stock')
-                                    .update({
-                                        quantite: newTotal,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('id', existing.id);
+                        lot:
+                            row.lot,
 
-                            if (updateErr) throw updateErr;
+                        quantite:
+                            row.quantite,
 
-                        } else {
+                        unite:
+                            row.unite,
 
-                            // Si le stock n'existe pas encore,
-                            // création d'une nouvelle ligne.
-                            const { error: insertErr } =
-                                await supabase
-                                    .from('stock')
-                                    .insert([{
-                                        division: null,
-                                        magasin: mag,
-                                        emplacement: null,
-                                        article: art,
-                                        designation_article: row.designation_article,
-                                        lot: lot,
-                                        quantite: addQty,
-                                        unite: row.unite || 'KG',
-                                        type_article: null,
-                                        groupe_article: null,
-                                        famille_article: null,
-                                        controle_qualite: 0,
-                                        stock_reserve: 0,
-                                        statut: 'DISPONIBLE',
-                                        updated_at: new Date().toISOString()
-                                    }]);
+                        type_article:
+                            row.type_article,
 
-                            if (insertErr) throw insertErr;
-                        }
+                        groupe_article:
+                            row.groupe_article,
 
-                        lignesTraitees++;
-                        quantiteTotaleAjoutee += addQty;
-                    }
+                        famille_article:
+                            row.famille_article,
 
-                    console.log("Entrée stock terminée :", {
-                        lignesTraitees,
-                        lignesIgnorees,
-                        quantiteTotaleAjoutee
+                        controle_qualite:
+                            0,
+
+                        stock_reserve:
+                            0,
+
+                        stock_disponible:
+                            row.quantite,
+
+                        statut:
+                            "DISPONIBLE"
+
                     });
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            newCount++;
+
+        }
+
+
+        const percent =
+            15 +
+            Math.round(
+                ((i + 1) / total) *
+                70
+            );
+
+
+        updateProgress(
+            percent,
+            `Traitement de la ligne ${i + 1} / ${total}`
+        );
+
+
+        /*
+         * Petite pause pour garder
+         * l'interface réactive.
+         */
+        if (
+            i % 25 === 0
+        ) {
+
+            await sleep(0);
+
+        }
+
+    }
+
+
+    /* ==============================================
+       SYNCHRONISATION
+    ============================================== */
+
+    if (
+        mode === "SYNCHRONISATION"
+    ) {
+
+        updateProgress(
+            88,
+            "Suppression des lignes absentes..."
+        );
+
+
+        for (
+            const old
+            of existing
+        ) {
+
+            const key =
+                makeStockKey(old);
+
+
+            if (
+                !importKeys.has(key)
+            ) {
+
+                const {
+                    error
+                } =
+                    await supabase
+                        .from(STOCK_TABLE)
+                        .delete()
+                        .eq(
+                            "id",
+                            old.id
+                        );
+
+
+                if (error) {
+
+                    throw error;
+
                 }
 
-                showCustomAlert(
-                    "Succès",
-                    "Opération et synchronisation par Excel effectuées avec succès !",
-                    "success"
-                );
 
-                setTimeout(() => window.location.reload(), 2000);
+                deletedCount++;
 
-            } catch (err) {
-                console.error("Erreur:", err);
-
-                showCustomAlert(
-                    "Erreur",
-                    "Erreur lors du traitement : " + (err.message || JSON.stringify(err)),
-                    "error"
-                );
-
-                processBtn.disabled = false;
-                processBtn.innerHTML =
-                    `<i class="fas fa-cloud-upload-alt"></i> Exécuter l'opération`;
             }
+
         }
-    </script>
+
+    }
+
+
+    /* ==============================================
+       HISTORIQUE
+    ============================================== */
+
+    updateProgress(
+        95,
+        "Enregistrement de l'historique..."
+    );
+
+
+    const duration =
+        Math.round(
+            (Date.now() - startedAt) /
+            1000
+        );
+
+
+    const totalQuantity =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                numberValue(
+                    row.quantite
+                ),
+            0
+        );
+
+
+    const articles =
+        new Set(
+            rows.map(
+                r =>
+                    normalize(
+                        r.article
+                    )
+            )
+        );
+
+
+    const lots =
+        new Set(
+            rows.map(
+                r =>
+                    normalize(
+                        r.lot
+                    )
+            )
+        );
+
+
+    const magasins =
+        new Set(
+            rows.map(
+                r =>
+                    normalize(
+                        r.magasin
+                    )
+            )
+        );
+
+
+    const historyData = {
+
+        type_import:
+            "STOCK",
+
+        mode_import:
+            mode,
+
+        nom_fichier:
+            state.file?.name ||
+            "import_stock.xlsx",
+
+        utilisateur:
+            profile?.id ||
+            user.id,
+
+        duree_import:
+            duration,
+
+        total_lignes:
+            rows.length,
+
+        nouvelles_lignes:
+            newCount,
+
+        lignes_modifiees:
+            updatedCount,
+
+        lignes_supprimees:
+            deletedCount,
+
+        lignes_inchangees:
+            sameCount,
+
+        total_articles:
+            articles.size,
+
+        total_lots:
+            lots.size,
+
+        total_magasins:
+            magasins.size,
+
+        total_quantite:
+            totalQuantity,
+
+        statut:
+            "SUCCESS",
+
+        message:
+            `Import direct Supabase - ${mode}`
+
+    };
+
+
+    const {
+        error:
+        historyError
+    } =
+        await supabase
+            .from(IMPORT_TABLE)
+            .insert(
+                historyData
+            );
+
+
+    if (historyError) {
+
+        console.warn(
+            "Historique import:",
+            historyError
+        );
+
+    }
+
+
+    updateProgress(
+        100,
+        "Importation terminée"
+    );
+
+
+    return {
+
+        newCount,
+
+        updatedCount,
+
+        deletedCount,
+
+        sameCount
+
+    };
+
+}
+
+
+/* =========================================================
+   STOCK KEY
+========================================================= */
+
+function makeStockKey(row) {
+
+    return [
+
+        normalize(row.division),
+
+        normalize(row.magasin),
+
+        normalize(row.emplacement),
+
+        normalize(row.article),
+
+        normalize(row.lot)
+
+    ].join("|");
+
+}
+
+
+/* =========================================================
+   COMPARE
+========================================================= */
+
+function rowsAreEqual(
+    old,
+    row
+) {
+
+    return (
+
+        normalize(old.division) ===
+        normalize(row.division)
+
+        &&
+
+        normalize(old.magasin) ===
+        normalize(row.magasin)
+
+        &&
+
+        normalize(old.emplacement) ===
+        normalize(row.emplacement)
+
+        &&
+
+        normalize(old.article) ===
+        normalize(row.article)
+
+        &&
+
+        normalize(old.designation_article) ===
+        normalize(row.designation_article)
+
+        &&
+
+        normalize(old.lot) ===
+        normalize(row.lot)
+
+        &&
+
+        Number(old.quantite || 0) ===
+        Number(row.quantite || 0)
+
+        &&
+
+        normalize(old.unite) ===
+        normalize(row.unite)
+
+        &&
+
+        normalize(old.type_article) ===
+        normalize(row.type_article)
+
+        &&
+
+        normalize(old.groupe_article) ===
+        normalize(row.groupe_article)
+
+        &&
+
+        normalize(old.famille_article) ===
+        normalize(row.famille_article)
+
+    );
+
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+function showProgress() {
+
+    progressSection.style.display =
+        "block";
+
+}
+
+
+function hideProgress() {
+
+    setTimeout(
+        () => {
+
+            progressSection.style.display =
+                "none";
+
+        },
+        800
+    );
+
+}
+
+
+function updateProgress(
+    percent,
+    text
+) {
+
+    $("progressPercent")
+        .textContent =
+        `${percent}%`;
+
+
+    $("progressBar")
+        .style.width =
+        `${percent}%`;
+
+
+    $("progressText")
+        .textContent =
+        text;
+
+
+    $("progressCount")
+        .textContent =
+        `${Math.round(percent)}%`;
+
+}
+
+
+/* =========================================================
+   REPORT
+========================================================= */
+
+function resetReport() {
+
+    reportSection.style.display =
+        "none";
+
+}
+
+
+function showReport(result) {
+
+    $("reportNew").textContent =
+        result.newCount;
+
+
+    $("reportUpdated").textContent =
+        result.updatedCount;
+
+
+    $("reportDeleted").textContent =
+        result.deletedCount;
+
+
+    $("reportSame").textContent =
+        result.sameCount;
+
+
+    reportSection.style.display =
+        "block";
+
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+function disableButtons(
+    disabled
+) {
+
+    importButton.disabled =
+        disabled ||
+        !state.normalizedRows.length;
+
+    importButtonBottom.disabled =
+        disabled ||
+        !state.normalizedRows.length;
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+clearPreview.addEventListener(
+    "click",
+    resetPage
+);
+
+
+resetButton.addEventListener(
+    "click",
+    resetPage
+);
+
+
+function resetPage() {
+
+    state.file = null;
+
+    state.rows = [];
+
+    state.normalizedRows = [];
+
+    state.imported = false;
+
+
+    fileInput.value = "";
+
+
+    $("fileInfoSection").style.display =
+        "none";
+
+
+    $("summarySection").style.display =
+        "none";
+
+
+    reportSection.style.display =
+        "none";
+
+
+    previewBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="11"
+                class="empty-table">
+
+                <i class="fas fa-file-excel"></i>
+
+                Aucune donnée à afficher
+
+            </td>
+
+        </tr>
+
+    `;
+
+
+    $("progressBar")
+        .style.width =
+        "0%";
+
+
+    $("progressPercent")
+        .textContent =
+        "0%";
+
+
+    $("progressText")
+        .textContent =
+        "Préparation...";
+
+
+    $("progressCount")
+        .textContent =
+        "0 / 0";
+
+
+    enableImport();
+
+}
+
+
+/* =========================================================
+   SLEEP
+========================================================= */
+
+function sleep(
+    ms
+) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+    );
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+$("mobileMenu")
+    ?.addEventListener(
+        "click",
+        () => {
+
+            $("sidebar")
+                ?.classList
+                .toggle("open");
+
+        }
+    );
+
+
+$("sidebarToggle")
+    ?.addEventListener(
+        "click",
+        () => {
+
+            $("sidebar")
+                ?.classList
+                .toggle("collapsed");
+
+        }
+    );
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+updateSelectedMode();
+
+checkConnection();
+
+</script>
+
 </body>
 </html>
