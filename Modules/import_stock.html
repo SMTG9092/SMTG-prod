@@ -1185,7 +1185,7 @@
                     </span>
 
                     <span id="apiStatusText">
-                        API non testée
+                        Supabase non testée
                     </span>
 
                 </div>
@@ -1248,7 +1248,7 @@
                         </div>
 
                         <h2>
-                            Prêt pour l'importation synchronisée API SMTG
+                            Prêt pour l'importation directe du stock
                         </h2>
 
                         <p>
@@ -1524,7 +1524,7 @@ let busy = false;
 
 /*
  * Progression visuelle de synchronisation.
- * Le serveur traite le POST en une seule requête, donc le navigateur
+ * Le Supabase traite les opérations en plusieurs lots, donc le navigateur
  * ne peut pas connaître le pourcentage SQL exact sans un système de job.
  * On affiche une progression par phases et on ne bloque plus à 80%.
  */
@@ -2413,7 +2413,7 @@ function normalizeStockRow(raw, rowIndex) {
 
         /*
          * Internal diagnostic information.
-         * Removed before API POST.
+         * Internal diagnostic only; not written to stock.
          */
         __quantity_source:
             quantityInfo.source,
@@ -3657,7 +3657,7 @@ function startProgressSimulation() {
 
     /*
      * Monte rapidement jusqu'à 80%, puis très doucement jusqu'à 96%.
-     * Le 100% est réservé à la réponse API réussie.
+     * Le 100% est réservé à la fin de l’opération Supabase.
      */
     progressValue = 8;
     setLoaderProgress(
@@ -3675,7 +3675,7 @@ function startProgressSimulation() {
 
                     setLoaderProgress(
                         progressValue,
-                        "Envoi des lignes vers l'API SMTG..."
+                        "Enregistrement direct dans Supabase..."
                     );
 
                 }
@@ -3851,136 +3851,70 @@ function updateClock() {
 
 
 /* ============================================================
-   EVENTS
+   EVENTS - SAFE BINDING
 ============================================================ */
 
-$("btnBrowse")
-    .addEventListener(
-        "click",
-        () =>
-            $("excelFile").click()
-    );
+function on(id, eventName, handler) {
 
+    const element = document.getElementById(id);
 
-$("dropZone")
-    .addEventListener(
-        "click",
-        () =>
-            $("excelFile").click()
-    );
+    if (!element) {
+        console.warn(`[SMTG IMPORT STOCK] Élément #${id} introuvable.`);
+        return false;
+    }
 
+    element.addEventListener(eventName, handler);
+    return true;
+}
 
-$("excelFile")
-    .addEventListener(
-        "change",
-        event => {
+function initImportStockEvents() {
 
-            const file =
-                event.target.files?.[0];
+    on("btnBrowse", "click", () => {
+        document.getElementById("excelFile")?.click();
+    });
 
-            handleFile(file);
+    on("dropZone", "click", (event) => {
+        if (event.target.closest("button, input, select, label")) return;
+        document.getElementById("excelFile")?.click();
+    });
+
+    on("excelFile", "change", event => {
+        const file = event.target?.files?.[0];
+        if (file) handleFile(file);
+    });
+
+    on("dropZone", "dragover", event => {
+        event.preventDefault();
+        document.getElementById("dropZone")?.classList.add("dragover");
+    });
+
+    on("dropZone", "dragleave", () => {
+        document.getElementById("dropZone")?.classList.remove("dragover");
+    });
+
+    on("dropZone", "drop", event => {
+        event.preventDefault();
+
+        document.getElementById("dropZone")?.classList.remove("dragover");
+
+        const file = event.dataTransfer?.files?.[0];
+
+        if (file) handleFile(file);
+    });
+
+    on("btnAnalyze", "click", analyzeFile);
+    on("btnSave", "click", saveToSupabase);
+    on("btnReset", "click", resetAll);
+    on("importMode", "change", updateMode);
+    on("modalOk", "click", hideModal);
+
+    on("modal", "click", event => {
+        const modal = document.getElementById("modal");
+        if (modal && event.target === modal) {
+            hideModal();
         }
-    );
-
-
-$("dropZone")
-    .addEventListener(
-        "dragover",
-        event => {
-
-            event.preventDefault();
-
-            $("dropZone")
-                .classList.add(
-                    "dragover"
-                );
-        }
-    );
-
-
-$("dropZone")
-    .addEventListener(
-        "dragleave",
-        () => {
-
-            $("dropZone")
-                .classList.remove(
-                    "dragover"
-                );
-        }
-    );
-
-
-$("dropZone")
-    .addEventListener(
-        "drop",
-        event => {
-
-            event.preventDefault();
-
-            $("dropZone")
-                .classList.remove(
-                    "dragover"
-                );
-
-            const file =
-                event.dataTransfer.files?.[0];
-
-            handleFile(file);
-        }
-    );
-
-
-$("btnAnalyze")
-    .addEventListener(
-        "click",
-        analyzeFile
-    );
-
-
-$("btnSave")
-    .addEventListener(
-        "click",
-        saveToSupabase
-    );
-
-
-$("btnReset")
-    .addEventListener(
-        "click",
-        resetAll
-    );
-
-
-$("importMode")
-    .addEventListener(
-        "change",
-        updateMode
-    );
-
-
-$("modalOk")
-    .addEventListener(
-        "click",
-        hideModal
-    );
-
-
-$("modal")
-    .addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target ===
-                $("modal")
-            ) {
-
-                hideModal();
-            }
-        }
-    );
-
+    });
+}
 
 /* ============================================================
    PUBLIC DEBUG
@@ -4018,27 +3952,36 @@ window.SMTGImportStock = {
    INIT
 ============================================================ */
 
-updateClock();
+function initImportStockPage() {
 
-setInterval(
-    updateClock,
-    1000
-);
+    initImportStockEvents();
 
-updateMode();
+    updateClock();
 
-checkSupabase();
+    setInterval(updateClock, 1000);
 
+    updateMode();
 
-console.log(
-    "[SMTG IMPORT STOCK] SOURCE:",
-    "Supabase direct / stock"
-);
+    checkSupabase();
 
-console.log(
-    "[SMTG IMPORT STOCK] Mode:",
-    $("importMode").value
-);
+    console.log(
+        "[SMTG IMPORT STOCK] SOURCE:",
+        "Supabase direct / stock"
+    );
+
+    const mode = document.getElementById("importMode");
+
+    console.log(
+        "[SMTG IMPORT STOCK] Mode:",
+        mode?.value || "MISE_A_JOUR"
+    );
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initImportStockPage, { once: true });
+} else {
+    initImportStockPage();
+}
 
 </script>
 
