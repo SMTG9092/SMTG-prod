@@ -1039,7 +1039,7 @@
                     Analyser le fichier
 
                 </button>
-<button class="btn btn-save" disabled="" id="btnSave" type="button">
+<button class="btn btn-save" disabled="" id="btnSave" title="Insérer les lignes analysées directement dans Supabase" type="button">
 <i class="fa-solid fa-cloud-arrow-up"></i>
 
                     Enregistrer &amp; Synchroniser
@@ -3018,7 +3018,7 @@ async function saveToSupabase() {
         `Mode : ${modeLabel}\n` +
         `Lignes : ${rows.length}\n` +
         `Quantité totale : ${formatNumber(totalQuantity)}\n\n` +
-        `Les données seront enregistrées directement dans Supabase.`
+        `Les données seront insérées directement dans la table stock de Supabase.`
     );
 
     if (!confirmed) return;
@@ -3138,7 +3138,7 @@ async function saveToSupabase() {
 
         showModal(
             "Import terminé",
-            `Enregistrement direct Supabase terminé avec succès.\n\n` +
+            `Insertion directe dans la base de données terminée avec succès.\n\n` +
             `Mode : ${modeLabel}\n` +
             `Lignes fichier : ${rows.length}\n` +
             `Quantité : ${formatNumber(totalQuantity)}\n` +
