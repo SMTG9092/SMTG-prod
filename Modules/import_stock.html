@@ -1199,7 +1199,7 @@
              MAIN
         ================================================== -->
 
-        <main class="main">
+        <div class="main">
 
             <div class="main-top">
 
@@ -1414,7 +1414,7 @@
 
             </div>
 
-        </main>
+        </div>
 
     </div>
 
@@ -3822,6 +3822,10 @@ function updateClock() {
 
     const now =
         new Date();
+
+    const dateEl = $("currentDate");
+    const timeEl = $("currentTime");
+    if (!dateEl || !timeEl) return;
 
 
     $("currentDate")
