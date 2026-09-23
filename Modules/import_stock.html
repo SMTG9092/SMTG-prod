@@ -1,7 +1,24 @@
-<!-- SMTG IMPORT STOCK - SPA VERSION -->
-<main id="import-stock-page" class="import-stock-page">
-<style>
+<!DOCTYPE html>
+<html lang="fr" class="dark">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Import Stock - SMTG WMS</title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+    <!-- SheetJS -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
+
+    <style>
         * {
             box-sizing: border-box;
         }
@@ -155,13 +172,11 @@
         .sidebar {
             width: 345px;
             min-width: 345px;
-            box-sizing: border-box;
             padding: 18px 12px 10px 8px;
             display: flex;
             flex-direction: column;
             gap: 14px;
             overflow-y: auto;
-            overflow-x: hidden;
             border-right: 1px solid #1b2139;
         }
 
@@ -346,25 +361,23 @@
         }
 
         .actions {
-            margin-top: 12px;
+            margin-top: auto;
             padding: 10px 0 8px;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            flex: 0 0 auto;
             position: sticky;
             bottom: 0;
-            z-index: 20;
-            background: linear-gradient(to bottom, rgba(6,8,23,.15), #060817 18%);
+            z-index: 50;
+            background: linear-gradient(180deg, rgba(6,8,23,.35) 0%, #060817 28%, #060817 100%);
         }
 
         .actions .btn {
-            flex: 0 0 40px;
+            flex: 0 0 auto;
             min-height: 40px;
-            visibility: visible !important;
         }
 
-        .actions #btnSave {
+        #btnSave {
             display: flex !important;
         }
 
@@ -921,330 +934,587 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
-    
-/* ============================================================
-   SPA / DASHBOARD HOST
-============================================================ */
-.import-stock-page {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: #060817;
-    color: #e8edf7;
-}
-.import-stock-page .body {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    height: auto;
-    margin: 0;
-}
-.import-stock-page .main {
-    min-height: 0;
-}
-.import-stock-page .sidebar {
-    min-height: 0;
-}
+    </style>
+</head>
 
-</style>
-<div class="body">
-<!-- =================================================
+<body>
+
+<div class="page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <i class="fa-solid fa-cubes"></i>
+            </div>
+
+            <div>
+                <div class="brand-title">
+                    SMTG
+                </div>
+
+                <div class="brand-subtitle">
+                    Traçabilité globale
+                </div>
+            </div>
+
+        </div>
+
+        <div class="clock-box">
+
+            <div
+                id="currentDate"
+                class="clock-date">
+                -
+            </div>
+
+            <div
+                id="currentTime"
+                class="clock-time">
+                -
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         BODY
+    ====================================================== -->
+
+    <div class="body">
+
+        <!-- =================================================
              SIDEBAR
         ================================================== -->
-<aside class="sidebar">
-<div class="panel-title">
-<strong>
-<i class="fa-solid fa-file-arrow-up" style="color:#10d69a;margin-right:5px">
-</i>
+
+        <aside class="sidebar">
+
+            <div class="panel-title">
+
+                <strong>
+                    <i class="fa-solid fa-file-arrow-up"
+                       style="color:#10d69a;margin-right:5px">
+                    </i>
                     Panneau d'importation
                 </strong>
-<button class="reset-link" id="btnReset" type="button">
+
+                <button
+                    id="btnReset"
+                    class="reset-link"
+                    type="button">
                     Tout réinitialiser
                 </button>
-</div>
-<!-- =================================================
+
+            </div>
+
+
+            <!-- =================================================
                  FILE STOCK
             ================================================== -->
-<div class="file-card" id="fileCard">
-<input accept=".xlsx,.xls,.csv" class="hidden" id="excelFile" type="file"/>
-<div class="file-head">
-<div class="file-title">
-<div class="file-icon">
-<i class="fa-solid fa-file-excel"></i>
-</div>
-<div>
-<strong>
+
+            <div
+                id="fileCard"
+                class="file-card">
+
+                <input
+                    type="file"
+                    id="excelFile"
+                    class="hidden"
+                    accept=".xlsx,.xls,.csv">
+
+                <div class="file-head">
+
+                    <div class="file-title">
+
+                        <div class="file-icon">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </div>
+
+                        <div>
+                            <strong>
                                 Fichier Stock
                             </strong>
-<span>
+
+                            <span>
                                 Fichier SAP Stock
                             </span>
-</div>
-</div>
-<span class="badge" id="fileBadge">
+                        </div>
+
+                    </div>
+
+                    <span
+                        id="fileBadge"
+                        class="badge">
                         En attente
                     </span>
-</div>
-<div class="drop-zone" id="dropZone">
-<div>
-<div class="file-name hidden" id="fileName">
-</div>
-<div id="dropText" style="
+
+                </div>
+
+
+                <div
+                    id="dropZone"
+                    class="drop-zone">
+
+                    <div>
+
+                        <div
+                            id="fileName"
+                            class="file-name hidden">
+                        </div>
+
+                        <div
+                            id="dropText"
+                            style="
                                 color:#cfd7e7;
                                 font-size:9px;
                                 font-weight:700;
                             ">
                             Sélectionner le fichier Stock
                         </div>
-</div>
-</div>
-<button class="browse-btn" id="btnBrowse" type="button">
-<i class="fa-solid fa-folder-open"></i>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="btnBrowse"
+                    class="browse-btn"
+                    type="button">
+
+                    <i class="fa-solid fa-folder-open"></i>
                     Parcourir Stock
 
                 </button>
-</div>
-<!-- =================================================
+
+            </div>
+
+
+            <!-- =================================================
                  MODE
             ================================================== -->
-<div class="file-card">
-<div class="file-head">
-<div class="file-title">
-<div class="file-icon">
-<i class="fa-solid fa-database"></i>
-</div>
-<div>
-<strong>
+
+            <div class="file-card">
+
+                <div class="file-head">
+
+                    <div class="file-title">
+
+                        <div class="file-icon">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+
+                        <div>
+                            <strong>
                                 Mode d'import
                             </strong>
-<span>
+
+                            <span>
                                 Mise à jour et ajout des lignes
                             </span>
-</div>
-</div>
-</div>
-<div class="mode-description" style="margin-top:12px">
-<strong id="modeLabel">
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="mode-description"
+                    style="margin-top:12px">
+
+                    <strong id="modeLabel">
                         Mise à jour
                     </strong>
-<span id="modeDescription">
+
+                    <span id="modeDescription">
                         Met à jour et ajoute les lignes
                     </span>
-</div>
-<select id="importMode">
-<option value="MISE_A_JOUR">
+
+                </div>
+
+                <select id="importMode">
+
+                    <option value="MISE_A_JOUR">
                         Mise à jour
                     </option>
-<option value="REMPLACER">
+
+                    <option value="REMPLACER">
                         Remplacer
                     </option>
-<option value="SYNCHRONISATION">
+
+                    <option value="SYNCHRONISATION">
                         Synchronisation
                     </option>
-</select>
-</div>
-<!-- =================================================
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
                  ACTIONS
             ================================================== -->
-<div class="actions">
-<button class="btn btn-analyze" disabled="" id="btnAnalyze" type="button">
-<i class="fa-solid fa-magnifying-glass-chart"></i>
+
+            <div class="actions">
+
+                <button
+                    id="btnAnalyze"
+                    class="btn btn-analyze"
+                    type="button"
+                    disabled>
+
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
 
                     Analyser le fichier
 
                 </button>
-<button class="btn btn-save" disabled="" id="btnSave" title="Insérer les lignes analysées directement dans Supabase" type="button">
-<i class="fa-solid fa-cloud-arrow-up"></i>
 
-                    Enregistrer &amp; Synchroniser
+
+                <button
+                    id="btnSave"
+                    class="btn btn-save"
+                    type="button"
+                    disabled>
+
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                    Enregistrer & Synchroniser
 
                 </button>
-<div class="api-status">
-<span class="api-dot" id="apiDot">
-</span>
-<span id="apiStatusText">
+
+
+                <div class="api-status">
+
+                    <span
+                        id="apiDot"
+                        class="api-dot">
+                    </span>
+
+                    <span id="apiStatusText">
                         Supabase non testée
                     </span>
-</div>
-</div>
-</aside>
-<!-- =================================================
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =================================================
              MAIN
         ================================================== -->
-<main class="main">
-<div class="main-top">
-<div class="main-title">
-<div>
-<h1>
+
+        <main class="main">
+
+            <div class="main-top">
+
+                <div class="main-title">
+
+                    <div>
+
+                        <h1>
                             Import Stock
                         </h1>
-<p>
+
+                        <p>
                             Importation du stock SAP et enregistrement direct dans Supabase.
                         </p>
-</div>
-<div class="main-status">
+
+                    </div>
+
+                    <div class="main-status">
 
                         Mode :
                         <strong id="mainModeLabel">
                             Mise à jour
                         </strong>
-</div>
-</div>
-</div>
-<div class="content">
-<!-- =================================================
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="content">
+
+                <!-- =================================================
                      EMPTY
                 ================================================== -->
-<section class="empty-state" id="emptyState">
-<div class="empty-inner">
-<div class="empty-icon">
-<i class="fa-solid fa-database"></i>
-</div>
-<h2>
+
+                <section
+                    id="emptyState"
+                    class="empty-state">
+
+                    <div class="empty-inner">
+
+                        <div class="empty-icon">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+
+                        <h2>
                             Prêt pour l'importation directe du stock
                         </h2>
-<p>
+
+                        <p>
                             Importez votre fichier Stock SAP pour analyser,
-                            contrôler et envoyer les données au serveur SMTG.
+                            contrôler et enregistrer les données directement dans Supabase.
                         </p>
-</div>
-</section>
-<!-- =================================================
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
                      RESULT
                 ================================================== -->
-<section class="result" id="resultSection">
-<div class="result-header">
-<strong>
+
+                <section
+                    id="resultSection"
+                    class="result">
+
+                    <div class="result-header">
+
+                        <strong>
                             Résultat de l'analyse
                         </strong>
-<span id="analysisMessage">
+
+                        <span id="analysisMessage">
                             Fichier prêt
                         </span>
-</div>
-<div class="stats">
-<div class="stat green">
-<small>
+
+                    </div>
+
+
+                    <div class="stats">
+
+                        <div class="stat green">
+
+                            <small>
                                 Lignes valides
                             </small>
-<strong id="statRows">
+
+                            <strong id="statRows">
                                 0
                             </strong>
-</div>
-<div class="stat blue">
-<small>
+
+                        </div>
+
+
+                        <div class="stat blue">
+
+                            <small>
                                 Articles
                             </small>
-<strong id="statArticles">
+
+                            <strong id="statArticles">
                                 0
                             </strong>
-</div>
-<div class="stat yellow">
-<small>
+
+                        </div>
+
+
+                        <div class="stat yellow">
+
+                            <small>
                                 Magasins
                             </small>
-<strong id="statMagasins">
+
+                            <strong id="statMagasins">
                                 0
                             </strong>
-</div>
-<div class="stat green">
-<small>
+
+                        </div>
+
+
+                        <div class="stat green">
+
+                            <small>
                                 Quantité totale
                             </small>
-<strong id="statQuantity">
+
+                            <strong id="statQuantity">
                                 0
                             </strong>
-</div>
-</div>
-<div class="table-card">
-<div class="table-head">
-<strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-card">
+
+                        <div class="table-head">
+
+                            <strong>
                                 Prévisualisation du stock
                             </strong>
-<span id="tableCount">
+
+                            <span id="tableCount">
                                 0 ligne
                             </span>
-</div>
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>
+
+                        </div>
+
+
+                        <div class="table-wrap">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
                                             Article
                                         </th>
-<th>
+
+                                        <th>
                                             Désignation
                                         </th>
-<th>
+
+                                        <th>
                                             Lot
                                         </th>
-<th>
+
+                                        <th>
                                             Magasin
                                         </th>
-<th>
+
+                                        <th>
                                             Emplacement
                                         </th>
-<th style="text-align:right">
+
+                                        <th style="text-align:right">
                                             Quantité
                                         </th>
-<th>
+
+                                        <th>
                                             Unité
                                         </th>
-<th style="text-align:right">
+
+                                        <th style="text-align:right">
                                             Disponible
                                         </th>
-<th>
+
+                                        <th>
                                             Statut
                                         </th>
-</tr>
-</thead>
-<tbody id="previewBody">
-</tbody>
-</table>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="previewBody">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
 </div>
-</div>
-</section>
-</div>
-</main>
-</div>
-<div class="overlay" id="loader">
-<div class="loader-box">
-<div class="spinner"></div>
-<strong id="loaderTitle">
+
+
+<!-- ============================================================
+     LOADER
+============================================================= -->
+
+<div
+    id="loader"
+    class="overlay">
+
+    <div class="loader-box">
+
+        <div class="spinner"></div>
+
+        <strong id="loaderTitle">
             Analyse
         </strong>
-<div class="sync-progress">
-<div class="sync-progress-bar" id="syncProgressBar">
-</div>
-</div>
-<div class="sync-progress-percent" id="syncProgressPercent">
+
+        <div class="sync-progress">
+            <div
+                id="syncProgressBar"
+                class="sync-progress-bar">
+            </div>
+        </div>
+
+        <div
+            id="syncProgressPercent"
+            class="sync-progress-percent">
             0%
         </div>
-<p id="loaderMessage">
+
+        <p id="loaderMessage">
             Traitement...
         </p>
+
+    </div>
+
 </div>
-</div>
-<div class="overlay" id="modal">
-<div class="modal-box">
-<div class="modal-icon" id="modalIcon">
-<i class="fa-solid fa-check" id="modalIconSymbol">
-</i>
-</div>
-<h3 id="modalTitle">
+
+
+<!-- ============================================================
+     MODAL
+============================================================= -->
+
+<div
+    id="modal"
+    class="overlay">
+
+    <div class="modal-box">
+
+        <div
+            id="modalIcon"
+            class="modal-icon">
+
+            <i
+                id="modalIconSymbol"
+                class="fa-solid fa-check">
+            </i>
+
+        </div>
+
+        <h3 id="modalTitle">
             Information
         </h3>
-<div class="modal-message" id="modalMessage">
-</div>
-<button class="modal-btn" id="modalOk" type="button">
+
+        <div
+            id="modalMessage"
+            class="modal-message">
+        </div>
+
+        <button
+            id="modalOk"
+            class="modal-btn"
+            type="button">
             ✓ OK, Compris
         </button>
-</div>
-</div>
-<script type="module">
 
+    </div>
+
+</div>
+
+
+<script type="module">
 "use strict";
 
 import supabase from "./assets/js/core/supabase.js";
@@ -2227,205 +2497,119 @@ function validateRows(inputRows) {
 
 
 /* ============================================================
-   SHEETJS LOADER - IMPORTANT FOR SPA
-   The dashboard injects this page with innerHTML, so <script src>
-   tags from this page are not executed. Load SheetJS dynamically.
+   SHEETJS READ
 ============================================================ */
-
-function loadScriptOnce(src) {
-
-    return new Promise((resolve, reject) => {
-
-        const existing =
-            document.querySelector(`script[data-smtg-sheetjs="${src}"]`);
-
-        if (existing) {
-            if (typeof XLSX !== "undefined") {
-                resolve();
-                return;
-            }
-
-            existing.addEventListener("load", () => resolve(), { once: true });
-            existing.addEventListener("error", () => reject(new Error(`Impossible de charger ${src}`)), { once: true });
-            return;
-        }
-
-        const script = document.createElement("script");
-        script.src = src;
-        script.async = true;
-        script.dataset.smtgSheetjs = src;
-
-        script.onload = () => {
-            if (typeof XLSX !== "undefined") {
-                resolve();
-            } else {
-                reject(new Error("SheetJS chargé mais XLSX reste indisponible."));
-            }
-        };
-
-        script.onerror = () => {
-            reject(new Error(`Impossible de charger SheetJS depuis ${src}`));
-        };
-
-        document.head.appendChild(script);
-    });
-}
 
 async function ensureSheetJS() {
 
-    if (typeof XLSX !== "undefined") {
-        return;
+    if (window.XLSX && typeof window.XLSX.read === "function") {
+        return window.XLSX;
     }
 
-    if (window.__SMTGSheetJSPromise) {
-        return window.__SMTGSheetJSPromise;
+    if (window.__SMTG_SHEETJS_PROMISE) {
+        return window.__SMTG_SHEETJS_PROMISE;
     }
 
-    const urls = [
-        "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js",
+    const sources = [
+        "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
         "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
     ];
 
-    window.__SMTGSheetJSPromise = (async () => {
-
-        let lastError = null;
-
-        for (const url of urls) {
+    window.__SMTG_SHEETJS_PROMISE = (async () => {
+        for (const src of sources) {
             try {
-                console.log("[SMTG IMPORT STOCK] Chargement SheetJS:", url);
-                await loadScriptOnce(url);
-                console.log("[SMTG IMPORT STOCK] SheetJS chargé avec succès.");
-                return;
-            } catch (error) {
-                lastError = error;
-                console.warn("[SMTG IMPORT STOCK] Échec SheetJS:", error);
+                await new Promise((resolve, reject) => {
+                    const existing = document.querySelector(`script[data-smtg-sheetjs="${src}"]`);
+                    if (existing) {
+                        if (window.XLSX) return resolve();
+                        existing.addEventListener("load", resolve, { once: true });
+                        existing.addEventListener("error", () => reject(new Error("SheetJS load failed")), { once: true });
+                        return;
+                    }
+
+                    const script = document.createElement("script");
+                    script.src = src;
+                    script.async = true;
+                    script.dataset.smtgSheetjs = src;
+                    script.onload = () => resolve();
+                    script.onerror = () => reject(new Error(`Impossible de charger SheetJS depuis ${src}`));
+                    document.head.appendChild(script);
+                });
+
+                if (window.XLSX && typeof window.XLSX.read === "function") {
+                    console.log("[SMTG IMPORT STOCK] SheetJS chargé:", src);
+                    return window.XLSX;
+                }
+            } catch (err) {
+                console.warn("[SMTG IMPORT STOCK] Échec SheetJS:", src, err);
             }
         }
 
-        throw lastError || new Error("SheetJS (XLSX) n'est pas chargé.");
+        throw new Error("SheetJS (XLSX) n'est pas chargé. Vérifiez la connexion Internet ou le chargement du CDN.");
     })();
 
     try {
-        await window.__SMTGSheetJSPromise;
+        return await window.__SMTG_SHEETJS_PROMISE;
     } catch (error) {
-        window.__SMTGSheetJSPromise = null;
+        window.__SMTG_SHEETJS_PROMISE = null;
         throw error;
     }
 }
 
-/* ============================================================
-   SHEETJS READ
-============================================================ */
-
 async function readFile(file) {
 
-    await ensureSheetJS();
+    const XLSXLib = await ensureSheetJS();
 
-    if (
-        typeof XLSX ===
-        "undefined"
-    ) {
+    const buffer = await file.arrayBuffer();
 
-        throw new Error(
-            "SheetJS (XLSX) n'est pas chargé. Vérifiez la connexion réseau ou chargez SheetJS dans dashboard.html."
-        );
+    const workbook = XLSXLib.read(
+        buffer,
+        {
+            type: "array",
+            cellDates: false,
+            raw: true
+        }
+    );
+
+    if (!workbook.SheetNames || !workbook.SheetNames.length) {
+        throw new Error("Aucune feuille Excel trouvée.");
     }
 
-    const buffer =
-        await file.arrayBuffer();
+    let sheetName = workbook.SheetNames[0];
 
-    const workbook =
-        XLSX.read(
-            buffer,
-            {
-                type: "array",
-                cellDates: false,
-                raw: true
-            }
-        );
+    for (const name of workbook.SheetNames) {
+        const sheet = workbook.Sheets[name];
+        const range = XLSXLib.utils.decode_range(sheet["!ref"] || "A1");
 
-    if (
-        !workbook.SheetNames ||
-        !workbook.SheetNames.length
-    ) {
-
-        throw new Error(
-            "Aucune feuille Excel trouvée."
-        );
-    }
-
-    /*
-     * First non-empty sheet.
-     */
-    let sheetName =
-        workbook.SheetNames[0];
-
-    for (
-        const name
-        of workbook.SheetNames
-    ) {
-
-        const sheet =
-            workbook.Sheets[name];
-
-        const range =
-            XLSX.utils.decode_range(
-                sheet["!ref"] || "A1"
-            );
-
-        if (
-            range.e.r >=
-            range.s.r
-        ) {
-
-            sheetName =
-                name;
-
+        if (range.e.r >= range.s.r) {
+            sheetName = name;
             break;
         }
     }
 
-    const sheet =
-        workbook.Sheets[
-            sheetName
-        ];
+    const sheet = workbook.Sheets[sheetName];
 
     if (!sheet) {
-
-        throw new Error(
-            "Impossible de lire la feuille Excel."
-        );
+        throw new Error("Impossible de lire la feuille Excel.");
     }
 
-    const rawRows =
-        XLSX.utils.sheet_to_json(
-            sheet,
-            {
-                defval: "",
-                raw: true,
-                blankrows: false
-            }
-        );
-
-    /*
-     * Debug information.
-     */
-    const first =
-        rawRows[0] || {};
-
-    console.log(
-        "[SMTG IMPORT STOCK] Feuille:",
-        sheetName
+    const rawRows = XLSXLib.utils.sheet_to_json(
+        sheet,
+        {
+            defval: "",
+            raw: true,
+            blankrows: false
+        }
     );
 
-    console.log(
-        "[SMTG IMPORT STOCK] Colonnes détectées:",
-        Object.keys(first)
-    );
+    const first = rawRows[0] || {};
+
+    console.log("[SMTG IMPORT STOCK] Feuille:", sheetName);
+    console.log("[SMTG IMPORT STOCK] Colonnes détectées:", Object.keys(first));
+    console.log("[SMTG IMPORT STOCK] Lignes Excel:", rawRows.length);
 
     return rawRows;
 }
-
 
 /* ============================================================
    FORMAT
@@ -3035,7 +3219,7 @@ async function saveToSupabase() {
         `Mode : ${modeLabel}\n` +
         `Lignes : ${rows.length}\n` +
         `Quantité totale : ${formatNumber(totalQuantity)}\n\n` +
-        `Les données seront insérées directement dans la table stock de Supabase.`
+        `Les données seront enregistrées directement dans Supabase.`
     );
 
     if (!confirmed) return;
@@ -3155,7 +3339,7 @@ async function saveToSupabase() {
 
         showModal(
             "Import terminé",
-            `Insertion directe dans la base de données terminée avec succès.\n\n` +
+            `Enregistrement direct Supabase terminé avec succès.\n\n` +
             `Mode : ${modeLabel}\n` +
             `Lignes fichier : ${rows.length}\n` +
             `Quantité : ${formatNumber(totalQuantity)}\n` +
@@ -3651,27 +3835,34 @@ function hideModal() {
 ============================================================ */
 
 function updateClock() {
-    const now = new Date();
 
-    const dateEl = document.getElementById("currentDate");
-    const timeEl = document.getElementById("currentTime");
+    const now =
+        new Date();
 
-    if (dateEl) {
-        dateEl.textContent = now.toLocaleDateString("fr-FR", {
-            weekday: "short",
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
-    }
 
-    if (timeEl) {
-        timeEl.textContent = now.toLocaleTimeString("fr-FR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-        });
-    }
+    $("currentDate")
+        .textContent =
+        now.toLocaleDateString(
+            "fr-FR",
+            {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+
+    $("currentTime")
+        .textContent =
+        now.toLocaleTimeString(
+            "fr-FR",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
 }
 
 
@@ -3783,10 +3974,7 @@ function initImportStockPage() {
 
     updateClock();
 
-    if (window.__SMTGImportStockClockTimer) {
-        clearInterval(window.__SMTGImportStockClockTimer);
-    }
-    window.__SMTGImportStockClockTimer = setInterval(updateClock, 1000);
+    setInterval(updateClock, 1000);
 
     updateMode();
 
@@ -3811,6 +3999,7 @@ if (document.readyState === "loading") {
     initImportStockPage();
 }
 
-
 </script>
-</main>
+
+</body>
+</html>
