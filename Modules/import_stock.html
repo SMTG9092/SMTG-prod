@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Import Stock - SMTG WMS</title>
+    <link rel="icon" href="data:,">
 
     <!-- Font Awesome -->
     <link
@@ -3968,35 +3969,78 @@ window.SMTGImportStock = {
    INIT
 ============================================================ */
 
-function initImportStockPage() {
+let smtgImportStockInitialized = false;
+let smtgImportStockClockStarted = false;
 
-    initImportStockEvents();
-
-    updateClock();
-
-    setInterval(updateClock, 1000);
-
-    updateMode();
-
-    checkSupabase();
-
-    console.log(
-        "[SMTG IMPORT STOCK] SOURCE:",
-        "Supabase direct / stock"
-    );
-
-    const mode = document.getElementById("importMode");
-
-    console.log(
-        "[SMTG IMPORT STOCK] Mode:",
-        mode?.value || "MISE_A_JOUR"
+function importStockDOMReady() {
+    return !!(
+        document.getElementById("btnBrowse") &&
+        document.getElementById("excelFile") &&
+        document.getElementById("dropZone") &&
+        document.getElementById("btnAnalyze") &&
+        document.getElementById("btnSave") &&
+        document.getElementById("btnReset") &&
+        document.getElementById("importMode")
     );
 }
 
+function initImportStockPage() {
+
+    // The dashboard may inject this page dynamically. Wait until controls exist.
+    if (!importStockDOMReady()) return false;
+    if (smtgImportStockInitialized) return true;
+
+    smtgImportStockInitialized = true;
+    initImportStockEvents();
+
+    if (!smtgImportStockClockStarted) {
+        smtgImportStockClockStarted = true;
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    updateMode();
+    checkSupabase();
+
+    console.log("[SMTG IMPORT STOCK] SOURCE:", "Supabase direct / stock");
+    console.log("[SMTG IMPORT STOCK] Mode:", document.getElementById("importMode")?.value || "MISE_A_JOUR");
+    console.log("[SMTG IMPORT STOCK] DOM prêt - contrôles détectés.");
+    return true;
+}
+
+function startImportStockWhenReady() {
+    if (initImportStockPage()) return;
+
+    console.log("[SMTG IMPORT STOCK] En attente du chargement dynamique de la page...");
+
+    let attempts = 0;
+    const maxAttempts = 200;
+    const timer = setInterval(() => {
+        attempts++;
+        if (initImportStockPage() || attempts >= maxAttempts) {
+            clearInterval(timer);
+            if (attempts >= maxAttempts && !smtgImportStockInitialized) {
+                console.warn("[SMTG IMPORT STOCK] Les contrôles HTML n'ont pas été trouvés.");
+            }
+        }
+    }, 50);
+
+    if (window.MutationObserver) {
+        const observer = new MutationObserver(() => {
+            if (initImportStockPage()) {
+                observer.disconnect();
+                clearInterval(timer);
+            }
+        });
+        observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        setTimeout(() => observer.disconnect(), 15000);
+    }
+}
+
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initImportStockPage, { once: true });
+    document.addEventListener("DOMContentLoaded", startImportStockWhenReady, { once: true });
 } else {
-    initImportStockPage();
+    startImportStockWhenReady();
 }
 
 </script>
