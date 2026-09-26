@@ -1,387 +1,3497 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi du Stock par Emplacement - SoufStock Enterprise ERP/WMS</title>
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tailwind CSS Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- SheetJS pour Export Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- jsPDF pour Export PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            950: '#020617',
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155',
-                            400: '#94a3b8',
-                            300: '#cbd5e1',
-                            100: '#f1f5f9'
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            600: '#059669',
-                            400: '#34d399',
-                            300: '#6ee7b7'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Stock par Emplacement - SoufStock</title>
+
+    <!-- =====================================================
+         ICONS
+    ====================================================== -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        body { background-color: #020617; color: #f1f5f9; font-family: ui-sans-serif, system-ui, sans-serif; }
+
+        /* =====================================================
+           VARIABLES
+        ====================================================== */
+
+        :root {
+            --green: #087f3e;
+            --green-dark: #075f32;
+            --green-light: #e8f7ef;
+
+            --blue: #1683d8;
+            --orange: #f59e0b;
+            --red: #dc2626;
+            --purple: #7c3aed;
+
+            --text: #172033;
+            --text-light: #64748b;
+
+            --border: #e2e8f0;
+            --bg: #f5f7f9;
+            --white: #ffffff;
+
+            --shadow:
+                0 2px 8px rgba(15, 23, 42, .06);
+
+            --radius: 12px;
+        }
+
+
+        /* =====================================================
+           RESET
+        ====================================================== */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+
+        /* =====================================================
+           LAYOUT
+        ====================================================== */
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ====================================================== */
+
+        .sidebar {
+            width: 235px;
+            background: linear-gradient(
+                180deg,
+                #075d40 0%,
+                #004d38 100%
+            );
+
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+
+            z-index: 100;
+
+            overflow-y: auto;
+        }
+
+
+        .logo {
+            height: 76px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 20px;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.10);
+        }
+
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+
+            border-radius: 50%;
+
+            background: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: var(--green);
+
+            font-size: 23px;
+
+            margin-right: 10px;
+        }
+
+
+        .logo-text strong {
+            display: block;
+
+            font-size: 22px;
+
+            line-height: 24px;
+        }
+
+
+        .logo-text strong span {
+            color: #1bc878;
+        }
+
+
+        .logo-text small {
+            font-size: 10px;
+
+            color: rgba(255,255,255,.78);
+        }
+
+
+        .menu {
+            padding: 15px 8px;
+        }
+
+
+        .menu-title {
+            color: rgba(255,255,255,.45);
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            padding: 14px 14px 7px;
+
+            letter-spacing: .7px;
+        }
+
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+
+            height: 45px;
+
+            padding: 0 14px;
+
+            margin-bottom: 3px;
+
+            border-radius: 7px;
+
+            color: rgba(255,255,255,.88);
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            transition: .2s;
+        }
+
+
+        .menu-item i {
+            width: 24px;
+
+            margin-right: 10px;
+
+            font-size: 16px;
+
+            text-align: center;
+        }
+
+
+        .menu-item:hover {
+            background: rgba(255,255,255,.09);
+        }
+
+
+        .menu-item.active {
+            background: #0a9b57;
+
+            color: white;
+
+            box-shadow:
+                inset 4px 0 0 white;
+        }
+
+
+        .menu-separator {
+            height: 1px;
+
+            background:
+                rgba(255,255,255,.12);
+
+            margin: 12px 10px;
+        }
+
+
+        /* =====================================================
+           MAIN
+        ====================================================== */
+
+        .main {
+            margin-left: 235px;
+
+            width: calc(100% - 235px);
+
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           TOPBAR
+        ====================================================== */
+
+        .topbar {
+            height: 64px;
+
+            background: white;
+
+            border-bottom:
+                1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 22px;
+
+            gap: 18px;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 50;
+        }
+
+
+        .menu-toggle {
+            border: none;
+
+            background: transparent;
+
+            font-size: 20px;
+
+            color: #475569;
+
+            cursor: pointer;
+        }
+
+
+        .global-search {
+            width: 510px;
+            max-width: 55%;
+
+            height: 38px;
+
+            background: #f1f5f9;
+
+            border-radius: 8px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 13px;
+
+            color: #64748b;
+        }
+
+
+        .global-search i {
+            margin-right: 10px;
+        }
+
+
+        .global-search input {
+            border: none;
+
+            outline: none;
+
+            background: transparent;
+
+            width: 100%;
+
+            font-size: 13px;
+        }
+
+
+        .topbar-right {
+            margin-left: auto;
+
+            display: flex;
+            align-items: center;
+
+            gap: 18px;
+        }
+
+
+        .notification {
+            position: relative;
+
+            font-size: 18px;
+
+            color: #475569;
+        }
+
+
+        .notification-badge {
+            position: absolute;
+
+            top: -8px;
+            right: -8px;
+
+            background: var(--red);
+
+            color: white;
+
+            font-size: 9px;
+
+            min-width: 17px;
+            height: 17px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .user {
+            display: flex;
+            align-items: center;
+
+            gap: 9px;
+
+            cursor: pointer;
+        }
+
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 50%;
+
+            background: #e2e8f0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: #64748b;
+        }
+
+
+        .user-info strong {
+            display: block;
+
+            font-size: 13px;
+        }
+
+
+        .user-info small {
+            color: #64748b;
+
+            font-size: 11px;
+        }
+
+
+        /* =====================================================
+           CONTENT
+        ====================================================== */
+
+        .content {
+            padding: 18px;
+        }
+
+
+        /* =====================================================
+           PAGE HEADER
+        ====================================================== */
+
+        .page-header {
+            background: white;
+
+            border-radius: var(--radius);
+
+            padding: 18px 20px;
+
+            box-shadow: var(--shadow);
+
+            display: flex;
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .page-title {
+            display: flex;
+            align-items: center;
+
+            gap: 15px;
+        }
+
+
+        .page-icon {
+            width: 62px;
+            height: 62px;
+
+            background: var(--green-light);
+
+            color: var(--green);
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 29px;
+        }
+
+
+        .page-title h1 {
+            font-size: 27px;
+
+            margin-bottom: 5px;
+        }
+
+
+        .page-title p {
+            color: var(--text-light);
+
+            font-size: 14px;
+        }
+
+
+        .header-actions {
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+        }
+
+
+        /* =====================================================
+           BUTTONS
+        ====================================================== */
+
+        .btn {
+            height: 40px;
+
+            padding: 0 14px;
+
+            border-radius: 7px;
+
+            border: 1px solid var(--border);
+
+            background: white;
+
+            cursor: pointer;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 7px;
+
+            font-size: 13px;
+
+            transition: .2s;
+        }
+
+
+        .btn:hover {
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 3px 8px rgba(15,23,42,.08);
+        }
+
+
+        .btn-primary {
+            background: var(--green);
+
+            border-color: var(--green);
+
+            color: white;
+        }
+
+
+        .btn-primary:hover {
+            background: var(--green-dark);
+        }
+
+
+        .btn-success {
+            color: var(--green);
+
+            border-color: #8bd5ad;
+        }
+
+
+        .btn-danger {
+            color: var(--red);
+
+            border-color: #f3aaaa;
+        }
+
+
+        .btn-blue {
+            color: var(--blue);
+
+            border-color: #9ccff0;
+        }
+
+
+        .btn-gray {
+            background: #f1f5f9;
+
+            color: #475569;
+        }
+
+
+        /* =====================================================
+           FILTER CARD
+        ====================================================== */
+
+        .filter-card {
+            background: white;
+
+            border-radius: var(--radius);
+
+            padding: 18px;
+
+            box-shadow: var(--shadow);
+
+            margin-bottom: 15px;
+        }
+
+
+        .filters {
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr
+                1.2fr
+                1fr
+                1fr;
+
+            gap: 12px;
+
+            margin-bottom: 12px;
+        }
+
+
+        .form-group label {
+            display: block;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            margin-bottom: 6px;
+
+            color: #334155;
+        }
+
+
+        .input-wrap {
+            position: relative;
+        }
+
+
+        .input-wrap i {
+            position: absolute;
+
+            left: 11px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: #94a3b8;
+
+            font-size: 13px;
+
+            pointer-events: none;
+        }
+
+
+        .form-control {
+            width: 100%;
+
+            height: 40px;
+
+            border:
+                1px solid #cbd5e1;
+
+            border-radius: 7px;
+
+            padding: 0 11px;
+
+            outline: none;
+
+            background: white;
+
+            color: #334155;
+
+            font-size: 13px;
+        }
+
+
+        .input-wrap .form-control {
+            padding-left: 34px;
+        }
+
+
+        .form-control:focus {
+            border-color: var(--green);
+
+            box-shadow:
+                0 0 0 3px rgba(8,127,62,.08);
+        }
+
+
+        .search-line {
+            display: flex;
+
+            gap: 10px;
+        }
+
+
+        .search-line .input-wrap {
+            flex: 1;
+        }
+
+
+        /* =====================================================
+           KPI
+        ====================================================== */
+
+        .kpi-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 13px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .kpi {
+            background: white;
+
+            border-radius: var(--radius);
+
+            padding: 17px;
+
+            box-shadow: var(--shadow);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+        }
+
+
+        .kpi-icon {
+            width: 51px;
+            height: 51px;
+
+            border-radius: 11px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 22px;
+        }
+
+
+        .kpi.green .kpi-icon {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+
+        .kpi.blue .kpi-icon {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+
+        .kpi.orange .kpi-icon {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+
+        .kpi.purple .kpi-icon {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+
+        .kpi-label {
+            color: #475569;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            margin-bottom: 4px;
+        }
+
+
+        .kpi-value {
+            font-size: 25px;
+
+            font-weight: 750;
+
+            color: #0f172a;
+        }
+
+
+        .kpi-sub {
+            font-size: 10px;
+
+            color: #64748b;
+
+            margin-top: 3px;
+        }
+
+
+        /* =====================================================
+           TABLE CARD
+        ====================================================== */
+
+        .table-card {
+            background: white;
+
+            border-radius: var(--radius);
+
+            box-shadow: var(--shadow);
+
+            overflow: hidden;
+        }
+
+
+        .table-header {
+            padding: 15px 17px;
+
+            display: flex;
+            align-items: center;
+
+            justify-content: space-between;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+
+        .table-title {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            font-size: 16px;
+
+            font-weight: 700;
+        }
+
+
+        .table-title i {
+            color: var(--green);
+        }
+
+
+        .table-options {
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            font-size: 12px;
+
+            color: #64748b;
+        }
+
+
+        .small-select {
+            height: 34px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 6px;
+
+            padding: 0 8px;
+
+            background: white;
+
+            outline: none;
+        }
+
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 1200px;
+        }
+
+
+        thead th {
+            background: #f1f5f9;
+
+            color: #334155;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            text-align: left;
+
+            padding: 11px 9px;
+
+            border-bottom:
+                1px solid #e2e8f0;
+
+            white-space: nowrap;
+        }
+
+
+        tbody td {
+            padding: 10px 9px;
+
+            font-size: 12px;
+
+            border-bottom:
+                1px solid #eef2f7;
+
+            white-space: nowrap;
+        }
+
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+
+        .code {
+            font-weight: 700;
+
+            color: #1e293b;
+        }
+
+
+        .quantity {
+            font-weight: 700;
+
+            text-align: right;
+        }
+
+
+        .pieces {
+            text-align: right;
+        }
+
+
+        /* =====================================================
+           STATUS
+        ====================================================== */
+
+        .status {
+            display: inline-flex;
+
+            align-items: center;
+
+            padding: 5px 9px;
+
+            border-radius: 6px;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+        }
+
+
+        .status-disponible {
+            background: #dcfce7;
+
+            color: #15803d;
+        }
+
+
+        .status-bloque {
+            background: #fef3c7;
+
+            color: #b45309;
+        }
+
+
+        .status-epuise {
+            background: #e2e8f0;
+
+            color: #475569;
+        }
+
+
+        .status-perime {
+            background: #fee2e2;
+
+            color: #dc2626;
+        }
+
+
+        /* =====================================================
+           ACTIONS
+        ====================================================== */
+
+        .actions {
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+        }
+
+
+        .action-btn {
+            width: 30px;
+            height: 30px;
+
+            border-radius: 6px;
+
+            border: none;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 12px;
+        }
+
+
+        .action-view {
+            background: #f1f5f9;
+
+            color: #334155;
+        }
+
+
+        .action-edit {
+            background: #dbeafe;
+
+            color: #2563eb;
+        }
+
+
+        .action-delete {
+            background: #fee2e2;
+
+            color: #dc2626;
+        }
+
+
+        /* =====================================================
+           EMPTY
+        ====================================================== */
+
+        .empty-state {
+            display: none;
+
+            padding: 55px 20px;
+
+            text-align: center;
+
+            color: #64748b;
+        }
+
+
+        .empty-state i {
+            font-size: 45px;
+
+            color: #cbd5e1;
+
+            margin-bottom: 12px;
+        }
+
+
+        .empty-state h3 {
+            color: #334155;
+
+            margin-bottom: 5px;
+        }
+
+
+        /* =====================================================
+           LOADING
+        ====================================================== */
+
+        .loading {
+            display: none;
+
+            padding: 45px;
+
+            text-align: center;
+
+            color: #64748b;
+        }
+
+
+        .loading i {
+            font-size: 25px;
+
+            color: var(--green);
+
+            animation: spin 1s linear infinite;
+        }
+
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        /* =====================================================
+           PAGINATION
+        ====================================================== */
+
+        .table-footer {
+            padding: 13px 17px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            border-top:
+                1px solid var(--border);
+        }
+
+
+        .result-info {
+            color: #64748b;
+
+            font-size: 12px;
+        }
+
+
+        .pagination {
+            display: flex;
+
+            gap: 5px;
+        }
+
+
+        .page-btn {
+            width: 34px;
+            height: 34px;
+
+            border:
+                1px solid var(--border);
+
+            background: white;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+        }
+
+
+        .page-btn:hover {
+            border-color: var(--green);
+
+            color: var(--green);
+        }
+
+
+        .page-btn.active {
+            background: var(--green);
+
+            border-color: var(--green);
+
+            color: white;
+        }
+
+
+        .page-btn:disabled {
+            opacity: .45;
+
+            cursor: not-allowed;
+        }
+
+
+        /* =====================================================
+           TOAST
+        ====================================================== */
+
+        .toast-container {
+            position: fixed;
+
+            right: 20px;
+
+            bottom: 20px;
+
+            z-index: 9999;
+        }
+
+
+        .toast {
+            min-width: 280px;
+
+            background: #0f172a;
+
+            color: white;
+
+            padding: 13px 15px;
+
+            border-radius: 8px;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,.18);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: 8px;
+
+            font-size: 13px;
+
+            animation:
+                toastIn .25s ease;
+        }
+
+
+        .toast.success i {
+            color: #4ade80;
+        }
+
+
+        .toast.error i {
+            color: #f87171;
+        }
+
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
+        @media (max-width: 1200px) {
+
+            .filters {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+            .kpi-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+
+        @media (max-width: 850px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+
+                transition: .25s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+
+                width: 100%;
+            }
+
+            .global-search {
+                max-width: none;
+
+                flex: 1;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .filters {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+
+        @media (max-width: 600px) {
+
+            .content {
+                padding: 10px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                flex: 1;
+            }
+
+            .table-footer {
+                flex-direction: column;
+
+                gap: 12px;
+            }
+        }
+
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
 
-    <!-- MAIN CONTAINER -->
-    <div class="flex-1 flex flex-col min-w-0">
-        
-        <!-- HEADER -->
-        <header class="h-20 bg-slate-900/40 border-b border-slate-800/80 px-8 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-6">
-                <!-- زر الرجوع السريع إلى index-stock.html -->
-                <a href="../index-stock.html" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm group">
-                    <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-                    <span>Retour au Hub</span>
-                </a>
 
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-100">Consultation du Stock par Emplacement</h1>
-                    <div class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                        <span>Accueil</span>
-                        <span>/</span>
-                        <strong class="text-slate-300">Affichage du Stock Actuel</strong>
+<body>
+
+<div class="app">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                <i class="fa-solid fa-snowflake"></i>
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    Souf<span>Stock</span>
+                </strong>
+
+                <small>
+                    Gestion de Stock Congelé
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-house"></i>
+                Tableau de bord
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-box"></i>
+                Produits
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-right-left"></i>
+                Mouvements
+            </a>
+
+            <a href="#" class="menu-item active">
+                <i class="fa-solid fa-location-dot"></i>
+                Stock par Emplacement
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-list"></i>
+                Stock par Article/Lot
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-snowflake"></i>
+                Stock par Chambre
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-temperature-low"></i>
+                Stock par Tunnel
+            </a>
+
+            <div class="menu-separator"></div>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-file-import"></i>
+                Import Stock
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-file-lines"></i>
+                Commandes
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-play"></i>
+                Lancement
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-truck"></i>
+                Expéditions
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-rotate-left"></i>
+                Retours
+            </a>
+
+            <div class="menu-separator"></div>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-users"></i>
+                Utilisateurs
+            </a>
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-gear"></i>
+                Paramètres
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-toggle"
+                id="menuToggle"
+                type="button"
+            >
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+
+            <div class="global-search">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="globalSearch"
+                    placeholder="Rechercher un article, un lot, un emplacement..."
+                >
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="notification">
+
+                    <i class="fa-solid fa-bell"></i>
+
+                    <span class="notification-badge">
+                        3
+                    </span>
+
+                </div>
+
+
+                <div class="user">
+
+                    <div class="user-avatar">
+                        <i class="fa-solid fa-user"></i>
                     </div>
+
+                    <div class="user-info">
+
+                        <strong>
+                            S.KAOUKABI
+                        </strong>
+
+                        <small>
+                            Gestion Préparateur
+                        </small>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-down"></i>
+
                 </div>
+
             </div>
-            
-            <div class="flex items-center gap-4 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-xl">
-                <div class="text-right">
-                    <span id="currentDate" class="text-xs font-medium text-slate-300 block capitalize">Chargement...</span>
-                    <span id="currentTime" class="text-[10px] text-emerald-400 font-mono block">00:00:00</span>
-                </div>
-            </div>
+
         </header>
 
-        <!-- PAGE BODY -->
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div class="w-full px-4 flex flex-col gap-6">
-                
-                <!-- TOP HEADER & ACTION BUTTONS BAR -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+
+
+        <!-- CONTENT -->
+
+        <section class="content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+
+            <div class="page-header">
+
+                <div class="page-title">
+
+                    <div class="page-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+
                     <div>
-                        <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
-                            <i class="fas fa-map-marker-alt text-emerald-400"></i> Suivi par Emplacement
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-1">
-                            Analyse détaillée et traçabilité des emplacements physiques.
+
+                        <h1>
+                            Stock par Emplacement
+                        </h1>
+
+                        <p>
+                            Gestion et suivi du stock physique par magasin, emplacement et lot
                         </p>
-                    </div>
-                    
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <button onclick="exportStockToExcel()" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="fas fa-file-excel"></i> <span>Excel</span>
-                        </button>
-                        
-                        <button onclick="exportStockToPDF()" class="bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="fas fa-file-pdf"></i> <span>PDF</span>
-                        </button>
 
-                        <button onclick="window.print()" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-                            <i class="fas fa-print"></i> <span>Imprimer</span>
-                        </button>
                     </div>
+
                 </div>
 
-                <!-- STAT CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
-                        <div>
-                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Lignes de Stock Actuelles</span>
-                            <span id="statTotalLignes" class="text-xl font-bold font-mono text-slate-100 mt-1 block">0</span>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg">
-                            <i class="fas fa-boxes"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
-                        <div>
-                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Quantité Totale</span>
-                            <span id="statTotalQuantite" class="text-xl font-bold font-mono text-slate-100 mt-1 block">0.00</span>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-lg">
-                            <i class="fas fa-weight-hanging"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
-                        <div>
-                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Articles Uniques</span>
-                            <span id="statArticlesUniques" class="text-xl font-bold font-mono text-slate-100 mt-1 block">0</span>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-lg">
-                            <i class="fas fa-barcode"></i>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- FILTER BAR -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-400 block mb-1">Filtrer par Magasin :</label>
-                        <select id="filterMagasin" onchange="loadStock()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500 cursor-pointer">
-                            <option value="">-- Tous les Magasins --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-400 block mb-1">Recherche Article / Désignation :</label>
-                        <input type="text" id="searchArticle" oninput="loadStock()" placeholder="Ex: 220000433" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-400 block mb-1">Recherche Lot :</label>
-                        <input type="text" id="searchLot" oninput="loadStock()" placeholder="Ex: 26123" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-400 block mb-1">Recherche Emplacement :</label>
-                        <input type="text" id="searchEmp" oninput="loadStock()" placeholder="Ex: A408-A-01" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500">
-                    </div>
-                </div>
+                <div class="header-actions">
 
-                <!-- TABLE -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-950/60 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800 font-semibold">
-                                    <th class="py-4 px-4">Magasin</th>
-                                    <th class="py-4 px-4">Emplacement</th>
-                                    <th class="py-4 px-4">Article</th>
-                                    <th class="py-4 px-4">Désignation</th>
-                                    <th class="py-4 px-4">Lot</th>
-                                    <th class="py-4 px-4">DLC</th>
-                                    <th class="py-4 px-4 text-right">Quantité</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stockTableBody" class="divide-y divide-slate-800/60 text-xs text-slate-300">
-                                <tr>
-                                    <td colspan="7" class="text-center py-10 text-slate-400">
-                                        <i class="fas fa-spinner fa-spin mr-2 text-emerald-500 text-base"></i> Chargement des données...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <button
+                        class="btn btn-primary"
+                        id="btnAdd"
+                        type="button"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        Ajouter
+                    </button>
+
+
+                    <button
+                        class="btn btn-success"
+                        id="btnRefresh"
+                        type="button"
+                    >
+                        <i class="fa-solid fa-rotate"></i>
+                        Actualiser
+                    </button>
+
+
+                    <button
+                        class="btn btn-success"
+                        id="btnExcel"
+                        type="button"
+                    >
+                        <i class="fa-solid fa-file-excel"></i>
+                        Exporter Excel
+                    </button>
+
+
+                    <button
+                        class="btn btn-danger"
+                        id="btnPdf"
+                        type="button"
+                    >
+                        <i class="fa-solid fa-file-pdf"></i>
+                        Exporter PDF
+                    </button>
+
                 </div>
 
             </div>
-        </main>
-    </div>
 
-    <!-- SCRIPTS -->
-    <script type="module">
-        import supabase from '../assets/js/core/supabase.js';
 
-        let allExportData = [];
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            initLiveClock();
-            await loadMagasinsDropdowns();
-            await loadStock();
+            <!-- =================================================
+                 FILTERS
+            ================================================== -->
+
+            <div class="filter-card">
+
+                <div class="filters">
+
+
+                    <!-- MAGASIN -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Magasin
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <i class="fa-solid fa-warehouse"></i>
+
+                            <select
+                                class="form-control"
+                                id="filterMagasin"
+                            >
+
+                                <option value="">
+                                    Tous les magasins
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMPLACEMENT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Emplacement
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+                            <select
+                                class="form-control"
+                                id="filterEmplacement"
+                            >
+
+                                <option value="">
+                                    Tous les emplacements
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ARTICLE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Article
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <i class="fa-solid fa-box"></i>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="filterArticle"
+                                placeholder="Code ou désignation"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Lot
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <i class="fa-solid fa-barcode"></i>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="filterLot"
+                                placeholder="Numéro du lot"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Statut
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <i class="fa-solid fa-layer-group"></i>
+
+                            <select
+                                class="form-control"
+                                id="filterStatut"
+                            >
+
+                                <option value="">
+                                    Tous les statuts
+                                </option>
+
+                                <option value="DISPONIBLE">
+                                    DISPONIBLE
+                                </option>
+
+                                <option value="BLOQUE">
+                                    BLOQUE
+                                </option>
+
+                                <option value="EPUISE">
+                                    EPUISE
+                                </option>
+
+                                <option value="PERIME">
+                                    PERIME
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="search-line">
+
+                    <div class="input-wrap">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="searchStock"
+                            placeholder="Rechercher dans le stock : article, désignation, lot, emplacement..."
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="btn btn-primary"
+                        id="btnSearch"
+                        type="button"
+                    >
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        Rechercher
+
+                    </button>
+
+
+                    <button
+                        class="btn btn-gray"
+                        id="btnReset"
+                        type="button"
+                    >
+
+                        <i class="fa-solid fa-rotate-left"></i>
+
+                        Effacer
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 KPI
+            ================================================== -->
+
+            <div class="kpi-grid">
+
+
+                <div class="kpi green">
+
+                    <div class="kpi-icon">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="kpi-label">
+                            Nombre d'articles
+                        </div>
+
+                        <div
+                            class="kpi-value"
+                            id="kpiArticles"
+                        >
+                            0
+                        </div>
+
+                        <div class="kpi-sub">
+                            Articles avec stock
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="kpi blue">
+
+                    <div class="kpi-icon">
+                        <i class="fa-solid fa-weight-hanging"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="kpi-label">
+                            Quantité totale
+                        </div>
+
+                        <div
+                            class="kpi-value"
+                            id="kpiQuantity"
+                        >
+                            0.00
+                        </div>
+
+                        <div class="kpi-sub">
+                            KG
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="kpi orange">
+
+                    <div class="kpi-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="kpi-label">
+                            Emplacements utilisés
+                        </div>
+
+                        <div
+                            class="kpi-value"
+                            id="kpiEmplacements"
+                        >
+                            0
+                        </div>
+
+                        <div class="kpi-sub">
+                            Emplacements
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="kpi purple">
+
+                    <div class="kpi-icon">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="kpi-label">
+                            Nombre de lots
+                        </div>
+
+                        <div
+                            class="kpi-value"
+                            id="kpiLots"
+                        >
+                            0
+                        </div>
+
+                        <div class="kpi-sub">
+                            Lots en stock
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="table-card">
+
+
+                <div class="table-header">
+
+                    <div class="table-title">
+
+                        <i class="fa-solid fa-list"></i>
+
+                        Liste du stock par emplacement
+
+                    </div>
+
+
+                    <div class="table-options">
+
+                        <span>
+                            Affichage :
+                        </span>
+
+                        <select
+                            class="small-select"
+                            id="pageSize"
+                        >
+
+                            <option value="25">
+                                25
+                            </option>
+
+                            <option value="50" selected>
+                                50
+                            </option>
+
+                            <option value="100">
+                                100
+                            </option>
+
+                        </select>
+
+                        <span>
+                            lignes
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- LOADING -->
+
+                <div
+                    class="loading"
+                    id="loading"
+                >
+
+                    <i class="fa-solid fa-spinner"></i>
+
+                    <div style="margin-top:10px;">
+                        Chargement du stock...
+                    </div>
+
+                </div>
+
+
+
+                <!-- EMPTY -->
+
+                <div
+                    class="empty-state"
+                    id="emptyState"
+                >
+
+                    <i class="fa-solid fa-box-open"></i>
+
+                    <h3>
+                        Aucun stock trouvé
+                    </h3>
+
+                    <p>
+                        Aucun enregistrement ne correspond aux critères.
+                    </p>
+
+                </div>
+
+
+
+                <!-- TABLE -->
+
+                <div
+                    class="table-container"
+                    id="tableContainer"
+                >
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Magasin
+                                </th>
+
+                                <th>
+                                    Emplacement
+                                </th>
+
+                                <th>
+                                    Article
+                                </th>
+
+                                <th>
+                                    Désignation
+                                </th>
+
+                                <th>
+                                    Lot
+                                </th>
+
+                                <th style="text-align:right;">
+                                    Quantité KG
+                                </th>
+
+                                <th style="text-align:right;">
+                                    Pièces
+                                </th>
+
+                                <th>
+                                    Date fabrication
+                                </th>
+
+                                <th>
+                                    DLC
+                                </th>
+
+                                <th>
+                                    Statut
+                                </th>
+
+                                <th>
+                                    Actions
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="stockTableBody">
+
+                            <!--
+                                Les lignes seront chargées
+                                depuis stock_emplacements
+                            -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <!-- FOOTER -->
+
+                <div class="table-footer">
+
+                    <div
+                        class="result-info"
+                        id="resultInfo"
+                    >
+                        Affichage de 0 à 0 sur 0 lignes
+                    </div>
+
+
+                    <div
+                        class="pagination"
+                        id="pagination"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     TOAST
+====================================================== -->
+
+<div
+    class="toast-container"
+    id="toastContainer"
+></div>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+    /* =====================================================
+       VARIABLES
+    ====================================================== */
+
+    let allStock = [];
+
+    let filteredStock = [];
+
+    let currentPage = 1;
+
+    let pageSize = 50;
+
+
+
+    /* =====================================================
+       ELEMENTS
+    ====================================================== */
+
+    const tableBody =
+        document.getElementById("stockTableBody");
+
+    const loading =
+        document.getElementById("loading");
+
+    const emptyState =
+        document.getElementById("emptyState");
+
+    const tableContainer =
+        document.getElementById("tableContainer");
+
+    const pagination =
+        document.getElementById("pagination");
+
+
+
+    /* =====================================================
+       TOAST
+    ====================================================== */
+
+    function showToast(
+        message,
+        type = "success"
+    ) {
+
+        const container =
+            document.getElementById(
+                "toastContainer"
+            );
+
+        const toast =
+            document.createElement("div");
+
+        toast.className =
+            `toast ${type}`;
+
+        toast.innerHTML = `
+
+            <i class="fa-solid ${
+                type === "error"
+                    ? "fa-circle-exclamation"
+                    : "fa-circle-check"
+            }"></i>
+
+            <span>${message}</span>
+
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 3500);
+
+    }
+
+
+
+    /* =====================================================
+       FORMAT NUMBER
+    ====================================================== */
+
+    function formatNumber(value) {
+
+        return Number(value || 0)
+            .toLocaleString(
+                "fr-FR",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+
+    }
+
+
+
+    /* =====================================================
+       FORMAT DATE
+    ====================================================== */
+
+    function formatDate(value) {
+
+        if (!value) {
+            return "";
+        }
+
+        const date =
+            new Date(value);
+
+        if (isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleDateString(
+            "fr-FR"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       STATUS HTML
+    ====================================================== */
+
+    function getStatusHTML(status) {
+
+        const value =
+            String(status || "")
+                .toUpperCase();
+
+        let className =
+            "status-disponible";
+
+        if (value === "BLOQUE") {
+            className =
+                "status-bloque";
+        }
+
+        if (value === "EPUISE") {
+            className =
+                "status-epuise";
+        }
+
+        if (value === "PERIME") {
+            className =
+                "status-perime";
+        }
+
+        return `
+            <span class="status ${className}">
+                ${value || "DISPONIBLE"}
+            </span>
+        `;
+
+    }
+
+
+
+    /* =====================================================
+       RENDER TABLE
+    ====================================================== */
+
+    function renderTable() {
+
+        tableBody.innerHTML = "";
+
+        const total =
+            filteredStock.length;
+
+        if (total === 0) {
+
+            tableContainer.style.display =
+                "none";
+
+            emptyState.style.display =
+                "block";
+
+            renderPagination();
+
+            return;
+        }
+
+        tableContainer.style.display =
+            "block";
+
+        emptyState.style.display =
+            "none";
+
+
+        const start =
+            (currentPage - 1) * pageSize;
+
+        const end =
+            Math.min(
+                start + pageSize,
+                total
+            );
+
+
+        const rows =
+            filteredStock.slice(
+                start,
+                end
+            );
+
+
+        rows.forEach(item => {
+
+            const tr =
+                document.createElement("tr");
+
+            tr.innerHTML = `
+
+                <td>
+                    <span class="code">
+                        ${escapeHTML(item.magasin_code)}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="code">
+                        ${escapeHTML(item.emplacement_code)}
+                    </span>
+                </td>
+
+                <td>
+                    ${escapeHTML(item.article)}
+                </td>
+
+                <td>
+                    ${escapeHTML(item.designation || "")}
+                </td>
+
+                <td>
+                    ${escapeHTML(item.lot)}
+                </td>
+
+                <td class="quantity">
+                    ${formatNumber(item.quantite_kg)}
+                </td>
+
+                <td class="pieces">
+                    ${Number(item.pieces || 0).toLocaleString("fr-FR")}
+                </td>
+
+                <td>
+                    ${formatDate(item.date_fabrication)}
+                </td>
+
+                <td>
+                    ${formatDate(item.dlc)}
+                </td>
+
+                <td>
+                    ${getStatusHTML(item.statut)}
+                </td>
+
+                <td>
+
+                    <div class="actions">
+
+                        <button
+                            class="action-btn action-view"
+                            title="Voir"
+                            onclick="viewStock(${item.id})"
+                        >
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+
+                        <button
+                            class="action-btn action-edit"
+                            title="Modifier"
+                            onclick="editStock(${item.id})"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+
+                        <button
+                            class="action-btn action-delete"
+                            title="Supprimer"
+                            onclick="deleteStock(${item.id})"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+            tableBody.appendChild(tr);
+
         });
 
-        // دالة لتحديث الوقت والتاريخ الحي باللغة الفرنسية
-        function initLiveClock() {
-            const updateClock = () => {
-                const now = new Date();
-                
-                // تنسيق التاريخ (مثال: mardi 28 juillet 2026)
-                const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const dateStr = now.toLocaleDateString('fr-FR', optionsDate);
-                
-                // تنسيق الوقت (HH:MM:SS)
-                const timeStr = now.toTimeString().split(' ')[0];
 
-                const dateEl = document.getElementById("currentDate");
-                const timeEl = document.getElementById("currentTime");
+        document.getElementById(
+            "resultInfo"
+        ).textContent =
+            `Affichage de ${start + 1} à ${end} sur ${total} lignes`;
 
-                if (dateEl) dateEl.innerText = dateStr;
-                if (timeEl) timeEl.innerText = timeStr;
-            };
 
-            updateClock();
-            setInterval(updateClock, 1000);
+        renderPagination();
+
+    }
+
+
+
+    /* =====================================================
+       PAGINATION
+    ====================================================== */
+
+    function renderPagination() {
+
+        pagination.innerHTML = "";
+
+        const totalPages =
+            Math.ceil(
+                filteredStock.length /
+                pageSize
+            );
+
+        if (totalPages <= 1) {
+            return;
         }
 
-        async function loadMagasinsDropdowns() {
-            try {
-                const { data, error } = await supabase.from('magasins').select('code_magasin, libelle_magasin').eq('statut', 'ACTIF');
-                if (error) {
-                    console.error("Erreur chargement magasins:", error);
-                    return;
-                }
 
-                const filterSelect = document.getElementById("filterMagasin");
-                let filterHtml = '<option value="">-- Tous les Magasins --</option>';
+        const prev =
+            document.createElement("button");
 
-                data.forEach(mag => {
-                    filterHtml += `<option value="${mag.code_magasin}">${mag.code_magasin} - ${mag.libelle_magasin}</option>`;
+        prev.className =
+            "page-btn";
+
+        prev.innerHTML =
+            '<i class="fa-solid fa-chevron-left"></i>';
+
+        prev.disabled =
+            currentPage === 1;
+
+        prev.onclick = () => {
+
+            if (currentPage > 1) {
+
+                currentPage--;
+
+                renderTable();
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
                 });
 
-                filterSelect.innerHTML = filterHtml;
-            } catch (err) {
-                console.error("Erreur technique magasins:", err);
             }
+
+        };
+
+        pagination.appendChild(prev);
+
+
+        const maxButtons = 5;
+
+        let startPage =
+            Math.max(
+                1,
+                currentPage - 2
+            );
+
+        let endPage =
+            Math.min(
+                totalPages,
+                startPage + maxButtons - 1
+            );
+
+
+        if (
+            endPage - startPage <
+            maxButtons - 1
+        ) {
+
+            startPage =
+                Math.max(
+                    1,
+                    endPage - maxButtons + 1
+                );
+
         }
 
-        window.loadStock = async function() {
-            const selectedMag = document.getElementById("filterMagasin").value;
-            const searchArt = document.getElementById("searchArticle").value.trim().toUpperCase();
-            const searchLot = document.getElementById("searchLot").value.trim().toUpperCase();
-            const searchEmp = document.getElementById("searchEmp").value.trim().toUpperCase();
 
-            let query = supabase.from('stock_emplacements').select('*').order('created_at', { ascending: false });
+        for (
+            let i = startPage;
+            i <= endPage;
+            i++
+        ) {
 
-            if (selectedMag) query = query.eq('magasin', selectedMag);
-            if (searchArt) query = query.or(`article.ilike.%${searchArt}%,designation_article.ilike.%${searchArt}%`);
-            if (searchLot) query = query.ilike('lot', `%${searchLot}%`);
-            if (searchEmp) query = query.ilike('emplacement', `%${searchEmp}%`);
+            const button =
+                document.createElement("button");
 
-            const { data, error } = await query;
-            const tbody = document.getElementById("stockTableBody");
+            button.className =
+                "page-btn";
+
+            if (i === currentPage) {
+                button.classList.add("active");
+            }
+
+            button.textContent = i;
+
+            button.onclick = () => {
+
+                currentPage = i;
+
+                renderTable();
+
+            };
+
+            pagination.appendChild(button);
+
+        }
+
+
+        const next =
+            document.createElement("button");
+
+        next.className =
+            "page-btn";
+
+        next.innerHTML =
+            '<i class="fa-solid fa-chevron-right"></i>';
+
+        next.disabled =
+            currentPage === totalPages;
+
+        next.onclick = () => {
+
+            if (
+                currentPage <
+                totalPages
+            ) {
+
+                currentPage++;
+
+                renderTable();
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            }
+
+        };
+
+        pagination.appendChild(next);
+
+    }
+
+
+
+    /* =====================================================
+       KPI
+    ====================================================== */
+
+    function updateKPIs() {
+
+        const articles =
+            new Set(
+                filteredStock
+                    .map(
+                        x => x.article
+                    )
+            ).size;
+
+
+        const lots =
+            new Set(
+                filteredStock
+                    .map(
+                        x => x.lot
+                    )
+            ).size;
+
+
+        const emplacements =
+            new Set(
+                filteredStock.map(
+                    x =>
+                        `${x.magasin_code}|${x.emplacement_code}`
+                )
+            ).size;
+
+
+        const quantity =
+            filteredStock.reduce(
+                (
+                    total,
+                    item
+                ) =>
+                    total +
+                    Number(
+                        item.quantite_kg || 0
+                    ),
+                0
+            );
+
+
+        document.getElementById(
+            "kpiArticles"
+        ).textContent =
+            articles.toLocaleString("fr-FR");
+
+
+        document.getElementById(
+            "kpiQuantity"
+        ).textContent =
+            formatNumber(quantity);
+
+
+        document.getElementById(
+            "kpiEmplacements"
+        ).textContent =
+            emplacements.toLocaleString("fr-FR");
+
+
+        document.getElementById(
+            "kpiLots"
+        ).textContent =
+            lots.toLocaleString("fr-FR");
+
+    }
+
+
+
+    /* =====================================================
+       FILTER
+    ====================================================== */
+
+    function applyFilters() {
+
+        const magasin =
+            document.getElementById(
+                "filterMagasin"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const emplacement =
+            document.getElementById(
+                "filterEmplacement"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const article =
+            document.getElementById(
+                "filterArticle"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const lot =
+            document.getElementById(
+                "filterLot"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const statut =
+            document.getElementById(
+                "filterStatut"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        const search =
+            document.getElementById(
+                "searchStock"
+            ).value
+                .trim()
+                .toLowerCase();
+
+
+        filteredStock =
+            allStock.filter(item => {
+
+                const text = [
+
+                    item.magasin_code,
+
+                    item.emplacement_code,
+
+                    item.article,
+
+                    item.designation,
+
+                    item.lot,
+
+                    item.statut
+
+                ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+
+                return (
+
+                    (!magasin ||
+                        String(
+                            item.magasin_code || ""
+                        ).toLowerCase() === magasin
+                    )
+
+                    &&
+
+                    (!emplacement ||
+                        String(
+                            item.emplacement_code || ""
+                        ).toLowerCase() === emplacement
+                    )
+
+                    &&
+
+                    (!article ||
+                        (
+                            String(
+                                item.article || ""
+                            )
+                            .toLowerCase()
+                            .includes(article)
+                            ||
+                            String(
+                                item.designation || ""
+                            )
+                            .toLowerCase()
+                            .includes(article)
+                        )
+                    )
+
+                    &&
+
+                    (!lot ||
+                        String(
+                            item.lot || ""
+                        )
+                        .toLowerCase()
+                        .includes(lot)
+                    )
+
+                    &&
+
+                    (!statut ||
+                        String(
+                            item.statut || ""
+                        ).toLowerCase() === statut
+                    )
+
+                    &&
+
+                    (!search ||
+                        text.includes(search)
+                    )
+
+                );
+
+            });
+
+
+        currentPage = 1;
+
+        updateKPIs();
+
+        renderTable();
+
+    }
+
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ====================================================== */
+
+    function escapeHTML(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+
+    /* =====================================================
+       LOAD DATA
+    ====================================================== */
+
+    async function loadStock() {
+
+        loading.style.display =
+            "block";
+
+        tableContainer.style.display =
+            "none";
+
+        emptyState.style.display =
+            "none";
+
+
+        try {
+
+            /*
+             * IMPORTANT
+             *
+             * Ici on branchera ton client
+             * Supabase existant.
+             *
+             * Exemple :
+             *
+             * const { data, error } =
+             *     await supabase
+             *       .from("stock_emplacements")
+             *       .select("*")
+             *       .order("id", {
+             *           ascending: false
+             *       });
+             */
+
+
+            if (
+                window.supabaseClient
+            ) {
+
+                const {
+                    data,
+                    error
+                } =
+                    await window.supabaseClient
+                        .from(
+                            "stock_emplacements"
+                        )
+                        .select("*")
+                        .order(
+                            "id",
+                            {
+                                ascending: false
+                            }
+                        );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                allStock =
+                    data || [];
+
+            }
+
+            else {
+
+                /*
+                 * Aucun client DB détecté.
+                 * On garde la liste vide
+                 * plutôt que d'inventer des données.
+                 */
+
+                allStock = [];
+
+            }
+
+
+            filteredStock =
+                [...allStock];
+
+
+            loadMagasins();
+
+            loadEmplacements();
+
+            updateKPIs();
+
+            renderTable();
+
+
+        } catch (error) {
+
+            console.error(
+                "[STOCK EMPLACEMENTS]",
+                error
+            );
+
+            allStock = [];
+
+            filteredStock = [];
+
+            updateKPIs();
+
+            renderTable();
+
+            showToast(
+                "Erreur lors du chargement du stock.",
+                "error"
+            );
+
+        }
+
+        finally {
+
+            loading.style.display =
+                "none";
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       LOAD MAGASINS
+    ====================================================== */
+
+    function loadMagasins() {
+
+        const select =
+            document.getElementById(
+                "filterMagasin"
+            );
+
+
+        const current =
+            select.value;
+
+
+        const values =
+            [
+                ...new Set(
+                    allStock
+                        .map(
+                            item =>
+                                item.magasin_code
+                        )
+                        .filter(Boolean)
+                )
+            ]
+            .sort();
+
+
+        select.innerHTML = `
+
+            <option value="">
+                Tous les magasins
+            </option>
+
+        `;
+
+
+        values.forEach(
+            value => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    value;
+
+                option.textContent =
+                    value;
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        select.value =
+            current;
+
+    }
+
+
+
+    /* =====================================================
+       LOAD EMPLACEMENTS
+    ====================================================== */
+
+    function loadEmplacements() {
+
+        const select =
+            document.getElementById(
+                "filterEmplacement"
+            );
+
+
+        const current =
+            select.value;
+
+
+        const values =
+            [
+                ...new Set(
+                    allStock
+                        .map(
+                            item =>
+                                item.emplacement_code
+                        )
+                        .filter(Boolean)
+                )
+            ]
+            .sort();
+
+
+        select.innerHTML = `
+
+            <option value="">
+                Tous les emplacements
+            </option>
+
+        `;
+
+
+        values.forEach(
+            value => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    value;
+
+                option.textContent =
+                    value;
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        select.value =
+            current;
+
+    }
+
+
+
+    /* =====================================================
+       VIEW
+    ====================================================== */
+
+    function viewStock(id) {
+
+        const item =
+            allStock.find(
+                x =>
+                    Number(x.id) ===
+                    Number(id)
+            );
+
+        if (!item) {
+            return;
+        }
+
+
+        alert(
+            [
+                `Magasin : ${item.magasin_code}`,
+                `Emplacement : ${item.emplacement_code}`,
+                `Article : ${item.article}`,
+                `Désignation : ${item.designation || ""}`,
+                `Lot : ${item.lot}`,
+                `Quantité KG : ${item.quantite_kg}`,
+                `Pièces : ${item.pieces}`,
+                `Date fabrication : ${formatDate(item.date_fabrication)}`,
+                `DLC : ${formatDate(item.dlc)}`,
+                `Statut : ${item.statut}`
+            ].join("\n")
+        );
+
+    }
+
+
+
+    /* =====================================================
+       EDIT
+    ====================================================== */
+
+    function editStock(id) {
+
+        const item =
+            allStock.find(
+                x =>
+                    Number(x.id) ===
+                    Number(id)
+            );
+
+        if (!item) {
+            return;
+        }
+
+
+        /*
+         * Le modal Ajouter/Modifier
+         * sera branché ici dans la prochaine étape.
+         */
+
+        showToast(
+            `Modification de l'enregistrement ${id}.`
+        );
+
+    }
+
+
+
+    /* =====================================================
+       DELETE
+    ====================================================== */
+
+    async function deleteStock(id) {
+
+        const item =
+            allStock.find(
+                x =>
+                    Number(x.id) ===
+                    Number(id)
+            );
+
+        if (!item) {
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `Voulez-vous supprimer le stock du lot ${item.lot} à l'emplacement ${item.emplacement_code} ?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        if (
+            !window.supabaseClient
+        ) {
+
+            showToast(
+                "Connexion à la base de données non disponible.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const {
+                error
+            } =
+                await window.supabaseClient
+                    .from(
+                        "stock_emplacements"
+                    )
+                    .delete()
+                    .eq(
+                        "id",
+                        id
+                    );
+
 
             if (error) {
-                console.error(error);
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i> Erreur de chargement du stock.</td></tr>`;
-                return;
+                throw error;
             }
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500"><i class="fas fa-folder-open mr-2"></i> Aucun stock trouvé.</td></tr>`;
-                document.getElementById("statTotalLignes").innerText = "0";
-                document.getElementById("statTotalQuantite").innerText = "0.00";
-                document.getElementById("statArticlesUniques").innerText = "0";
-                allExportData = [];
-                return;
-            }
 
-            allExportData = data;
+            showToast(
+                "Stock supprimé avec succès."
+            );
 
-            let totalQty = 0;
-            let uniqueArticles = new Set();
 
-            tbody.innerHTML = '';
-            data.forEach(item => {
-                const qty = Number(item.quantite) || 0;
-                totalQty += qty;
-                if (item.article) uniqueArticles.add(item.article);
+            await loadStock();
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/35 transition">
-                        <td class="py-4 px-4 font-bold text-emerald-400 font-mono">${item.magasin || ''}</td>
-                        <td class="py-4 px-4 font-semibold text-slate-100 font-mono"><i class="fas fa-map-pin mr-1 text-sky-400 opacity-70"></i>${item.emplacement || ''}</td>
-                        <td class="py-4 px-4 font-bold font-mono text-blue-400">${item.article || ''}</td>
-                        <td class="py-4 px-4 text-slate-200 font-medium">${item.designation_article || ''}</td>
-                        <td class="py-4 px-4 font-mono text-slate-300">${item.lot || ''}</td>
-                        <td class="py-4 px-4 font-mono text-slate-400">${item.dlc || '-'}</td>
-                        <td class="py-4 px-4 text-right font-mono font-bold text-emerald-400">${qty.toLocaleString()} ${item.unite || ''}</td>
-                    </tr>
-                `;
-            });
 
-            document.getElementById("statTotalLignes").innerText = data.length.toLocaleString();
-            document.getElementById("statTotalQuantite").innerText = totalQty.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById("statArticlesUniques").innerText = uniqueArticles.size.toLocaleString();
+        } catch (error) {
+
+            console.error(error);
+
+            showToast(
+                "Erreur lors de la suppression.",
+                "error"
+            );
+
         }
 
-        window.exportStockToExcel = function() {
-            if (!allExportData || allExportData.length === 0) {
-                alert("Aucune donnée à exporter.");
-                return;
+    }
+
+
+
+    /* =====================================================
+       EVENTS
+    ====================================================== */
+
+    document
+        .getElementById("btnRefresh")
+        .addEventListener(
+            "click",
+            loadStock
+        );
+
+
+    document
+        .getElementById("btnSearch")
+        .addEventListener(
+            "click",
+            applyFilters
+        );
+
+
+    document
+        .getElementById("btnReset")
+        .addEventListener(
+            "click",
+            () => {
+
+                document.getElementById(
+                    "filterMagasin"
+                ).value = "";
+
+                document.getElementById(
+                    "filterEmplacement"
+                ).value = "";
+
+                document.getElementById(
+                    "filterArticle"
+                ).value = "";
+
+                document.getElementById(
+                    "filterLot"
+                ).value = "";
+
+                document.getElementById(
+                    "filterStatut"
+                ).value = "";
+
+                document.getElementById(
+                    "searchStock"
+                ).value = "";
+
+                currentPage = 1;
+
+                applyFilters();
+
             }
+        );
 
-            const exportData = allExportData.map(item => ({
-                "Magasin": item.magasin || '',
-                "Emplacement": item.emplacement || '',
-                "Article": item.article || '',
-                "Désignation": item.designation_article || '',
-                "Lot": item.lot || '',
-                "DLC": item.dlc || '',
-                "Quantité": Number(item.quantite || 0),
-                "Unité": item.unite || ''
-            }));
 
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Stock Emplacements");
-            XLSX.writeFile(workbook, `Stock_Emplacements_${new Date().toISOString().slice(0,10)}.xlsx`);
-        }
+    document
+        .getElementById("pageSize")
+        .addEventListener(
+            "change",
+            event => {
 
-        window.exportStockToPDF = function() {
-            if (!allExportData || allExportData.length === 0) {
-                alert("Aucune donnée à exporter.");
-                return;
+                pageSize =
+                    Number(
+                        event.target.value
+                    );
+
+                currentPage = 1;
+
+                renderTable();
+
             }
+        );
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
 
-            doc.setFontSize(16);
-            doc.setTextColor(15, 23, 42);
-            doc.text("SoufStock Enterprise - Stock par Emplacements", 14, 15);
+    document
+        .getElementById("filterMagasin")
+        .addEventListener(
+            "change",
+            applyFilters
+        );
 
-            doc.setFontSize(10);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`Date d'export : ${new Date().toLocaleDateString('fr-FR')}`, 14, 22);
 
-            const tableColumn = ["Magasin", "Emplacement", "Article", "Désignation", "Lot", "DLC", "Quantité"];
-            const tableRows = [];
+    document
+        .getElementById("filterEmplacement")
+        .addEventListener(
+            "change",
+            applyFilters
+        );
 
-            allExportData.forEach(item => {
-                tableRows.push([
-                    item.magasin || '',
-                    item.emplacement || '',
-                    item.article || '',
-                    item.designation_article || '',
-                    item.lot || '',
-                    item.dlc || '-',
-                    `${Number(item.quantite || 0).toLocaleString()} ${item.unite || ''}`
-                ]);
-            });
 
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 28,
-                theme: 'grid',
-                styles: { fontSize: 8, cellPadding: 3 },
-                headStyles: { fillColor: [15, 23, 42] }
-            });
+    document
+        .getElementById("filterStatut")
+        .addEventListener(
+            "change",
+            applyFilters
+        );
 
-            doc.save(`Stock_Emplacements_${new Date().toISOString().slice(0,10)}.pdf`);
+
+    document
+        .getElementById("filterArticle")
+        .addEventListener(
+            "input",
+            debounce(
+                applyFilters,
+                300
+            )
+        );
+
+
+    document
+        .getElementById("filterLot")
+        .addEventListener(
+            "input",
+            debounce(
+                applyFilters,
+                300
+            )
+        );
+
+
+    document
+        .getElementById("searchStock")
+        .addEventListener(
+            "input",
+            debounce(
+                applyFilters,
+                300
+            )
+        );
+
+
+    document
+        .getElementById("globalSearch")
+        .addEventListener(
+            "input",
+            debounce(
+                event => {
+
+                    document.getElementById(
+                        "searchStock"
+                    ).value =
+                        event.target.value;
+
+                    applyFilters();
+
+                },
+                300
+            )
+        );
+
+
+    document
+        .getElementById("btnAdd")
+        .addEventListener(
+            "click",
+            () => {
+
+                showToast(
+                    "Le formulaire Ajouter sera ajouté dans l'étape CRUD."
+                );
+
+            }
+        );
+
+
+    /* =====================================================
+       DEBOUNCE
+    ====================================================== */
+
+    function debounce(
+        fn,
+        delay
+    ) {
+
+        let timer;
+
+        return function () {
+
+            clearTimeout(timer);
+
+            timer =
+                setTimeout(
+                    () => fn.apply(
+                        this,
+                        arguments
+                    ),
+                    delay
+                );
+
+        };
+
+    }
+
+
+
+    /* =====================================================
+       MOBILE MENU
+    ====================================================== */
+
+    document
+        .getElementById("menuToggle")
+        .addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById("sidebar")
+                    .classList.toggle("open");
+
+            }
+        );
+
+
+
+    /* =====================================================
+       INIT
+    ====================================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            loadStock();
+
         }
-    </script>
+    );
+
+</script>
+
 </body>
 </html>
