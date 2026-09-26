@@ -4,26 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Stock par Emplacement - SoufStock</title>
+    <title>Stock par Emplacement</title>
 
-    <!-- =====================================================
-         ICONS
-    ====================================================== -->
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
     <style>
-
-        /* =====================================================
-           VARIABLES
-        ====================================================== */
-
         :root {
             --green: #087f3e;
             --green-dark: #075f32;
-            --green-light: #e8f7ef;
+            --green-light: #e9f7ef;
 
             --blue: #1683d8;
             --orange: #f59e0b;
@@ -31,22 +23,14 @@
             --purple: #7c3aed;
 
             --text: #172033;
-            --text-light: #64748b;
-
+            --muted: #64748b;
             --border: #e2e8f0;
             --bg: #f5f7f9;
             --white: #ffffff;
 
-            --shadow:
-                0 2px 8px rgba(15, 23, 42, .06);
-
+            --shadow: 0 2px 8px rgba(15, 23, 42, .06);
             --radius: 12px;
         }
-
-
-        /* =====================================================
-           RESET
-        ====================================================== */
 
         * {
             box-sizing: border-box;
@@ -63,9 +47,7 @@
 
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
         }
-
 
         button,
         input,
@@ -73,358 +55,79 @@
             font-family: inherit;
         }
 
+        /* =========================
+           TOP HEADER
+        ========================== */
 
-        /* =====================================================
-           LAYOUT
-        ====================================================== */
-
-        .app {
-            display: flex;
-            min-height: 100vh;
-        }
-
-
-        /* =====================================================
-           SIDEBAR
-        ====================================================== */
-
-        .sidebar {
-            width: 235px;
-            background: linear-gradient(
-                180deg,
-                #075d40 0%,
-                #004d38 100%
-            );
-
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-
-            z-index: 100;
-
-            overflow-y: auto;
-        }
-
-
-        .logo {
-            height: 76px;
+        .topbar {
+            height: 64px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
 
             display: flex;
             align-items: center;
 
-            padding: 0 20px;
+            padding: 0 24px;
 
-            border-bottom:
-                1px solid rgba(255,255,255,.10);
+            position: sticky;
+            top: 0;
+            z-index: 20;
         }
 
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        .logo-icon {
-            width: 42px;
-            height: 42px;
+        .brand-icon {
+            width: 38px;
+            height: 38px;
 
-            border-radius: 50%;
+            border-radius: 9px;
 
-            background: white;
+            background: var(--green-light);
+            color: var(--green);
 
             display: flex;
             align-items: center;
             justify-content: center;
 
+            font-size: 19px;
+        }
+
+        .brand strong {
+            font-size: 18px;
+            color: #172033;
+        }
+
+        .brand span {
             color: var(--green);
-
-            font-size: 23px;
-
-            margin-right: 10px;
         }
 
-
-        .logo-text strong {
-            display: block;
-
-            font-size: 22px;
-
-            line-height: 24px;
-        }
-
-
-        .logo-text strong span {
-            color: #1bc878;
-        }
-
-
-        .logo-text small {
-            font-size: 10px;
-
-            color: rgba(255,255,255,.78);
-        }
-
-
-        .menu {
-            padding: 15px 8px;
-        }
-
-
-        .menu-title {
-            color: rgba(255,255,255,.45);
-
-            font-size: 10px;
-
-            text-transform: uppercase;
-
-            padding: 14px 14px 7px;
-
-            letter-spacing: .7px;
-        }
-
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-
-            height: 45px;
-
-            padding: 0 14px;
-
-            margin-bottom: 3px;
-
-            border-radius: 7px;
-
-            color: rgba(255,255,255,.88);
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            transition: .2s;
-        }
-
-
-        .menu-item i {
-            width: 24px;
-
-            margin-right: 10px;
-
-            font-size: 16px;
-
-            text-align: center;
-        }
-
-
-        .menu-item:hover {
-            background: rgba(255,255,255,.09);
-        }
-
-
-        .menu-item.active {
-            background: #0a9b57;
-
-            color: white;
-
-            box-shadow:
-                inset 4px 0 0 white;
-        }
-
-
-        .menu-separator {
-            height: 1px;
-
-            background:
-                rgba(255,255,255,.12);
-
-            margin: 12px 10px;
-        }
-
-
-        /* =====================================================
-           MAIN
-        ====================================================== */
-
-        .main {
-            margin-left: 235px;
-
-            width: calc(100% - 235px);
-
-            min-height: 100vh;
-        }
-
-
-        /* =====================================================
-           TOPBAR
-        ====================================================== */
-
-        .topbar {
-            height: 64px;
-
-            background: white;
-
-            border-bottom:
-                1px solid var(--border);
-
-            display: flex;
-            align-items: center;
-
-            padding: 0 22px;
-
-            gap: 18px;
-
-            position: sticky;
-
-            top: 0;
-
-            z-index: 50;
-        }
-
-
-        .menu-toggle {
-            border: none;
-
-            background: transparent;
-
-            font-size: 20px;
-
-            color: #475569;
-
-            cursor: pointer;
-        }
-
-
-        .global-search {
-            width: 510px;
-            max-width: 55%;
-
-            height: 38px;
-
-            background: #f1f5f9;
-
-            border-radius: 8px;
-
-            display: flex;
-            align-items: center;
-
-            padding: 0 13px;
-
-            color: #64748b;
-        }
-
-
-        .global-search i {
-            margin-right: 10px;
-        }
-
-
-        .global-search input {
-            border: none;
-
-            outline: none;
-
-            background: transparent;
-
-            width: 100%;
-
-            font-size: 13px;
-        }
-
-
-        .topbar-right {
+        .top-actions {
             margin-left: auto;
 
             display: flex;
             align-items: center;
-
-            gap: 18px;
+            gap: 8px;
         }
 
+        /* =========================
+           MAIN
+        ========================== */
 
-        .notification {
-            position: relative;
-
-            font-size: 18px;
-
-            color: #475569;
+        .page {
+            width: 100%;
+            padding: 18px 24px 30px;
         }
 
-
-        .notification-badge {
-            position: absolute;
-
-            top: -8px;
-            right: -8px;
-
-            background: var(--red);
-
-            color: white;
-
-            font-size: 9px;
-
-            min-width: 17px;
-            height: 17px;
-
-            border-radius: 50%;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-
-        .user {
-            display: flex;
-            align-items: center;
-
-            gap: 9px;
-
-            cursor: pointer;
-        }
-
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-
-            border-radius: 50%;
-
-            background: #e2e8f0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            color: #64748b;
-        }
-
-
-        .user-info strong {
-            display: block;
-
-            font-size: 13px;
-        }
-
-
-        .user-info small {
-            color: #64748b;
-
-            font-size: 11px;
-        }
-
-
-        /* =====================================================
-           CONTENT
-        ====================================================== */
-
-        .content {
-            padding: 18px;
-        }
-
-
-        /* =====================================================
+        /* =========================
            PAGE HEADER
-        ====================================================== */
+        ========================== */
 
         .page-header {
-            background: white;
+            background: #fff;
 
             border-radius: var(--radius);
 
@@ -434,7 +137,6 @@
 
             display: flex;
             align-items: center;
-
             justify-content: space-between;
 
             gap: 20px;
@@ -442,70 +144,58 @@
             margin-bottom: 15px;
         }
 
-
-        .page-title {
+        .title-area {
             display: flex;
             align-items: center;
-
-            gap: 15px;
+            gap: 14px;
         }
 
-
         .page-icon {
-            width: 62px;
-            height: 62px;
-
-            background: var(--green-light);
-
-            color: var(--green);
+            width: 58px;
+            height: 58px;
 
             border-radius: 12px;
+
+            background: var(--green-light);
+            color: var(--green);
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            font-size: 29px;
-        }
-
-
-        .page-title h1 {
             font-size: 27px;
-
-            margin-bottom: 5px;
         }
 
-
-        .page-title p {
-            color: var(--text-light);
-
-            font-size: 14px;
+        .title-area h1 {
+            font-size: 26px;
+            margin-bottom: 4px;
         }
 
+        .title-area p {
+            font-size: 13px;
+            color: var(--muted);
+        }
 
-        .header-actions {
+        .header-buttons {
             display: flex;
-
             gap: 8px;
-
             flex-wrap: wrap;
         }
 
-
-        /* =====================================================
+        /* =========================
            BUTTONS
-        ====================================================== */
+        ========================== */
 
         .btn {
-            height: 40px;
+            height: 39px;
 
-            padding: 0 14px;
+            padding: 0 13px;
 
             border-radius: 7px;
 
             border: 1px solid var(--border);
 
-            background: white;
+            background: #fff;
 
             cursor: pointer;
 
@@ -515,68 +205,52 @@
 
             gap: 7px;
 
-            font-size: 13px;
+            font-size: 12px;
 
             transition: .2s;
         }
 
-
         .btn:hover {
             transform: translateY(-1px);
-
-            box-shadow:
-                0 3px 8px rgba(15,23,42,.08);
+            box-shadow: 0 3px 8px rgba(0,0,0,.07);
         }
-
 
         .btn-primary {
             background: var(--green);
-
+            color: #fff;
             border-color: var(--green);
-
-            color: white;
         }
-
 
         .btn-primary:hover {
             background: var(--green-dark);
         }
 
-
         .btn-success {
             color: var(--green);
-
-            border-color: #8bd5ad;
+            border-color: #a7dfbf;
         }
-
 
         .btn-danger {
             color: var(--red);
-
-            border-color: #f3aaaa;
+            border-color: #f2b1b1;
         }
-
 
         .btn-blue {
             color: var(--blue);
-
-            border-color: #9ccff0;
+            border-color: #a8d2f0;
         }
-
 
         .btn-gray {
             background: #f1f5f9;
-
             color: #475569;
         }
 
-
-        /* =====================================================
+        /* =========================
            FILTER CARD
-        ====================================================== */
+        ========================== */
 
         .filter-card {
-            background: white;
+            background: #fff;
 
             border-radius: var(--radius);
 
@@ -586,7 +260,6 @@
 
             margin-bottom: 15px;
         }
-
 
         .filters {
             display: grid;
@@ -603,94 +276,78 @@
             margin-bottom: 12px;
         }
 
-
-        .form-group label {
+        .field label {
             display: block;
 
-            font-size: 12px;
+            font-size: 11px;
 
-            font-weight: 600;
-
-            margin-bottom: 6px;
+            font-weight: 700;
 
             color: #334155;
+
+            margin-bottom: 6px;
         }
 
-
-        .input-wrap {
+        .input-box {
             position: relative;
         }
 
-
-        .input-wrap i {
+        .input-box i {
             position: absolute;
 
             left: 11px;
-
             top: 50%;
 
             transform: translateY(-50%);
 
             color: #94a3b8;
 
-            font-size: 13px;
+            font-size: 12px;
 
             pointer-events: none;
         }
 
-
-        .form-control {
+        .control {
             width: 100%;
 
-            height: 40px;
+            height: 39px;
 
-            border:
-                1px solid #cbd5e1;
+            border: 1px solid #cbd5e1;
 
             border-radius: 7px;
 
-            padding: 0 11px;
+            background: #fff;
 
             outline: none;
 
-            background: white;
+            padding: 0 10px 0 32px;
+
+            font-size: 12px;
 
             color: #334155;
-
-            font-size: 13px;
         }
 
-
-        .input-wrap .form-control {
-            padding-left: 34px;
-        }
-
-
-        .form-control:focus {
+        .control:focus {
             border-color: var(--green);
 
             box-shadow:
                 0 0 0 3px rgba(8,127,62,.08);
         }
 
-
-        .search-line {
+        .search-row {
             display: flex;
-
-            gap: 10px;
+            gap: 8px;
         }
 
-
-        .search-line .input-wrap {
+        .search-row .input-box {
             flex: 1;
         }
 
-
-        /* =====================================================
+        /* =========================
            KPI
-        ====================================================== */
+        ========================== */
 
-        .kpi-grid {
+        .kpis {
             display: grid;
 
             grid-template-columns:
@@ -701,27 +358,24 @@
             margin-bottom: 15px;
         }
 
-
         .kpi {
-            background: white;
+            background: #fff;
 
             border-radius: var(--radius);
 
-            padding: 17px;
+            padding: 16px;
 
             box-shadow: var(--shadow);
 
             display: flex;
-
             align-items: center;
 
             gap: 13px;
         }
 
-
         .kpi-icon {
-            width: 51px;
-            height: 51px;
+            width: 50px;
+            height: 50px;
 
             border-radius: 11px;
 
@@ -729,69 +383,53 @@
             align-items: center;
             justify-content: center;
 
-            font-size: 22px;
+            font-size: 21px;
         }
-
 
         .kpi.green .kpi-icon {
             background: #dcfce7;
             color: #16a34a;
         }
 
-
         .kpi.blue .kpi-icon {
             background: #dbeafe;
             color: #2563eb;
         }
-
 
         .kpi.orange .kpi-icon {
             background: #ffedd5;
             color: #ea580c;
         }
 
-
         .kpi.purple .kpi-icon {
             background: #ede9fe;
             color: #7c3aed;
         }
 
-
         .kpi-label {
-            color: #475569;
-
-            font-size: 12px;
-
+            color: #64748b;
+            font-size: 11px;
             font-weight: 600;
-
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
-
         .kpi-value {
-            font-size: 25px;
-
+            font-size: 24px;
             font-weight: 750;
-
             color: #0f172a;
         }
 
-
-        .kpi-sub {
+        .kpi-unit {
             font-size: 10px;
-
             color: #64748b;
-
-            margin-top: 3px;
         }
 
-
-        /* =====================================================
-           TABLE CARD
-        ====================================================== */
+        /* =========================
+           TABLE
+        ========================== */
 
         .table-card {
-            background: white;
+            background: #fff;
 
             border-radius: var(--radius);
 
@@ -800,87 +438,71 @@
             overflow: hidden;
         }
 
-
         .table-header {
-            padding: 15px 17px;
+            padding: 14px 17px;
 
             display: flex;
             align-items: center;
-
             justify-content: space-between;
 
-            border-bottom:
-                1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
-
 
         .table-title {
             display: flex;
-
             align-items: center;
 
-            gap: 10px;
+            gap: 9px;
 
-            font-size: 16px;
-
+            font-size: 15px;
             font-weight: 700;
         }
-
 
         .table-title i {
             color: var(--green);
         }
 
-
-        .table-options {
+        .table-tools {
             display: flex;
-
             align-items: center;
+            gap: 8px;
 
-            gap: 7px;
-
-            font-size: 12px;
-
+            font-size: 11px;
             color: #64748b;
         }
 
+        .page-size {
+            height: 32px;
 
-        .small-select {
-            height: 34px;
-
-            border:
-                1px solid var(--border);
+            border: 1px solid var(--border);
 
             border-radius: 6px;
 
             padding: 0 8px;
 
-            background: white;
+            background: #fff;
 
             outline: none;
         }
-
 
         .table-container {
             overflow-x: auto;
         }
 
-
         table {
             width: 100%;
 
-            border-collapse: collapse;
-
             min-width: 1200px;
-        }
 
+            border-collapse: collapse;
+        }
 
         thead th {
             background: #f1f5f9;
 
             color: #334155;
 
-            font-size: 11px;
+            font-size: 10px;
 
             font-weight: 700;
 
@@ -888,155 +510,139 @@
 
             padding: 11px 9px;
 
-            border-bottom:
-                1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
 
             white-space: nowrap;
         }
-
 
         tbody td {
             padding: 10px 9px;
 
-            font-size: 12px;
+            font-size: 11px;
 
-            border-bottom:
-                1px solid #eef2f7;
+            border-bottom: 1px solid #eef2f7;
 
             white-space: nowrap;
         }
-
 
         tbody tr:hover {
             background: #f8fafc;
         }
 
-
         .code {
             font-weight: 700;
-
             color: #1e293b;
         }
 
-
-        .quantity {
+        .number {
+            text-align: right;
             font-weight: 700;
-
-            text-align: right;
         }
 
-
-        .pieces {
-            text-align: right;
-        }
-
-
-        /* =====================================================
+        /* =========================
            STATUS
-        ====================================================== */
+        ========================== */
 
         .status {
             display: inline-flex;
-
-            align-items: center;
 
             padding: 5px 9px;
 
             border-radius: 6px;
 
-            font-size: 10px;
+            font-size: 9px;
 
             font-weight: 700;
-
-            text-transform: uppercase;
         }
 
-
-        .status-disponible {
+        .status.disponible {
             background: #dcfce7;
-
             color: #15803d;
         }
 
-
-        .status-bloque {
+        .status.bloque {
             background: #fef3c7;
-
             color: #b45309;
         }
 
-
-        .status-epuise {
+        .status.epuise {
             background: #e2e8f0;
-
             color: #475569;
         }
 
-
-        .status-perime {
+        .status.perime {
             background: #fee2e2;
-
             color: #dc2626;
         }
 
-
-        /* =====================================================
+        /* =========================
            ACTIONS
-        ====================================================== */
+        ========================== */
 
         .actions {
             display: flex;
-
-            align-items: center;
-
             gap: 5px;
         }
 
+        .action {
+            width: 29px;
+            height: 29px;
 
-        .action-btn {
-            width: 30px;
-            height: 30px;
+            border: 0;
 
             border-radius: 6px;
-
-            border: none;
 
             cursor: pointer;
 
             display: flex;
             align-items: center;
             justify-content: center;
-
-            font-size: 12px;
         }
 
-
-        .action-view {
+        .view {
             background: #f1f5f9;
-
             color: #334155;
         }
 
-
-        .action-edit {
+        .edit {
             background: #dbeafe;
-
             color: #2563eb;
         }
 
-
-        .action-delete {
+        .delete {
             background: #fee2e2;
-
             color: #dc2626;
         }
 
+        /* =========================
+           LOADING / EMPTY
+        ========================== */
 
-        /* =====================================================
-           EMPTY
-        ====================================================== */
+        .loading {
+            padding: 45px;
 
-        .empty-state {
+            text-align: center;
+
+            color: #64748b;
+
+            display: none;
+        }
+
+        .loading i {
+            color: var(--green);
+
+            font-size: 25px;
+
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty {
             display: none;
 
             padding: 55px 20px;
@@ -1046,151 +652,93 @@
             color: #64748b;
         }
 
-
-        .empty-state i {
-            font-size: 45px;
+        .empty i {
+            font-size: 42px;
 
             color: #cbd5e1;
 
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
-
-        .empty-state h3 {
+        .empty h3 {
             color: #334155;
 
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
-
-        /* =====================================================
-           LOADING
-        ====================================================== */
-
-        .loading {
-            display: none;
-
-            padding: 45px;
-
-            text-align: center;
-
-            color: #64748b;
-        }
-
-
-        .loading i {
-            font-size: 25px;
-
-            color: var(--green);
-
-            animation: spin 1s linear infinite;
-        }
-
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-
-        /* =====================================================
-           PAGINATION
-        ====================================================== */
+        /* =========================
+           FOOTER
+        ========================== */
 
         .table-footer {
             padding: 13px 17px;
 
+            border-top: 1px solid var(--border);
+
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
-            border-top:
-                1px solid var(--border);
         }
-
 
         .result-info {
+            font-size: 11px;
             color: #64748b;
-
-            font-size: 12px;
         }
-
 
         .pagination {
             display: flex;
-
-            gap: 5px;
+            gap: 4px;
         }
 
-
         .page-btn {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
 
-            border:
-                1px solid var(--border);
-
-            background: white;
+            border: 1px solid var(--border);
 
             border-radius: 6px;
 
+            background: #fff;
+
             cursor: pointer;
 
-            font-size: 12px;
+            font-size: 11px;
         }
-
-
-        .page-btn:hover {
-            border-color: var(--green);
-
-            color: var(--green);
-        }
-
 
         .page-btn.active {
             background: var(--green);
-
             border-color: var(--green);
-
-            color: white;
+            color: #fff;
         }
 
-
         .page-btn:disabled {
-            opacity: .45;
-
+            opacity: .4;
             cursor: not-allowed;
         }
 
-
-        /* =====================================================
+        /* =========================
            TOAST
-        ====================================================== */
+        ========================== */
 
         .toast-container {
             position: fixed;
 
             right: 20px;
-
             bottom: 20px;
 
-            z-index: 9999;
+            z-index: 1000;
         }
-
 
         .toast {
             min-width: 280px;
 
+            padding: 12px 15px;
+
+            border-radius: 8px;
+
             background: #0f172a;
 
             color: white;
-
-            padding: 13px 15px;
-
-            border-radius: 8px;
 
             box-shadow:
                 0 10px 30px rgba(0,0,0,.18);
@@ -1199,955 +747,663 @@
 
             align-items: center;
 
-            gap: 10px;
+            gap: 9px;
 
             margin-top: 8px;
 
-            font-size: 13px;
-
-            animation:
-                toastIn .25s ease;
+            font-size: 12px;
         }
-
 
         .toast.success i {
             color: #4ade80;
         }
 
-
         .toast.error i {
             color: #f87171;
         }
 
-
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-
-        /* =====================================================
+        /* =========================
            RESPONSIVE
-        ====================================================== */
+        ========================== */
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1100px) {
 
             .filters {
                 grid-template-columns:
                     repeat(3, 1fr);
             }
 
-            .kpi-grid {
+            .kpis {
                 grid-template-columns:
                     repeat(2, 1fr);
             }
         }
 
+        @media (max-width: 700px) {
 
-        @media (max-width: 850px) {
-
-            .sidebar {
-                transform: translateX(-100%);
-
-                transition: .25s;
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main {
-                margin-left: 0;
-
-                width: 100%;
-            }
-
-            .global-search {
-                max-width: none;
-
-                flex: 1;
-            }
-
-            .user-info {
-                display: none;
-            }
-
-            .filters {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-        }
-
-
-        @media (max-width: 600px) {
-
-            .content {
+            .page {
                 padding: 10px;
             }
 
             .page-header {
-                align-items: flex-start;
-
                 flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-buttons {
+                width: 100%;
+            }
+
+            .header-buttons .btn {
+                flex: 1;
             }
 
             .filters {
                 grid-template-columns: 1fr;
             }
 
-            .kpi-grid {
+            .kpis {
                 grid-template-columns: 1fr;
             }
 
-            .header-actions {
-                width: 100%;
-            }
-
-            .header-actions .btn {
-                flex: 1;
+            .search-row {
+                flex-direction: column;
             }
 
             .table-footer {
                 flex-direction: column;
-
-                gap: 12px;
+                gap: 10px;
             }
         }
-
     </style>
 </head>
 
-
 <body>
 
-<div class="app">
-
-
     <!-- =====================================================
-         SIDEBAR
+         TOP BAR
     ====================================================== -->
 
-    <aside class="sidebar" id="sidebar">
+    <header class="topbar">
 
-        <div class="logo">
+        <div class="brand">
 
-            <div class="logo-icon">
+            <div class="brand-icon">
                 <i class="fa-solid fa-snowflake"></i>
             </div>
 
-            <div class="logo-text">
-
-                <strong>
-                    Souf<span>Stock</span>
-                </strong>
-
-                <small>
-                    Gestion de Stock Congelé
-                </small>
-
-            </div>
+            <strong>
+                Souf<span>Stock</span>
+            </strong>
 
         </div>
 
+        <div class="top-actions">
 
-        <nav class="menu">
+            <button
+                class="btn btn-success"
+                id="btnRefresh"
+            >
+                <i class="fa-solid fa-rotate"></i>
+                Actualiser
+            </button>
 
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-house"></i>
-                Tableau de bord
-            </a>
+            <button
+                class="btn btn-blue"
+                id="btnExcel"
+            >
+                <i class="fa-solid fa-file-excel"></i>
+                Excel
+            </button>
 
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-box"></i>
-                Produits
-            </a>
+            <button
+                class="btn btn-danger"
+                id="btnPdf"
+            >
+                <i class="fa-solid fa-file-pdf"></i>
+                PDF
+            </button>
 
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-right-left"></i>
-                Mouvements
-            </a>
+        </div>
 
-            <a href="#" class="menu-item active">
-                <i class="fa-solid fa-location-dot"></i>
-                Stock par Emplacement
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-list"></i>
-                Stock par Article/Lot
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-snowflake"></i>
-                Stock par Chambre
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-temperature-low"></i>
-                Stock par Tunnel
-            </a>
-
-            <div class="menu-separator"></div>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-file-import"></i>
-                Import Stock
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-file-lines"></i>
-                Commandes
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-play"></i>
-                Lancement
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-truck"></i>
-                Expéditions
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-rotate-left"></i>
-                Retours
-            </a>
-
-            <div class="menu-separator"></div>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-users"></i>
-                Utilisateurs
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-gear"></i>
-                Paramètres
-            </a>
-
-        </nav>
-
-    </aside>
-
+    </header>
 
 
     <!-- =====================================================
-         MAIN
+         PAGE
     ====================================================== -->
 
-    <main class="main">
+    <main class="page">
 
 
-        <!-- TOPBAR -->
+        <!-- PAGE HEADER -->
 
-        <header class="topbar">
+        <section class="page-header">
 
-            <button
-                class="menu-toggle"
-                id="menuToggle"
-                type="button"
-            >
-                <i class="fa-solid fa-bars"></i>
-            </button>
+            <div class="title-area">
 
-
-            <div class="global-search">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="text"
-                    id="globalSearch"
-                    placeholder="Rechercher un article, un lot, un emplacement..."
-                >
-
-            </div>
-
-
-            <div class="topbar-right">
-
-                <div class="notification">
-
-                    <i class="fa-solid fa-bell"></i>
-
-                    <span class="notification-badge">
-                        3
-                    </span>
-
+                <div class="page-icon">
+                    <i class="fa-solid fa-location-dot"></i>
                 </div>
 
-
-                <div class="user">
-
-                    <div class="user-avatar">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div class="user-info">
-
-                        <strong>
-                            S.KAOUKABI
-                        </strong>
-
-                        <small>
-                            Gestion Préparateur
-                        </small>
-
-                    </div>
-
-                    <i class="fa-solid fa-chevron-down"></i>
-
-                </div>
-
-            </div>
-
-        </header>
-
-
-
-        <!-- CONTENT -->
-
-        <section class="content">
-
-
-            <!-- =================================================
-                 PAGE HEADER
-            ================================================== -->
-
-            <div class="page-header">
-
-                <div class="page-title">
-
-                    <div class="page-icon">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-
-                    <div>
-
-                        <h1>
-                            Stock par Emplacement
-                        </h1>
-
-                        <p>
-                            Gestion et suivi du stock physique par magasin, emplacement et lot
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="header-actions">
-
-                    <button
-                        class="btn btn-primary"
-                        id="btnAdd"
-                        type="button"
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                        Ajouter
-                    </button>
-
-
-                    <button
-                        class="btn btn-success"
-                        id="btnRefresh"
-                        type="button"
-                    >
-                        <i class="fa-solid fa-rotate"></i>
-                        Actualiser
-                    </button>
-
-
-                    <button
-                        class="btn btn-success"
-                        id="btnExcel"
-                        type="button"
-                    >
-                        <i class="fa-solid fa-file-excel"></i>
-                        Exporter Excel
-                    </button>
-
-
-                    <button
-                        class="btn btn-danger"
-                        id="btnPdf"
-                        type="button"
-                    >
-                        <i class="fa-solid fa-file-pdf"></i>
-                        Exporter PDF
-                    </button>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 FILTERS
-            ================================================== -->
-
-            <div class="filter-card">
-
-                <div class="filters">
-
-
-                    <!-- MAGASIN -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Magasin
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fa-solid fa-warehouse"></i>
-
-                            <select
-                                class="form-control"
-                                id="filterMagasin"
-                            >
-
-                                <option value="">
-                                    Tous les magasins
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- EMPLACEMENT -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Emplacement
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fa-solid fa-location-dot"></i>
-
-                            <select
-                                class="form-control"
-                                id="filterEmplacement"
-                            >
-
-                                <option value="">
-                                    Tous les emplacements
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ARTICLE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Article
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fa-solid fa-box"></i>
-
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="filterArticle"
-                                placeholder="Code ou désignation"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- LOT -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Lot
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fa-solid fa-barcode"></i>
-
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="filterLot"
-                                placeholder="Numéro du lot"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- STATUT -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Statut
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fa-solid fa-layer-group"></i>
-
-                            <select
-                                class="form-control"
-                                id="filterStatut"
-                            >
-
-                                <option value="">
-                                    Tous les statuts
-                                </option>
-
-                                <option value="DISPONIBLE">
-                                    DISPONIBLE
-                                </option>
-
-                                <option value="BLOQUE">
-                                    BLOQUE
-                                </option>
-
-                                <option value="EPUISE">
-                                    EPUISE
-                                </option>
-
-                                <option value="PERIME">
-                                    PERIME
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="search-line">
-
-                    <div class="input-wrap">
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="searchStock"
-                            placeholder="Rechercher dans le stock : article, désignation, lot, emplacement..."
-                        >
-
-                    </div>
-
-
-                    <button
-                        class="btn btn-primary"
-                        id="btnSearch"
-                        type="button"
-                    >
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                        Rechercher
-
-                    </button>
-
-
-                    <button
-                        class="btn btn-gray"
-                        id="btnReset"
-                        type="button"
-                    >
-
-                        <i class="fa-solid fa-rotate-left"></i>
-
-                        Effacer
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 KPI
-            ================================================== -->
-
-            <div class="kpi-grid">
-
-
-                <div class="kpi green">
-
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-box"></i>
-                    </div>
-
-                    <div>
-
-                        <div class="kpi-label">
-                            Nombre d'articles
-                        </div>
-
-                        <div
-                            class="kpi-value"
-                            id="kpiArticles"
-                        >
-                            0
-                        </div>
-
-                        <div class="kpi-sub">
-                            Articles avec stock
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="kpi blue">
-
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-weight-hanging"></i>
-                    </div>
-
-                    <div>
-
-                        <div class="kpi-label">
-                            Quantité totale
-                        </div>
-
-                        <div
-                            class="kpi-value"
-                            id="kpiQuantity"
-                        >
-                            0.00
-                        </div>
-
-                        <div class="kpi-sub">
-                            KG
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="kpi orange">
-
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-
-                    <div>
-
-                        <div class="kpi-label">
-                            Emplacements utilisés
-                        </div>
-
-                        <div
-                            class="kpi-value"
-                            id="kpiEmplacements"
-                        >
-                            0
-                        </div>
-
-                        <div class="kpi-sub">
-                            Emplacements
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="kpi purple">
-
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-cubes"></i>
-                    </div>
-
-                    <div>
-
-                        <div class="kpi-label">
-                            Nombre de lots
-                        </div>
-
-                        <div
-                            class="kpi-value"
-                            id="kpiLots"
-                        >
-                            0
-                        </div>
-
-                        <div class="kpi-sub">
-                            Lots en stock
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 TABLE
-            ================================================== -->
-
-            <div class="table-card">
-
-
-                <div class="table-header">
-
-                    <div class="table-title">
-
-                        <i class="fa-solid fa-list"></i>
-
-                        Liste du stock par emplacement
-
-                    </div>
-
-
-                    <div class="table-options">
-
-                        <span>
-                            Affichage :
-                        </span>
-
-                        <select
-                            class="small-select"
-                            id="pageSize"
-                        >
-
-                            <option value="25">
-                                25
-                            </option>
-
-                            <option value="50" selected>
-                                50
-                            </option>
-
-                            <option value="100">
-                                100
-                            </option>
-
-                        </select>
-
-                        <span>
-                            lignes
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- LOADING -->
-
-                <div
-                    class="loading"
-                    id="loading"
-                >
-
-                    <i class="fa-solid fa-spinner"></i>
-
-                    <div style="margin-top:10px;">
-                        Chargement du stock...
-                    </div>
-
-                </div>
-
-
-
-                <!-- EMPTY -->
-
-                <div
-                    class="empty-state"
-                    id="emptyState"
-                >
-
-                    <i class="fa-solid fa-box-open"></i>
-
-                    <h3>
-                        Aucun stock trouvé
-                    </h3>
+                <div>
+
+                    <h1>
+                        Stock par Emplacement
+                    </h1>
 
                     <p>
-                        Aucun enregistrement ne correspond aux critères.
+                        Gestion et suivi du stock physique par magasin, emplacement et lot
                     </p>
 
                 </div>
 
+            </div>
 
 
-                <!-- TABLE -->
+            <div class="header-buttons">
 
-                <div
-                    class="table-container"
-                    id="tableContainer"
+                <button
+                    class="btn btn-primary"
+                    id="btnAdd"
                 >
+                    <i class="fa-solid fa-plus"></i>
+                    Ajouter
+                </button>
 
-                    <table>
+            </div>
 
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Magasin
-                                </th>
-
-                                <th>
-                                    Emplacement
-                                </th>
-
-                                <th>
-                                    Article
-                                </th>
-
-                                <th>
-                                    Désignation
-                                </th>
-
-                                <th>
-                                    Lot
-                                </th>
-
-                                <th style="text-align:right;">
-                                    Quantité KG
-                                </th>
-
-                                <th style="text-align:right;">
-                                    Pièces
-                                </th>
-
-                                <th>
-                                    Date fabrication
-                                </th>
-
-                                <th>
-                                    DLC
-                                </th>
-
-                                <th>
-                                    Statut
-                                </th>
-
-                                <th>
-                                    Actions
-                                </th>
-
-                            </tr>
-
-                        </thead>
+        </section>
 
 
-                        <tbody id="stockTableBody">
+        <!-- FILTERS -->
 
-                            <!--
-                                Les lignes seront chargées
-                                depuis stock_emplacements
-                            -->
+        <section class="filter-card">
 
-                        </tbody>
+            <div class="filters">
 
-                    </table>
+                <div class="field">
+
+                    <label>
+                        Magasin
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-warehouse"></i>
+
+                        <select
+                            class="control"
+                            id="filterMagasin"
+                        >
+
+                            <option value="">
+                                Tous les magasins
+                            </option>
+
+                        </select>
+
+                    </div>
 
                 </div>
 
 
+                <div class="field">
 
-                <!-- FOOTER -->
+                    <label>
+                        Emplacement
+                    </label>
 
-                <div class="table-footer">
+                    <div class="input-box">
 
-                    <div
-                        class="result-info"
-                        id="resultInfo"
-                    >
-                        Affichage de 0 à 0 sur 0 lignes
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        <select
+                            class="control"
+                            id="filterEmplacement"
+                        >
+
+                            <option value="">
+                                Tous les emplacements
+                            </option>
+
+                        </select>
+
                     </div>
 
+                </div>
 
-                    <div
-                        class="pagination"
-                        id="pagination"
-                    >
+
+                <div class="field">
+
+                    <label>
+                        Article
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-box"></i>
+
+                        <input
+                            type="text"
+                            class="control"
+                            id="filterArticle"
+                            placeholder="Article ou désignation"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Lot
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-barcode"></i>
+
+                        <input
+                            type="text"
+                            class="control"
+                            id="filterLot"
+                            placeholder="Numéro du lot"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Statut
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-layer-group"></i>
+
+                        <select
+                            class="control"
+                            id="filterStatut"
+                        >
+
+                            <option value="">
+                                Tous les statuts
+                            </option>
+
+                            <option value="DISPONIBLE">
+                                DISPONIBLE
+                            </option>
+
+                            <option value="BLOQUE">
+                                BLOQUE
+                            </option>
+
+                            <option value="EPUISE">
+                                EPUISE
+                            </option>
+
+                            <option value="PERIME">
+                                PERIME
+                            </option>
+
+                        </select>
+
                     </div>
 
                 </div>
 
             </div>
 
+
+            <div class="search-row">
+
+                <div class="input-box">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        class="control"
+                        id="search"
+                        placeholder="Rechercher article, lot, emplacement, désignation..."
+                    >
+
+                </div>
+
+
+                <button
+                    class="btn btn-primary"
+                    id="btnSearch"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    Rechercher
+                </button>
+
+
+                <button
+                    class="btn btn-gray"
+                    id="btnReset"
+                >
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Effacer
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- KPI -->
+
+        <section class="kpis">
+
+            <div class="kpi green">
+
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+
+                <div>
+
+                    <div class="kpi-label">
+                        Articles
+                    </div>
+
+                    <div
+                        class="kpi-value"
+                        id="kpiArticles"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="kpi blue">
+
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+
+                <div>
+
+                    <div class="kpi-label">
+                        Quantité totale
+                    </div>
+
+                    <div
+                        class="kpi-value"
+                        id="kpiQuantity"
+                    >
+                        0.00
+                    </div>
+
+                    <div class="kpi-unit">
+                        KG
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="kpi orange">
+
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div>
+
+                    <div class="kpi-label">
+                        Emplacements utilisés
+                    </div>
+
+                    <div
+                        class="kpi-value"
+                        id="kpiEmplacements"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="kpi purple">
+
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-cubes"></i>
+                </div>
+
+                <div>
+
+                    <div class="kpi-label">
+                        Lots
+                    </div>
+
+                    <div
+                        class="kpi-value"
+                        id="kpiLots"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TABLE -->
+
+        <section class="table-card">
+
+            <div class="table-header">
+
+                <div class="table-title">
+
+                    <i class="fa-solid fa-list"></i>
+
+                    Liste du stock par emplacement
+
+                </div>
+
+
+                <div class="table-tools">
+
+                    <span>
+                        Lignes :
+                    </span>
+
+                    <select
+                        class="page-size"
+                        id="pageSize"
+                    >
+
+                        <option value="25">
+                            25
+                        </option>
+
+                        <option
+                            value="50"
+                            selected
+                        >
+                            50
+                        </option>
+
+                        <option value="100">
+                            100
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- LOADING -->
+
+            <div
+                class="loading"
+                id="loading"
+            >
+
+                <i class="fa-solid fa-spinner"></i>
+
+                <div style="margin-top:10px;">
+                    Chargement du stock...
+                </div>
+
+            </div>
+
+
+            <!-- EMPTY -->
+
+            <div
+                class="empty"
+                id="empty"
+            >
+
+                <i class="fa-solid fa-box-open"></i>
+
+                <h3>
+                    Aucun stock trouvé
+                </h3>
+
+                <p>
+                    Aucun enregistrement ne correspond aux critères.
+                </p>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div
+                class="table-container"
+                id="tableContainer"
+            >
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Magasin
+                            </th>
+
+                            <th>
+                                Emplacement
+                            </th>
+
+                            <th>
+                                Article
+                            </th>
+
+                            <th>
+                                Désignation
+                            </th>
+
+                            <th>
+                                Lot
+                            </th>
+
+                            <th style="text-align:right;">
+                                Quantité KG
+                            </th>
+
+                            <th style="text-align:right;">
+                                Pièces
+                            </th>
+
+                            <th>
+                                Fabrication
+                            </th>
+
+                            <th>
+                                DLC
+                            </th>
+
+                            <th>
+                                Statut
+                            </th>
+
+                            <th>
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="tableBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="table-footer">
+
+                <div
+                    class="result-info"
+                    id="resultInfo"
+                >
+                    Affichage de 0 à 0 sur 0
+                </div>
+
+
+                <div
+                    class="pagination"
+                    id="pagination"
+                >
+                </div>
+
+            </div>
 
         </section>
 
     </main>
 
-</div>
 
+    <!-- TOAST -->
 
+    <div
+        class="toast-container"
+        id="toastContainer"
+    ></div>
 
-<!-- =====================================================
-     TOAST
-====================================================== -->
-
-<div
-    class="toast-container"
-    id="toastContainer"
-></div>
-
-
-
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
 
 <script>
 
     /* =====================================================
-       VARIABLES
+       DATA
     ====================================================== */
 
     let allStock = [];
-
     let filteredStock = [];
 
     let currentPage = 1;
-
     let pageSize = 50;
-
 
 
     /* =====================================================
@@ -2155,71 +1411,80 @@
     ====================================================== */
 
     const tableBody =
-        document.getElementById("stockTableBody");
+        document.getElementById("tableBody");
 
     const loading =
         document.getElementById("loading");
 
-    const emptyState =
-        document.getElementById("emptyState");
+    const empty =
+        document.getElementById("empty");
 
     const tableContainer =
         document.getElementById("tableContainer");
-
-    const pagination =
-        document.getElementById("pagination");
-
 
 
     /* =====================================================
        TOAST
     ====================================================== */
 
-    function showToast(
-        message,
-        type = "success"
-    ) {
+    function toast(message, type = "success") {
 
-        const container =
+        const box =
             document.getElementById(
                 "toastContainer"
             );
 
-        const toast =
+        const element =
             document.createElement("div");
 
-        toast.className =
-            `toast ${type}`;
+        element.className =
+            "toast " + type;
 
-        toast.innerHTML = `
-
+        element.innerHTML = `
             <i class="fa-solid ${
                 type === "error"
                     ? "fa-circle-exclamation"
                     : "fa-circle-check"
             }"></i>
 
-            <span>${message}</span>
-
+            <span>${escapeHTML(message)}</span>
         `;
 
-        container.appendChild(toast);
+        box.appendChild(element);
 
         setTimeout(() => {
-
-            toast.remove();
-
-        }, 3500);
-
+            element.remove();
+        }, 3000);
     }
 
 
-
     /* =====================================================
-       FORMAT NUMBER
+       ESCAPE
     ====================================================== */
 
-    function formatNumber(value) {
+    function escapeHTML(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    /* =====================================================
+       NUMBER
+    ====================================================== */
+
+    function number(value) {
 
         return Number(value || 0)
             .toLocaleString(
@@ -2229,79 +1494,71 @@
                     maximumFractionDigits: 2
                 }
             );
-
     }
 
 
-
     /* =====================================================
-       FORMAT DATE
+       DATE
     ====================================================== */
 
-    function formatDate(value) {
+    function dateFR(value) {
 
-        if (!value) {
-            return "";
-        }
+        if (!value) return "";
 
         const date =
             new Date(value);
 
-        if (isNaN(date.getTime())) {
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
             return value;
         }
 
         return date.toLocaleDateString(
             "fr-FR"
         );
-
     }
 
 
-
     /* =====================================================
-       STATUS HTML
+       STATUS
     ====================================================== */
 
-    function getStatusHTML(status) {
+    function statusHTML(value) {
 
-        const value =
-            String(status || "")
+        const status =
+            String(value || "")
                 .toUpperCase();
 
-        let className =
-            "status-disponible";
+        let cls = "disponible";
 
-        if (value === "BLOQUE") {
-            className =
-                "status-bloque";
+        if (status === "BLOQUE") {
+            cls = "bloque";
         }
 
-        if (value === "EPUISE") {
-            className =
-                "status-epuise";
+        if (status === "EPUISE") {
+            cls = "epuise";
         }
 
-        if (value === "PERIME") {
-            className =
-                "status-perime";
+        if (status === "PERIME") {
+            cls = "perime";
         }
 
         return `
-            <span class="status ${className}">
-                ${value || "DISPONIBLE"}
+            <span class="status ${cls}">
+                ${escapeHTML(status)}
             </span>
         `;
-
     }
 
 
-
     /* =====================================================
-       RENDER TABLE
+       RENDER
     ====================================================== */
 
-    function renderTable() {
+    function render() {
 
         tableBody.innerHTML = "";
 
@@ -2313,10 +1570,10 @@
             tableContainer.style.display =
                 "none";
 
-            emptyState.style.display =
+            empty.style.display =
                 "block";
 
-            renderPagination();
+            updatePagination();
 
             return;
         }
@@ -2324,12 +1581,13 @@
         tableContainer.style.display =
             "block";
 
-        emptyState.style.display =
+        empty.style.display =
             "none";
 
 
         const start =
-            (currentPage - 1) * pageSize;
+            (currentPage - 1) *
+            pageSize;
 
         const end =
             Math.min(
@@ -2354,46 +1612,68 @@
 
                 <td>
                     <span class="code">
-                        ${escapeHTML(item.magasin_code)}
+                        ${escapeHTML(
+                            item.magasin_code
+                        )}
                     </span>
                 </td>
 
                 <td>
                     <span class="code">
-                        ${escapeHTML(item.emplacement_code)}
+                        ${escapeHTML(
+                            item.emplacement_code
+                        )}
                     </span>
                 </td>
 
                 <td>
-                    ${escapeHTML(item.article)}
+                    <span class="code">
+                        ${escapeHTML(
+                            item.article
+                        )}
+                    </span>
                 </td>
 
                 <td>
-                    ${escapeHTML(item.designation || "")}
+                    ${escapeHTML(
+                        item.designation || ""
+                    )}
                 </td>
 
                 <td>
-                    ${escapeHTML(item.lot)}
+                    ${escapeHTML(
+                        item.lot
+                    )}
                 </td>
 
-                <td class="quantity">
-                    ${formatNumber(item.quantite_kg)}
+                <td class="number">
+                    ${number(
+                        item.quantite_kg
+                    )}
                 </td>
 
-                <td class="pieces">
-                    ${Number(item.pieces || 0).toLocaleString("fr-FR")}
+                <td class="number">
+                    ${Number(
+                        item.pieces || 0
+                    ).toLocaleString("fr-FR")}
                 </td>
 
                 <td>
-                    ${formatDate(item.date_fabrication)}
+                    ${dateFR(
+                        item.date_fabrication
+                    )}
                 </td>
 
                 <td>
-                    ${formatDate(item.dlc)}
+                    ${dateFR(
+                        item.dlc
+                    )}
                 </td>
 
                 <td>
-                    ${getStatusHTML(item.statut)}
+                    ${statusHTML(
+                        item.statut
+                    )}
                 </td>
 
                 <td>
@@ -2401,7 +1681,7 @@
                     <div class="actions">
 
                         <button
-                            class="action-btn action-view"
+                            class="action view"
                             title="Voir"
                             onclick="viewStock(${item.id})"
                         >
@@ -2409,7 +1689,7 @@
                         </button>
 
                         <button
-                            class="action-btn action-edit"
+                            class="action edit"
                             title="Modifier"
                             onclick="editStock(${item.id})"
                         >
@@ -2417,7 +1697,7 @@
                         </button>
 
                         <button
-                            class="action-btn action-delete"
+                            class="action delete"
                             title="Supprimer"
                             onclick="deleteStock(${item.id})"
                         >
@@ -2427,196 +1707,41 @@
                     </div>
 
                 </td>
-
             `;
 
             tableBody.appendChild(tr);
-
         });
 
 
         document.getElementById(
             "resultInfo"
         ).textContent =
-            `Affichage de ${start + 1} à ${end} sur ${total} lignes`;
+            `Affichage de ${start + 1} à ${end} sur ${total}`;
 
 
-        renderPagination();
-
+        updatePagination();
     }
-
-
-
-    /* =====================================================
-       PAGINATION
-    ====================================================== */
-
-    function renderPagination() {
-
-        pagination.innerHTML = "";
-
-        const totalPages =
-            Math.ceil(
-                filteredStock.length /
-                pageSize
-            );
-
-        if (totalPages <= 1) {
-            return;
-        }
-
-
-        const prev =
-            document.createElement("button");
-
-        prev.className =
-            "page-btn";
-
-        prev.innerHTML =
-            '<i class="fa-solid fa-chevron-left"></i>';
-
-        prev.disabled =
-            currentPage === 1;
-
-        prev.onclick = () => {
-
-            if (currentPage > 1) {
-
-                currentPage--;
-
-                renderTable();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
-            }
-
-        };
-
-        pagination.appendChild(prev);
-
-
-        const maxButtons = 5;
-
-        let startPage =
-            Math.max(
-                1,
-                currentPage - 2
-            );
-
-        let endPage =
-            Math.min(
-                totalPages,
-                startPage + maxButtons - 1
-            );
-
-
-        if (
-            endPage - startPage <
-            maxButtons - 1
-        ) {
-
-            startPage =
-                Math.max(
-                    1,
-                    endPage - maxButtons + 1
-                );
-
-        }
-
-
-        for (
-            let i = startPage;
-            i <= endPage;
-            i++
-        ) {
-
-            const button =
-                document.createElement("button");
-
-            button.className =
-                "page-btn";
-
-            if (i === currentPage) {
-                button.classList.add("active");
-            }
-
-            button.textContent = i;
-
-            button.onclick = () => {
-
-                currentPage = i;
-
-                renderTable();
-
-            };
-
-            pagination.appendChild(button);
-
-        }
-
-
-        const next =
-            document.createElement("button");
-
-        next.className =
-            "page-btn";
-
-        next.innerHTML =
-            '<i class="fa-solid fa-chevron-right"></i>';
-
-        next.disabled =
-            currentPage === totalPages;
-
-        next.onclick = () => {
-
-            if (
-                currentPage <
-                totalPages
-            ) {
-
-                currentPage++;
-
-                renderTable();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
-            }
-
-        };
-
-        pagination.appendChild(next);
-
-    }
-
 
 
     /* =====================================================
        KPI
     ====================================================== */
 
-    function updateKPIs() {
+    function updateKPI() {
 
         const articles =
             new Set(
-                filteredStock
-                    .map(
-                        x => x.article
-                    )
+                filteredStock.map(
+                    x => x.article
+                )
             ).size;
 
 
         const lots =
             new Set(
-                filteredStock
-                    .map(
-                        x => x.lot
-                    )
+                filteredStock.map(
+                    x => x.lot
+                )
             ).size;
 
 
@@ -2652,7 +1777,7 @@
         document.getElementById(
             "kpiQuantity"
         ).textContent =
-            formatNumber(quantity);
+            number(quantity);
 
 
         document.getElementById(
@@ -2665,9 +1790,7 @@
             "kpiLots"
         ).textContent =
             lots.toLocaleString("fr-FR");
-
     }
-
 
 
     /* =====================================================
@@ -2679,17 +1802,13 @@
         const magasin =
             document.getElementById(
                 "filterMagasin"
-            ).value
-                .trim()
-                .toLowerCase();
+            ).value.toLowerCase();
 
 
         const emplacement =
             document.getElementById(
                 "filterEmplacement"
-            ).value
-                .trim()
-                .toLowerCase();
+            ).value.toLowerCase();
 
 
         const article =
@@ -2711,14 +1830,12 @@
         const statut =
             document.getElementById(
                 "filterStatut"
-            ).value
-                .trim()
-                .toLowerCase();
+            ).value.toLowerCase();
 
 
         const search =
             document.getElementById(
-                "searchStock"
+                "search"
             ).value
                 .trim()
                 .toLowerCase();
@@ -2730,15 +1847,10 @@
                 const text = [
 
                     item.magasin_code,
-
                     item.emplacement_code,
-
                     item.article,
-
                     item.designation,
-
                     item.lot,
-
                     item.statut
 
                 ]
@@ -2749,41 +1861,45 @@
 
                 return (
 
-                    (!magasin ||
+                    (
+                        !magasin ||
                         String(
                             item.magasin_code || ""
-                        ).toLowerCase() === magasin
+                        ).toLowerCase()
+                        === magasin
                     )
 
                     &&
 
-                    (!emplacement ||
+                    (
+                        !emplacement ||
                         String(
                             item.emplacement_code || ""
-                        ).toLowerCase() === emplacement
+                        ).toLowerCase()
+                        === emplacement
                     )
 
                     &&
 
-                    (!article ||
-                        (
-                            String(
-                                item.article || ""
-                            )
-                            .toLowerCase()
-                            .includes(article)
-                            ||
-                            String(
-                                item.designation || ""
-                            )
-                            .toLowerCase()
-                            .includes(article)
+                    (
+                        !article ||
+                        String(
+                            item.article || ""
                         )
+                        .toLowerCase()
+                        .includes(article)
+                        ||
+                        String(
+                            item.designation || ""
+                        )
+                        .toLowerCase()
+                        .includes(article)
                     )
 
                     &&
 
-                    (!lot ||
+                    (
+                        !lot ||
                         String(
                             item.lot || ""
                         )
@@ -2793,55 +1909,176 @@
 
                     &&
 
-                    (!statut ||
+                    (
+                        !statut ||
                         String(
                             item.statut || ""
-                        ).toLowerCase() === statut
+                        ).toLowerCase()
+                        === statut
                     )
 
                     &&
 
-                    (!search ||
+                    (
+                        !search ||
                         text.includes(search)
                     )
 
                 );
-
             });
 
 
         currentPage = 1;
 
-        updateKPIs();
+        updateKPI();
 
-        renderTable();
-
+        render();
     }
-
 
 
     /* =====================================================
-       ESCAPE HTML
+       PAGINATION
     ====================================================== */
 
-    function escapeHTML(value) {
+    function updatePagination() {
 
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return "";
+        const box =
+            document.getElementById(
+                "pagination"
+            );
+
+        box.innerHTML = "";
+
+        const totalPages =
+            Math.ceil(
+                filteredStock.length /
+                pageSize
+            );
+
+        if (totalPages <= 1) {
+            return;
         }
 
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
 
+        const previous =
+            document.createElement("button");
+
+        previous.className =
+            "page-btn";
+
+        previous.innerHTML =
+            `<i class="fa-solid fa-chevron-left"></i>`;
+
+        previous.disabled =
+            currentPage === 1;
+
+        previous.onclick = () => {
+
+            if (currentPage > 1) {
+
+                currentPage--;
+
+                render();
+            }
+        };
+
+        box.appendChild(previous);
+
+
+        for (
+            let i = 1;
+            i <= totalPages;
+            i++
+        ) {
+
+            if (
+                totalPages > 7 &&
+                i > 3 &&
+                i < totalPages - 2 &&
+                Math.abs(i - currentPage) > 1
+            ) {
+                if (
+                    i === 4 ||
+                    i === totalPages - 3
+                ) {
+
+                    const dots =
+                        document.createElement(
+                            "button"
+                        );
+
+                    dots.className =
+                        "page-btn";
+
+                    dots.textContent =
+                        "...";
+
+                    dots.disabled = true;
+
+                    box.appendChild(dots);
+                }
+
+                continue;
+            }
+
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.className =
+                "page-btn";
+
+            if (
+                i === currentPage
+            ) {
+                button.classList.add(
+                    "active"
+                );
+            }
+
+            button.textContent =
+                i;
+
+            button.onclick = () => {
+
+                currentPage = i;
+
+                render();
+            };
+
+            box.appendChild(button);
+        }
+
+
+        const next =
+            document.createElement("button");
+
+        next.className =
+            "page-btn";
+
+        next.innerHTML =
+            `<i class="fa-solid fa-chevron-right"></i>`;
+
+        next.disabled =
+            currentPage === totalPages;
+
+        next.onclick = () => {
+
+            if (
+                currentPage <
+                totalPages
+            ) {
+
+                currentPage++;
+
+                render();
+            }
+        };
+
+        box.appendChild(next);
     }
-
 
 
     /* =====================================================
@@ -2856,39 +2093,30 @@
         tableContainer.style.display =
             "none";
 
-        emptyState.style.display =
+        empty.style.display =
             "none";
 
 
         try {
 
-            /*
-             * IMPORTANT
-             *
-             * Ici on branchera ton client
-             * Supabase existant.
-             *
-             * Exemple :
-             *
-             * const { data, error } =
-             *     await supabase
-             *       .from("stock_emplacements")
-             *       .select("*")
-             *       .order("id", {
-             *           ascending: false
-             *       });
-             */
-
-
             if (
-                window.supabaseClient
+                typeof supabase === "undefined"
             ) {
+
+                /*
+                 * Pour l'instant aucune
+                 * donnée fictive n'est créée.
+                 */
+
+                allStock = [];
+
+            } else {
 
                 const {
                     data,
                     error
                 } =
-                    await window.supabaseClient
+                    await supabase
                         .from(
                             "stock_emplacements"
                         )
@@ -2908,19 +2136,6 @@
 
                 allStock =
                     data || [];
-
-            }
-
-            else {
-
-                /*
-                 * Aucun client DB détecté.
-                 * On garde la liste vide
-                 * plutôt que d'inventer des données.
-                 */
-
-                allStock = [];
-
             }
 
 
@@ -2928,19 +2143,17 @@
                 [...allStock];
 
 
-            loadMagasins();
+            loadFilterValues();
 
-            loadEmplacements();
+            updateKPI();
 
-            updateKPIs();
-
-            renderTable();
+            render();
 
 
         } catch (error) {
 
             console.error(
-                "[STOCK EMPLACEMENTS]",
+                "Erreur stock_emplacements:",
                 error
             );
 
@@ -2948,119 +2161,47 @@
 
             filteredStock = [];
 
-            updateKPIs();
+            updateKPI();
 
-            renderTable();
+            render();
 
-            showToast(
+            toast(
                 "Erreur lors du chargement du stock.",
                 "error"
             );
 
-        }
-
-        finally {
+        } finally {
 
             loading.style.display =
                 "none";
-
         }
-
     }
 
 
-
     /* =====================================================
-       LOAD MAGASINS
+       FILTER VALUES
     ====================================================== */
 
-    function loadMagasins() {
+    function loadFilterValues() {
 
-        const select =
+        const magasinSelect =
             document.getElementById(
                 "filterMagasin"
             );
 
-
-        const current =
-            select.value;
-
-
-        const values =
-            [
-                ...new Set(
-                    allStock
-                        .map(
-                            item =>
-                                item.magasin_code
-                        )
-                        .filter(Boolean)
-                )
-            ]
-            .sort();
-
-
-        select.innerHTML = `
-
-            <option value="">
-                Tous les magasins
-            </option>
-
-        `;
-
-
-        values.forEach(
-            value => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    value;
-
-                option.textContent =
-                    value;
-
-                select.appendChild(
-                    option
-                );
-
-            }
-        );
-
-
-        select.value =
-            current;
-
-    }
-
-
-
-    /* =====================================================
-       LOAD EMPLACEMENTS
-    ====================================================== */
-
-    function loadEmplacements() {
-
-        const select =
+        const emplacementSelect =
             document.getElementById(
                 "filterEmplacement"
             );
 
 
-        const current =
-            select.value;
-
-
-        const values =
+        const magasins =
             [
                 ...new Set(
                     allStock
                         .map(
-                            item =>
-                                item.emplacement_code
+                            x =>
+                                x.magasin_code
                         )
                         .filter(Boolean)
                 )
@@ -3068,46 +2209,73 @@
             .sort();
 
 
-        select.innerHTML = `
+        const emplacements =
+            [
+                ...new Set(
+                    allStock
+                        .map(
+                            x =>
+                                x.emplacement_code
+                        )
+                        .filter(Boolean)
+                )
+            ]
+            .sort();
 
-            <option value="">
+
+        magasinSelect.innerHTML =
+            `<option value="">
+                Tous les magasins
+            </option>`;
+
+
+        emplacementSelect.innerHTML =
+            `<option value="">
                 Tous les emplacements
-            </option>
-
-        `;
+            </option>`;
 
 
-        values.forEach(
-            value => {
+        magasins.forEach(value => {
 
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    value;
-
-                option.textContent =
-                    value;
-
-                select.appendChild(
-                    option
+            const option =
+                document.createElement(
+                    "option"
                 );
 
-            }
-        );
+            option.value =
+                value;
+
+            option.textContent =
+                value;
+
+            magasinSelect.appendChild(
+                option
+            );
+        });
 
 
-        select.value =
-            current;
+        emplacements.forEach(value => {
 
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                value;
+
+            option.textContent =
+                value;
+
+            emplacementSelect.appendChild(
+                option
+            );
+        });
     }
 
 
-
     /* =====================================================
-       VIEW
+       ACTIONS
     ====================================================== */
 
     function viewStock(id) {
@@ -3119,64 +2287,30 @@
                     Number(id)
             );
 
-        if (!item) {
-            return;
-        }
-
+        if (!item) return;
 
         alert(
-            [
-                `Magasin : ${item.magasin_code}`,
-                `Emplacement : ${item.emplacement_code}`,
-                `Article : ${item.article}`,
-                `Désignation : ${item.designation || ""}`,
-                `Lot : ${item.lot}`,
-                `Quantité KG : ${item.quantite_kg}`,
-                `Pièces : ${item.pieces}`,
-                `Date fabrication : ${formatDate(item.date_fabrication)}`,
-                `DLC : ${formatDate(item.dlc)}`,
-                `Statut : ${item.statut}`
-            ].join("\n")
+            `Magasin : ${item.magasin_code}\n` +
+            `Emplacement : ${item.emplacement_code}\n` +
+            `Article : ${item.article}\n` +
+            `Désignation : ${item.designation || ""}\n` +
+            `Lot : ${item.lot}\n` +
+            `Quantité : ${item.quantite_kg} KG\n` +
+            `Pièces : ${item.pieces}\n` +
+            `Fabrication : ${dateFR(item.date_fabrication)}\n` +
+            `DLC : ${dateFR(item.dlc)}\n` +
+            `Statut : ${item.statut}`
         );
-
     }
 
-
-
-    /* =====================================================
-       EDIT
-    ====================================================== */
 
     function editStock(id) {
 
-        const item =
-            allStock.find(
-                x =>
-                    Number(x.id) ===
-                    Number(id)
-            );
-
-        if (!item) {
-            return;
-        }
-
-
-        /*
-         * Le modal Ajouter/Modifier
-         * sera branché ici dans la prochaine étape.
-         */
-
-        showToast(
+        toast(
             `Modification de l'enregistrement ${id}.`
         );
-
     }
 
-
-
-    /* =====================================================
-       DELETE
-    ====================================================== */
 
     async function deleteStock(id) {
 
@@ -3187,33 +2321,30 @@
                     Number(id)
             );
 
-        if (!item) {
-            return;
-        }
+        if (!item) return;
 
 
-        const confirmed =
+        const confirmDelete =
             confirm(
-                `Voulez-vous supprimer le stock du lot ${item.lot} à l'emplacement ${item.emplacement_code} ?`
+                `Supprimer le stock du lot ${item.lot} ?`
             );
 
 
-        if (!confirmed) {
+        if (!confirmDelete) {
             return;
         }
 
 
         if (
-            !window.supabaseClient
+            typeof supabase === "undefined"
         ) {
 
-            showToast(
-                "Connexion à la base de données non disponible.",
+            toast(
+                "Supabase n'est pas chargé.",
                 "error"
             );
 
             return;
-
         }
 
 
@@ -3222,7 +2353,7 @@
             const {
                 error
             } =
-                await window.supabaseClient
+                await supabase
                     .from(
                         "stock_emplacements"
                     )
@@ -3238,27 +2369,23 @@
             }
 
 
-            showToast(
+            toast(
                 "Stock supprimé avec succès."
             );
 
 
             await loadStock();
 
-
         } catch (error) {
 
             console.error(error);
 
-            showToast(
+            toast(
                 "Erreur lors de la suppression.",
                 "error"
             );
-
         }
-
     }
-
 
 
     /* =====================================================
@@ -3308,13 +2435,10 @@
                 ).value = "";
 
                 document.getElementById(
-                    "searchStock"
+                    "search"
                 ).value = "";
 
-                currentPage = 1;
-
                 applyFilters();
-
             }
         );
 
@@ -3332,8 +2456,7 @@
 
                 currentPage = 1;
 
-                renderTable();
-
+                render();
             }
         );
 
@@ -3366,10 +2489,7 @@
         .getElementById("filterArticle")
         .addEventListener(
             "input",
-            debounce(
-                applyFilters,
-                300
-            )
+            applyFilters
         );
 
 
@@ -3377,41 +2497,15 @@
         .getElementById("filterLot")
         .addEventListener(
             "input",
-            debounce(
-                applyFilters,
-                300
-            )
+            applyFilters
         );
 
 
     document
-        .getElementById("searchStock")
+        .getElementById("search")
         .addEventListener(
             "input",
-            debounce(
-                applyFilters,
-                300
-            )
-        );
-
-
-    document
-        .getElementById("globalSearch")
-        .addEventListener(
-            "input",
-            debounce(
-                event => {
-
-                    document.getElementById(
-                        "searchStock"
-                    ).value =
-                        event.target.value;
-
-                    applyFilters();
-
-                },
-                300
-            )
+            applyFilters
         );
 
 
@@ -3421,61 +2515,37 @@
             "click",
             () => {
 
-                showToast(
-                    "Le formulaire Ajouter sera ajouté dans l'étape CRUD."
+                toast(
+                    "Le formulaire Ajouter sera intégré dans la prochaine étape."
                 );
-
             }
         );
 
 
-    /* =====================================================
-       DEBOUNCE
-    ====================================================== */
-
-    function debounce(
-        fn,
-        delay
-    ) {
-
-        let timer;
-
-        return function () {
-
-            clearTimeout(timer);
-
-            timer =
-                setTimeout(
-                    () => fn.apply(
-                        this,
-                        arguments
-                    ),
-                    delay
-                );
-
-        };
-
-    }
-
-
-
-    /* =====================================================
-       MOBILE MENU
-    ====================================================== */
-
     document
-        .getElementById("menuToggle")
+        .getElementById("btnExcel")
         .addEventListener(
             "click",
             () => {
 
-                document
-                    .getElementById("sidebar")
-                    .classList.toggle("open");
-
+                toast(
+                    "Export Excel sera intégré dans la prochaine étape."
+                );
             }
         );
 
+
+    document
+        .getElementById("btnPdf")
+        .addEventListener(
+            "click",
+            () => {
+
+                toast(
+                    "Export PDF sera intégré dans la prochaine étape."
+                );
+            }
+        );
 
 
     /* =====================================================
@@ -3484,11 +2554,7 @@
 
     document.addEventListener(
         "DOMContentLoaded",
-        () => {
-
-            loadStock();
-
-        }
+        loadStock
     );
 
 </script>
