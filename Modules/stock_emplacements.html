@@ -1,1126 +1,215 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Stock par Emplacement</title>
+    <title>Stock par Emplacement - SoufStock</title>
 
+    <!-- Font Awesome -->
     <link
         rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     >
 
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- jsPDF AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+
+            theme: {
+                extend: {
+
+                    colors: {
+
+                        slate: {
+                            950: '#020617',
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            600: '#475569',
+                            500: '#64748b',
+                            400: '#94a3b8',
+                            300: '#cbd5e1',
+                            200: '#e2e8f0',
+                            100: '#f1f5f9'
+                        },
+
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            400: '#34d399',
+                            300: '#6ee7b7'
+                        }
+
+                    }
+
+                }
+            }
+        };
+    </script>
+
     <style>
-        :root {
-            --green: #087f3e;
-            --green-dark: #075f32;
-            --green-light: #e9f7ef;
-
-            --blue: #1683d8;
-            --orange: #f59e0b;
-            --red: #dc2626;
-            --purple: #7c3aed;
-
-            --text: #172033;
-            --muted: #64748b;
-            --border: #e2e8f0;
-            --bg: #f5f7f9;
-            --white: #ffffff;
-
-            --shadow: 0 2px 8px rgba(15, 23, 42, .06);
-            --radius: 12px;
-        }
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
         }
 
         body {
-            font-family:
-                Inter,
-                "Segoe UI",
-                Arial,
-                sans-serif;
-
-            background: var(--bg);
-            color: var(--text);
+            background-color: #020617;
+            color: #f1f5f9;
+            font-family: ui-sans-serif, system-ui, sans-serif;
         }
 
-        button,
-        input,
-        select {
-            font-family: inherit;
-        }
-
-        /* =========================
-           TOP HEADER
-        ========================== */
-
-        .topbar {
-            height: 64px;
-            background: #fff;
-            border-bottom: 1px solid var(--border);
-
-            display: flex;
-            align-items: center;
-
-            padding: 0 24px;
-
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-icon {
-            width: 38px;
-            height: 38px;
-
-            border-radius: 9px;
-
-            background: var(--green-light);
-            color: var(--green);
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 19px;
-        }
-
-        .brand strong {
-            font-size: 18px;
-            color: #172033;
-        }
-
-        .brand span {
-            color: var(--green);
-        }
-
-        .top-actions {
-            margin-left: auto;
-
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* =========================
-           MAIN
-        ========================== */
-
-        .page {
-            width: 100%;
-            padding: 18px 24px 30px;
-        }
-
-        /* =========================
-           PAGE HEADER
-        ========================== */
-
-        .page-header {
-            background: #fff;
-
-            border-radius: var(--radius);
-
-            padding: 18px 20px;
-
-            box-shadow: var(--shadow);
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 20px;
-
-            margin-bottom: 15px;
-        }
-
-        .title-area {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .page-icon {
-            width: 58px;
-            height: 58px;
-
-            border-radius: 12px;
-
-            background: var(--green-light);
-            color: var(--green);
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 27px;
-        }
-
-        .title-area h1 {
-            font-size: 26px;
-            margin-bottom: 4px;
-        }
-
-        .title-area p {
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        /* =========================
-           BUTTONS
-        ========================== */
-
-        .btn {
-            height: 39px;
-
-            padding: 0 13px;
-
-            border-radius: 7px;
-
-            border: 1px solid var(--border);
-
-            background: #fff;
-
-            cursor: pointer;
-
+        .status-badge {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-
-            gap: 7px;
-
-            font-size: 12px;
-
-            transition: .2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0,0,0,.07);
-        }
-
-        .btn-primary {
-            background: var(--green);
-            color: #fff;
-            border-color: var(--green);
-        }
-
-        .btn-primary:hover {
-            background: var(--green-dark);
-        }
-
-        .btn-success {
-            color: var(--green);
-            border-color: #a7dfbf;
-        }
-
-        .btn-danger {
-            color: var(--red);
-            border-color: #f2b1b1;
-        }
-
-        .btn-blue {
-            color: var(--blue);
-            border-color: #a8d2f0;
-        }
-
-        .btn-gray {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        /* =========================
-           FILTER CARD
-        ========================== */
-
-        .filter-card {
-            background: #fff;
-
-            border-radius: var(--radius);
-
-            padding: 18px;
-
-            box-shadow: var(--shadow);
-
-            margin-bottom: 15px;
-        }
-
-        .filters {
-            display: grid;
-
-            grid-template-columns:
-                1fr
-                1fr
-                1.2fr
-                1fr
-                1fr;
-
-            gap: 12px;
-
-            margin-bottom: 12px;
-        }
-
-        .field label {
-            display: block;
-
-            font-size: 11px;
-
+            gap: 6px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 10px;
             font-weight: 700;
-
-            color: #334155;
-
-            margin-bottom: 6px;
+            white-space: nowrap;
         }
 
-        .input-box {
-            position: relative;
+        .status-disponible {
+            color: #34d399;
+            background: rgba(16, 185, 129, .10);
+            border: 1px solid rgba(16, 185, 129, .20);
         }
 
-        .input-box i {
-            position: absolute;
+        .status-bloque {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, .10);
+            border: 1px solid rgba(245, 158, 11, .20);
+        }
 
-            left: 11px;
-            top: 50%;
-
-            transform: translateY(-50%);
-
+        .status-epuise {
             color: #94a3b8;
-
-            font-size: 12px;
-
-            pointer-events: none;
+            background: rgba(100, 116, 139, .10);
+            border: 1px solid rgba(100, 116, 139, .20);
         }
 
-        .control {
-            width: 100%;
-
-            height: 39px;
-
-            border: 1px solid #cbd5e1;
-
-            border-radius: 7px;
-
-            background: #fff;
-
-            outline: none;
-
-            padding: 0 10px 0 32px;
-
-            font-size: 12px;
-
-            color: #334155;
+        .status-perime {
+            color: #fb7185;
+            background: rgba(244, 63, 94, .10);
+            border: 1px solid rgba(244, 63, 94, .20);
         }
 
-        .control:focus {
-            border-color: var(--green);
-
-            box-shadow:
-                0 0 0 3px rgba(8,127,62,.08);
+        .loading-row {
+            min-height: 120px;
         }
 
-        .search-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .search-row .input-box {
-            flex: 1;
-        }
-
-        /* =========================
-           KPI
-        ========================== */
-
-        .kpis {
-            display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
-            gap: 13px;
-
-            margin-bottom: 15px;
-        }
-
-        .kpi {
-            background: #fff;
-
-            border-radius: var(--radius);
-
-            padding: 16px;
-
-            box-shadow: var(--shadow);
-
-            display: flex;
-            align-items: center;
-
-            gap: 13px;
-        }
-
-        .kpi-icon {
-            width: 50px;
-            height: 50px;
-
-            border-radius: 11px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 21px;
-        }
-
-        .kpi.green .kpi-icon {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .kpi.blue .kpi-icon {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-
-        .kpi.orange .kpi-icon {
-            background: #ffedd5;
-            color: #ea580c;
-        }
-
-        .kpi.purple .kpi-icon {
-            background: #ede9fe;
-            color: #7c3aed;
-        }
-
-        .kpi-label {
-            color: #64748b;
-            font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-
-        .kpi-value {
-            font-size: 24px;
-            font-weight: 750;
-            color: #0f172a;
-        }
-
-        .kpi-unit {
-            font-size: 10px;
-            color: #64748b;
-        }
-
-        /* =========================
-           TABLE
-        ========================== */
-
-        .table-card {
-            background: #fff;
-
-            border-radius: var(--radius);
-
-            box-shadow: var(--shadow);
-
-            overflow: hidden;
-        }
-
-        .table-header {
-            padding: 14px 17px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            border-bottom: 1px solid var(--border);
-        }
-
-        .table-title {
-            display: flex;
-            align-items: center;
-
-            gap: 9px;
-
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .table-title i {
-            color: var(--green);
-        }
-
-        .table-tools {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .page-size {
-            height: 32px;
-
-            border: 1px solid var(--border);
-
-            border-radius: 6px;
-
-            padding: 0 8px;
-
-            background: #fff;
-
-            outline: none;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-
-            min-width: 1200px;
-
-            border-collapse: collapse;
-        }
-
-        thead th {
-            background: #f1f5f9;
-
-            color: #334155;
-
-            font-size: 10px;
-
-            font-weight: 700;
-
-            text-align: left;
-
-            padding: 11px 9px;
-
-            border-bottom: 1px solid var(--border);
-
-            white-space: nowrap;
-        }
-
-        tbody td {
-            padding: 10px 9px;
-
-            font-size: 11px;
-
-            border-bottom: 1px solid #eef2f7;
-
-            white-space: nowrap;
-        }
-
-        tbody tr:hover {
-            background: #f8fafc;
-        }
-
-        .code {
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .number {
-            text-align: right;
-            font-weight: 700;
-        }
-
-        /* =========================
-           STATUS
-        ========================== */
-
-        .status {
-            display: inline-flex;
-
-            padding: 5px 9px;
-
-            border-radius: 6px;
-
-            font-size: 9px;
-
-            font-weight: 700;
-        }
-
-        .status.disponible {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .status.bloque {
-            background: #fef3c7;
-            color: #b45309;
-        }
-
-        .status.epuise {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        .status.perime {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        /* =========================
-           ACTIONS
-        ========================== */
-
-        .actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .action {
-            width: 29px;
-            height: 29px;
-
-            border: 0;
-
-            border-radius: 6px;
-
-            cursor: pointer;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .view {
-            background: #f1f5f9;
-            color: #334155;
-        }
-
-        .edit {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-
-        .delete {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        /* =========================
-           LOADING / EMPTY
-        ========================== */
-
-        .loading {
-            padding: 45px;
-
-            text-align: center;
-
-            color: #64748b;
-
-            display: none;
-        }
-
-        .loading i {
-            color: var(--green);
-
-            font-size: 25px;
-
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .empty {
-            display: none;
-
-            padding: 55px 20px;
-
-            text-align: center;
-
-            color: #64748b;
-        }
-
-        .empty i {
-            font-size: 42px;
-
-            color: #cbd5e1;
-
-            margin-bottom: 10px;
-        }
-
-        .empty h3 {
-            color: #334155;
-
-            margin-bottom: 4px;
-        }
-
-        /* =========================
-           FOOTER
-        ========================== */
-
-        .table-footer {
-            padding: 13px 17px;
-
-            border-top: 1px solid var(--border);
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .result-info {
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .pagination {
-            display: flex;
-            gap: 4px;
-        }
-
-        .page-btn {
-            width: 32px;
-            height: 32px;
-
-            border: 1px solid var(--border);
-
-            border-radius: 6px;
-
-            background: #fff;
-
-            cursor: pointer;
-
-            font-size: 11px;
-        }
-
-        .page-btn.active {
-            background: var(--green);
-            border-color: var(--green);
-            color: #fff;
-        }
-
-        .page-btn:disabled {
-            opacity: .4;
-            cursor: not-allowed;
-        }
-
-        /* =========================
-           TOAST
-        ========================== */
-
-        .toast-container {
-            position: fixed;
-
-            right: 20px;
-            bottom: 20px;
-
-            z-index: 1000;
-        }
-
-        .toast {
-            min-width: 280px;
-
-            padding: 12px 15px;
-
-            border-radius: 8px;
-
-            background: #0f172a;
-
-            color: white;
-
-            box-shadow:
-                0 10px 30px rgba(0,0,0,.18);
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 9px;
-
-            margin-top: 8px;
-
-            font-size: 12px;
-        }
-
-        .toast.success i {
-            color: #4ade80;
-        }
-
-        .toast.error i {
-            color: #f87171;
-        }
-
-        /* =========================
-           RESPONSIVE
-        ========================== */
-
-        @media (max-width: 1100px) {
-
-            .filters {
-                grid-template-columns:
-                    repeat(3, 1fr);
+        @media print {
+
+            body {
+                background: white !important;
+                color: black !important;
             }
 
-            .kpis {
-                grid-template-columns:
-                    repeat(2, 1fr);
+            .no-print {
+                display: none !important;
             }
+
+            main {
+                padding: 0 !important;
+            }
+
+            .print-table {
+                background: white !important;
+                color: black !important;
+            }
+
         }
 
-        @media (max-width: 700px) {
-
-            .page {
-                padding: 10px;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-buttons {
-                width: 100%;
-            }
-
-            .header-buttons .btn {
-                flex: 1;
-            }
-
-            .filters {
-                grid-template-columns: 1fr;
-            }
-
-            .kpis {
-                grid-template-columns: 1fr;
-            }
-
-            .search-row {
-                flex-direction: column;
-            }
-
-            .table-footer {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
     </style>
+
 </head>
 
-<body>
 
-    <!-- =====================================================
-         TOP BAR
-    ====================================================== -->
+<body
+    class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col overflow-x-hidden"
+>
 
-    <header class="topbar">
+    <!-- ========================================================= -->
+    <!-- MAIN -->
+    <!-- ========================================================= -->
 
-        <div class="brand">
+    <div class="flex-1 flex flex-col min-w-0">
 
-            <div class="brand-icon">
-                <i class="fa-solid fa-snowflake"></i>
-            </div>
+        <!-- ===================================================== -->
+        <!-- HEADER -->
+        <!-- ===================================================== -->
 
-            <strong>
-                Souf<span>Stock</span>
-            </strong>
+        <header
+            class="h-20 bg-slate-900/40 border-b border-slate-800/80 px-8 flex items-center justify-between shrink-0"
+        >
 
-        </div>
+            <div class="flex items-center gap-6">
 
-        <div class="top-actions">
+                <!-- Retour -->
+                <a
+                    href="../index-stock.html"
+                    class="no-print bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm group"
+                >
 
-            <button
-                class="btn btn-success"
-                id="btnRefresh"
-            >
-                <i class="fa-solid fa-rotate"></i>
-                Actualiser
-            </button>
+                    <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
 
-            <button
-                class="btn btn-blue"
-                id="btnExcel"
-            >
-                <i class="fa-solid fa-file-excel"></i>
-                Excel
-            </button>
+                    <span>Retour au Hub</span>
 
-            <button
-                class="btn btn-danger"
-                id="btnPdf"
-            >
-                <i class="fa-solid fa-file-pdf"></i>
-                PDF
-            </button>
+                </a>
 
-        </div>
-
-    </header>
-
-
-    <!-- =====================================================
-         PAGE
-    ====================================================== -->
-
-    <main class="page">
-
-
-        <!-- PAGE HEADER -->
-
-        <section class="page-header">
-
-            <div class="title-area">
-
-                <div class="page-icon">
-                    <i class="fa-solid fa-location-dot"></i>
-                </div>
 
                 <div>
 
-                    <h1>
-                        Stock par Emplacement
+                    <h1
+                        class="text-xl font-bold tracking-tight text-slate-100"
+                    >
+                        Consultation du Stock par Emplacement
                     </h1>
 
-                    <p>
-                        Gestion et suivi du stock physique par magasin, emplacement et lot
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="header-buttons">
-
-                <button
-                    class="btn btn-primary"
-                    id="btnAdd"
-                >
-                    <i class="fa-solid fa-plus"></i>
-                    Ajouter
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- FILTERS -->
-
-        <section class="filter-card">
-
-            <div class="filters">
-
-                <div class="field">
-
-                    <label>
-                        Magasin
-                    </label>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-warehouse"></i>
-
-                        <select
-                            class="control"
-                            id="filterMagasin"
-                        >
-
-                            <option value="">
-                                Tous les magasins
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Emplacement
-                    </label>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-location-dot"></i>
-
-                        <select
-                            class="control"
-                            id="filterEmplacement"
-                        >
-
-                            <option value="">
-                                Tous les emplacements
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Article
-                    </label>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-box"></i>
-
-                        <input
-                            type="text"
-                            class="control"
-                            id="filterArticle"
-                            placeholder="Article ou désignation"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Lot
-                    </label>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-barcode"></i>
-
-                        <input
-                            type="text"
-                            class="control"
-                            id="filterLot"
-                            placeholder="Numéro du lot"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Statut
-                    </label>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-layer-group"></i>
-
-                        <select
-                            class="control"
-                            id="filterStatut"
-                        >
-
-                            <option value="">
-                                Tous les statuts
-                            </option>
-
-                            <option value="DISPONIBLE">
-                                DISPONIBLE
-                            </option>
-
-                            <option value="BLOQUE">
-                                BLOQUE
-                            </option>
-
-                            <option value="EPUISE">
-                                EPUISE
-                            </option>
-
-                            <option value="PERIME">
-                                PERIME
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="search-row">
-
-                <div class="input-box">
-
-                    <i class="fa-solid fa-magnifying-glass"></i>
-
-                    <input
-                        type="text"
-                        class="control"
-                        id="search"
-                        placeholder="Rechercher article, lot, emplacement, désignation..."
-                    >
-
-                </div>
-
-
-                <button
-                    class="btn btn-primary"
-                    id="btnSearch"
-                >
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    Rechercher
-                </button>
-
-
-                <button
-                    class="btn btn-gray"
-                    id="btnReset"
-                >
-                    <i class="fa-solid fa-rotate-left"></i>
-                    Effacer
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- KPI -->
-
-        <section class="kpis">
-
-            <div class="kpi green">
-
-                <div class="kpi-icon">
-                    <i class="fa-solid fa-box"></i>
-                </div>
-
-                <div>
-
-                    <div class="kpi-label">
-                        Articles
-                    </div>
-
                     <div
-                        class="kpi-value"
-                        id="kpiArticles"
+                        class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5"
                     >
-                        0
+
+                        <span>Accueil</span>
+
+                        <span>/</span>
+
+                        <strong class="text-slate-300">
+                            Stock par Emplacement
+                        </strong>
+
                     </div>
 
                 </div>
@@ -1128,1436 +217,1965 @@
             </div>
 
 
-            <div class="kpi blue">
+            <!-- DATE / HEURE -->
 
-                <div class="kpi-icon">
-                    <i class="fa-solid fa-weight-hanging"></i>
-                </div>
+            <div
+                class="flex items-center gap-4 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-xl"
+            >
 
-                <div>
+                <div class="text-right">
 
-                    <div class="kpi-label">
-                        Quantité totale
-                    </div>
-
-                    <div
-                        class="kpi-value"
-                        id="kpiQuantity"
+                    <span
+                        id="currentDate"
+                        class="text-xs font-medium text-slate-300 block capitalize"
                     >
-                        0.00
-                    </div>
-
-                    <div class="kpi-unit">
-                        KG
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="kpi orange">
-
-                <div class="kpi-icon">
-                    <i class="fa-solid fa-location-dot"></i>
-                </div>
-
-                <div>
-
-                    <div class="kpi-label">
-                        Emplacements utilisés
-                    </div>
-
-                    <div
-                        class="kpi-value"
-                        id="kpiEmplacements"
-                    >
-                        0
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="kpi purple">
-
-                <div class="kpi-icon">
-                    <i class="fa-solid fa-cubes"></i>
-                </div>
-
-                <div>
-
-                    <div class="kpi-label">
-                        Lots
-                    </div>
-
-                    <div
-                        class="kpi-value"
-                        id="kpiLots"
-                    >
-                        0
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- TABLE -->
-
-        <section class="table-card">
-
-            <div class="table-header">
-
-                <div class="table-title">
-
-                    <i class="fa-solid fa-list"></i>
-
-                    Liste du stock par emplacement
-
-                </div>
-
-
-                <div class="table-tools">
-
-                    <span>
-                        Lignes :
+                        Chargement...
                     </span>
 
-                    <select
-                        class="page-size"
-                        id="pageSize"
+                    <span
+                        id="currentTime"
+                        class="text-[10px] text-emerald-400 font-mono block"
+                    >
+                        00:00:00
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ===================================================== -->
+        <!-- BODY -->
+        <!-- ===================================================== -->
+
+        <main class="flex-1 p-8 overflow-y-auto">
+
+            <div class="w-full px-4 flex flex-col gap-6">
+
+
+                <!-- ================================================= -->
+                <!-- TITLE BAR -->
+                <!-- ================================================= -->
+
+                <div
+                    class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4"
+                >
+
+                    <div>
+
+                        <h2
+                            class="text-xl font-bold text-slate-100 flex items-center gap-2"
+                        >
+
+                            <i class="fas fa-map-marker-alt text-emerald-400"></i>
+
+                            Suivi par Emplacement
+
+                        </h2>
+
+                        <p class="text-xs text-slate-400 mt-1">
+
+                            Consultation du stock physique par magasin,
+                            emplacement, article et lot.
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="no-print flex items-center gap-3 flex-wrap">
+
+                        <button
+                            type="button"
+                            onclick="loadStock()"
+                            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2"
+                        >
+
+                            <i class="fas fa-rotate"></i>
+
+                            Actualiser
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="exportStockToExcel()"
+                            class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2"
+                        >
+
+                            <i class="fas fa-file-excel"></i>
+
+                            Excel
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="exportStockToPDF()"
+                            class="bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2"
+                        >
+
+                            <i class="fas fa-file-pdf"></i>
+
+                            PDF
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="window.print()"
+                            class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/20 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-2"
+                        >
+
+                            <i class="fas fa-print"></i>
+
+                            Imprimer
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- KPI -->
+                <!-- ================================================= -->
+
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4"
+                >
+
+                    <!-- LIGNES -->
+
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between"
                     >
 
-                        <option value="25">
-                            25
-                        </option>
+                        <div>
 
-                        <option
-                            value="50"
-                            selected
+                            <span
+                                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block"
+                            >
+                                Lignes de Stock
+                            </span>
+
+                            <span
+                                id="statTotalLignes"
+                                class="text-xl font-bold font-mono text-slate-100 mt-1 block"
+                            >
+                                0
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg"
                         >
-                            50
-                        </option>
 
-                        <option value="100">
-                            100
-                        </option>
+                            <i class="fas fa-boxes"></i>
 
-                    </select>
+                        </div>
+
+                    </div>
+
+
+                    <!-- KG -->
+
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between"
+                    >
+
+                        <div>
+
+                            <span
+                                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block"
+                            >
+                                Quantité Totale
+                            </span>
+
+                            <span
+                                id="statTotalQuantite"
+                                class="text-xl font-bold font-mono text-slate-100 mt-1 block"
+                            >
+                                0.00 KG
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-lg"
+                        >
+
+                            <i class="fas fa-weight-hanging"></i>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ARTICLES -->
+
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between"
+                    >
+
+                        <div>
+
+                            <span
+                                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block"
+                            >
+                                Articles Uniques
+                            </span>
+
+                            <span
+                                id="statArticlesUniques"
+                                class="text-xl font-bold font-mono text-slate-100 mt-1 block"
+                            >
+                                0
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-lg"
+                        >
+
+                            <i class="fas fa-barcode"></i>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMPLACEMENTS -->
+
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between"
+                    >
+
+                        <div>
+
+                            <span
+                                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block"
+                            >
+                                Emplacements
+                            </span>
+
+                            <span
+                                id="statEmplacements"
+                                class="text-xl font-bold font-mono text-slate-100 mt-1 block"
+                            >
+                                0
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 text-lg"
+                        >
+
+                            <i class="fas fa-location-dot"></i>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOTS -->
+
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between"
+                    >
+
+                        <div>
+
+                            <span
+                                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block"
+                            >
+                                Lots
+                            </span>
+
+                            <span
+                                id="statLots"
+                                class="text-xl font-bold font-mono text-slate-100 mt-1 block"
+                            >
+                                0
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg"
+                        >
+
+                            <i class="fas fa-layer-group"></i>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-            </div>
 
+                <!-- ================================================= -->
+                <!-- FILTERS -->
+                <!-- ================================================= -->
 
-            <!-- LOADING -->
+                <div
+                    class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl"
+                >
 
-            <div
-                class="loading"
-                id="loading"
-            >
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4"
+                    >
 
-                <i class="fa-solid fa-spinner"></i>
+                        <!-- MAGASIN -->
 
-                <div style="margin-top:10px;">
-                    Chargement du stock...
-                </div>
+                        <div>
 
-            </div>
-
-
-            <!-- EMPTY -->
-
-            <div
-                class="empty"
-                id="empty"
-            >
-
-                <i class="fa-solid fa-box-open"></i>
-
-                <h3>
-                    Aucun stock trouvé
-                </h3>
-
-                <p>
-                    Aucun enregistrement ne correspond aux critères.
-                </p>
-
-            </div>
-
-
-            <!-- TABLE -->
-
-            <div
-                class="table-container"
-                id="tableContainer"
-            >
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
+                            <label
+                                class="text-[11px] font-semibold text-slate-400 block mb-1"
+                            >
                                 Magasin
-                            </th>
+                            </label>
 
-                            <th>
-                                Emplacement
-                            </th>
+                            <select
+                                id="filterMagasin"
+                                onchange="loadStock()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500 cursor-pointer"
+                            >
 
-                            <th>
-                                Article
-                            </th>
+                                <option value="">
+                                    -- Tous les Magasins --
+                                </option>
 
-                            <th>
-                                Désignation
-                            </th>
+                            </select>
 
-                            <th>
+                        </div>
+
+
+                        <!-- ARTICLE -->
+
+                        <div>
+
+                            <label
+                                class="text-[11px] font-semibold text-slate-400 block mb-1"
+                            >
+                                Article / Désignation
+                            </label>
+
+                            <input
+                                type="text"
+                                id="searchArticle"
+                                oninput="loadStock()"
+                                placeholder="Ex: 220000284"
+                                autocomplete="off"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500"
+                            >
+
+                        </div>
+
+
+                        <!-- LOT -->
+
+                        <div>
+
+                            <label
+                                class="text-[11px] font-semibold text-slate-400 block mb-1"
+                            >
                                 Lot
-                            </th>
+                            </label>
 
-                            <th style="text-align:right;">
-                                Quantité KG
-                            </th>
+                            <input
+                                type="text"
+                                id="searchLot"
+                                oninput="loadStock()"
+                                placeholder="Ex: 26181PC293"
+                                autocomplete="off"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500"
+                            >
 
-                            <th style="text-align:right;">
-                                Pièces
-                            </th>
+                        </div>
 
-                            <th>
-                                Fabrication
-                            </th>
 
-                            <th>
-                                DLC
-                            </th>
+                        <!-- EMPLACEMENT -->
 
-                            <th>
+                        <div>
+
+                            <label
+                                class="text-[11px] font-semibold text-slate-400 block mb-1"
+                            >
+                                Emplacement
+                            </label>
+
+                            <input
+                                type="text"
+                                id="searchEmp"
+                                oninput="loadStock()"
+                                placeholder="Ex: A408-A-01"
+                                autocomplete="off"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500"
+                            >
+
+                        </div>
+
+
+                        <!-- STATUT -->
+
+                        <div>
+
+                            <label
+                                class="text-[11px] font-semibold text-slate-400 block mb-1"
+                            >
                                 Statut
-                            </th>
+                            </label>
 
-                            <th>
-                                Actions
-                            </th>
+                            <select
+                                id="filterStatut"
+                                onchange="loadStock()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 uppercase focus:outline-none focus:border-emerald-500 cursor-pointer"
+                            >
 
-                        </tr>
+                                <option value="">
+                                    -- Tous les statuts --
+                                </option>
 
-                    </thead>
+                                <option value="DISPONIBLE">
+                                    DISPONIBLE
+                                </option>
 
+                                <option value="BLOQUE">
+                                    BLOQUE
+                                </option>
 
-                    <tbody id="tableBody">
-                    </tbody>
+                                <option value="EPUISE">
+                                    EPUISE
+                                </option>
 
-                </table>
+                                <option value="PERIME">
+                                    PERIME
+                                </option>
 
-            </div>
+                            </select>
 
+                        </div>
 
-            <!-- FOOTER -->
+                    </div>
 
-            <div class="table-footer">
 
-                <div
-                    class="result-info"
-                    id="resultInfo"
-                >
-                    Affichage de 0 à 0 sur 0
-                </div>
+                    <!-- RESET -->
 
-
-                <div
-                    class="pagination"
-                    id="pagination"
-                >
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- TOAST -->
-
-    <div
-        class="toast-container"
-        id="toastContainer"
-    ></div>
-
-
-<script>
-
-    /* =====================================================
-       DATA
-    ====================================================== */
-
-    let allStock = [];
-    let filteredStock = [];
-
-    let currentPage = 1;
-    let pageSize = 50;
-
-
-    /* =====================================================
-       ELEMENTS
-    ====================================================== */
-
-    const tableBody =
-        document.getElementById("tableBody");
-
-    const loading =
-        document.getElementById("loading");
-
-    const empty =
-        document.getElementById("empty");
-
-    const tableContainer =
-        document.getElementById("tableContainer");
-
-
-    /* =====================================================
-       TOAST
-    ====================================================== */
-
-    function toast(message, type = "success") {
-
-        const box =
-            document.getElementById(
-                "toastContainer"
-            );
-
-        const element =
-            document.createElement("div");
-
-        element.className =
-            "toast " + type;
-
-        element.innerHTML = `
-            <i class="fa-solid ${
-                type === "error"
-                    ? "fa-circle-exclamation"
-                    : "fa-circle-check"
-            }"></i>
-
-            <span>${escapeHTML(message)}</span>
-        `;
-
-        box.appendChild(element);
-
-        setTimeout(() => {
-            element.remove();
-        }, 3000);
-    }
-
-
-    /* =====================================================
-       ESCAPE
-    ====================================================== */
-
-    function escapeHTML(value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return "";
-        }
-
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-    }
-
-
-    /* =====================================================
-       NUMBER
-    ====================================================== */
-
-    function number(value) {
-
-        return Number(value || 0)
-            .toLocaleString(
-                "fr-FR",
-                {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }
-            );
-    }
-
-
-    /* =====================================================
-       DATE
-    ====================================================== */
-
-    function dateFR(value) {
-
-        if (!value) return "";
-
-        const date =
-            new Date(value);
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-            return value;
-        }
-
-        return date.toLocaleDateString(
-            "fr-FR"
-        );
-    }
-
-
-    /* =====================================================
-       STATUS
-    ====================================================== */
-
-    function statusHTML(value) {
-
-        const status =
-            String(value || "")
-                .toUpperCase();
-
-        let cls = "disponible";
-
-        if (status === "BLOQUE") {
-            cls = "bloque";
-        }
-
-        if (status === "EPUISE") {
-            cls = "epuise";
-        }
-
-        if (status === "PERIME") {
-            cls = "perime";
-        }
-
-        return `
-            <span class="status ${cls}">
-                ${escapeHTML(status)}
-            </span>
-        `;
-    }
-
-
-    /* =====================================================
-       RENDER
-    ====================================================== */
-
-    function render() {
-
-        tableBody.innerHTML = "";
-
-        const total =
-            filteredStock.length;
-
-        if (total === 0) {
-
-            tableContainer.style.display =
-                "none";
-
-            empty.style.display =
-                "block";
-
-            updatePagination();
-
-            return;
-        }
-
-        tableContainer.style.display =
-            "block";
-
-        empty.style.display =
-            "none";
-
-
-        const start =
-            (currentPage - 1) *
-            pageSize;
-
-        const end =
-            Math.min(
-                start + pageSize,
-                total
-            );
-
-
-        const rows =
-            filteredStock.slice(
-                start,
-                end
-            );
-
-
-        rows.forEach(item => {
-
-            const tr =
-                document.createElement("tr");
-
-            tr.innerHTML = `
-
-                <td>
-                    <span class="code">
-                        ${escapeHTML(
-                            item.magasin_code
-                        )}
-                    </span>
-                </td>
-
-                <td>
-                    <span class="code">
-                        ${escapeHTML(
-                            item.emplacement_code
-                        )}
-                    </span>
-                </td>
-
-                <td>
-                    <span class="code">
-                        ${escapeHTML(
-                            item.article
-                        )}
-                    </span>
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        item.designation || ""
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        item.lot
-                    )}
-                </td>
-
-                <td class="number">
-                    ${number(
-                        item.quantite_kg
-                    )}
-                </td>
-
-                <td class="number">
-                    ${Number(
-                        item.pieces || 0
-                    ).toLocaleString("fr-FR")}
-                </td>
-
-                <td>
-                    ${dateFR(
-                        item.date_fabrication
-                    )}
-                </td>
-
-                <td>
-                    ${dateFR(
-                        item.dlc
-                    )}
-                </td>
-
-                <td>
-                    ${statusHTML(
-                        item.statut
-                    )}
-                </td>
-
-                <td>
-
-                    <div class="actions">
+                    <div class="mt-4 flex justify-end no-print">
 
                         <button
-                            class="action view"
-                            title="Voir"
-                            onclick="viewStock(${item.id})"
+                            type="button"
+                            onclick="resetFilters()"
+                            class="text-xs text-slate-400 hover:text-slate-200 transition flex items-center gap-2"
                         >
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
 
-                        <button
-                            class="action edit"
-                            title="Modifier"
-                            onclick="editStock(${item.id})"
-                        >
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
+                            <i class="fas fa-rotate-left"></i>
 
-                        <button
-                            class="action delete"
-                            title="Supprimer"
-                            onclick="deleteStock(${item.id})"
-                        >
-                            <i class="fa-solid fa-trash"></i>
+                            Réinitialiser les filtres
+
                         </button>
 
                     </div>
 
-                </td>
-            `;
-
-            tableBody.appendChild(tr);
-        });
+                </div>
 
 
-        document.getElementById(
-            "resultInfo"
-        ).textContent =
-            `Affichage de ${start + 1} à ${end} sur ${total}`;
+                <!-- ================================================= -->
+                <!-- TABLE -->
+                <!-- ================================================= -->
+
+                <div
+                    class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl print-table"
+                >
+
+                    <div class="overflow-x-auto">
+
+                        <table
+                            class="w-full text-left border-collapse min-w-[1250px]"
+                        >
+
+                            <thead>
+
+                                <tr
+                                    class="bg-slate-950/60 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800 font-semibold"
+                                >
+
+                                    <th class="py-4 px-4">
+                                        Magasin
+                                    </th>
+
+                                    <th class="py-4 px-4">
+                                        Emplacement
+                                    </th>
+
+                                    <th class="py-4 px-4">
+                                        Article
+                                    </th>
+
+                                    <th class="py-4 px-4">
+                                        Désignation
+                                    </th>
+
+                                    <th class="py-4 px-4">
+                                        Lot
+                                    </th>
+
+                                    <th class="py-4 px-4">
+                                        Fabrication
+                                    </th>
+
+                                    <th class="py-4 px-4">
+                                        DLC
+                                    </th>
+
+                                    <th class="py-4 px-4 text-right">
+                                        KG
+                                    </th>
+
+                                    <th class="py-4 px-4 text-right">
+                                        Pièces
+                                    </th>
+
+                                    <th class="py-4 px-4 text-center">
+                                        Statut
+                                    </th>
+
+                                </tr>
+
+                            </thead>
 
 
-        updatePagination();
-    }
+                            <tbody
+                                id="stockTableBody"
+                                class="divide-y divide-slate-800/60 text-xs text-slate-300"
+                            >
+
+                                <tr>
+
+                                    <td
+                                        colspan="10"
+                                        class="text-center py-12 text-slate-400 loading-row"
+                                    >
+
+                                        <i
+                                            class="fas fa-spinner fa-spin mr-2 text-emerald-500 text-base"
+                                        ></i>
+
+                                        Chargement des données...
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
 
 
-    /* =====================================================
-       KPI
-    ====================================================== */
+                    <!-- FOOTER TABLE -->
 
-    function updateKPI() {
+                    <div
+                        class="px-5 py-3 border-t border-slate-800 bg-slate-950/30 flex items-center justify-between"
+                    >
 
-        const articles =
-            new Set(
-                filteredStock.map(
-                    x => x.article
-                )
-            ).size;
+                        <span
+                            id="resultInfo"
+                            class="text-[11px] text-slate-500"
+                        >
+                            0 résultat
+                        </span>
 
+                        <span
+                            id="lastUpdate"
+                            class="text-[11px] text-slate-500"
+                        >
+                            -
+                        </span>
 
-        const lots =
-            new Set(
-                filteredStock.map(
-                    x => x.lot
-                )
-            ).size;
+                    </div>
 
+                </div>
 
-        const emplacements =
-            new Set(
-                filteredStock.map(
-                    x =>
-                        `${x.magasin_code}|${x.emplacement_code}`
-                )
-            ).size;
+            </div>
 
+        </main>
 
-        const quantity =
-            filteredStock.reduce(
-                (
-                    total,
-                    item
-                ) =>
-                    total +
-                    Number(
-                        item.quantite_kg || 0
-                    ),
-                0
-            );
+    </div>
 
 
-        document.getElementById(
-            "kpiArticles"
-        ).textContent =
-            articles.toLocaleString("fr-FR");
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================================= -->
+
+    <script type="module">
+
+        import supabase from '../assets/js/core/supabase.js';
 
 
-        document.getElementById(
-            "kpiQuantity"
-        ).textContent =
-            number(quantity);
+        /* =========================================================
+           VARIABLES
+        ========================================================= */
+
+        let allExportData = [];
+
+        let loadingRequest = false;
+
+        let clockInterval = null;
 
 
-        document.getElementById(
-            "kpiEmplacements"
-        ).textContent =
-            emplacements.toLocaleString("fr-FR");
+        /* =========================================================
+           HELPERS
+        ========================================================= */
+
+        function $(id) {
+
+            return document.getElementById(id);
+
+        }
 
 
-        document.getElementById(
-            "kpiLots"
-        ).textContent =
-            lots.toLocaleString("fr-FR");
-    }
+        function safeText(value) {
+
+            if (value === null || value === undefined) {
+                return '';
+            }
+
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        }
 
 
-    /* =====================================================
-       FILTER
-    ====================================================== */
+        function formatNumber(value, decimals = 2) {
 
-    function applyFilters() {
+            const number = Number(value);
 
-        const magasin =
-            document.getElementById(
-                "filterMagasin"
-            ).value.toLowerCase();
+            if (!Number.isFinite(number)) {
+                return (0).toLocaleString('fr-FR', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                });
+            }
 
-
-        const emplacement =
-            document.getElementById(
-                "filterEmplacement"
-            ).value.toLowerCase();
-
-
-        const article =
-            document.getElementById(
-                "filterArticle"
-            ).value
-                .trim()
-                .toLowerCase();
-
-
-        const lot =
-            document.getElementById(
-                "filterLot"
-            ).value
-                .trim()
-                .toLowerCase();
-
-
-        const statut =
-            document.getElementById(
-                "filterStatut"
-            ).value.toLowerCase();
-
-
-        const search =
-            document.getElementById(
-                "search"
-            ).value
-                .trim()
-                .toLowerCase();
-
-
-        filteredStock =
-            allStock.filter(item => {
-
-                const text = [
-
-                    item.magasin_code,
-                    item.emplacement_code,
-                    item.article,
-                    item.designation,
-                    item.lot,
-                    item.statut
-
-                ]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase();
-
-
-                return (
-
-                    (
-                        !magasin ||
-                        String(
-                            item.magasin_code || ""
-                        ).toLowerCase()
-                        === magasin
-                    )
-
-                    &&
-
-                    (
-                        !emplacement ||
-                        String(
-                            item.emplacement_code || ""
-                        ).toLowerCase()
-                        === emplacement
-                    )
-
-                    &&
-
-                    (
-                        !article ||
-                        String(
-                            item.article || ""
-                        )
-                        .toLowerCase()
-                        .includes(article)
-                        ||
-                        String(
-                            item.designation || ""
-                        )
-                        .toLowerCase()
-                        .includes(article)
-                    )
-
-                    &&
-
-                    (
-                        !lot ||
-                        String(
-                            item.lot || ""
-                        )
-                        .toLowerCase()
-                        .includes(lot)
-                    )
-
-                    &&
-
-                    (
-                        !statut ||
-                        String(
-                            item.statut || ""
-                        ).toLowerCase()
-                        === statut
-                    )
-
-                    &&
-
-                    (
-                        !search ||
-                        text.includes(search)
-                    )
-
-                );
+            return number.toLocaleString('fr-FR', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
             });
 
-
-        currentPage = 1;
-
-        updateKPI();
-
-        render();
-    }
-
-
-    /* =====================================================
-       PAGINATION
-    ====================================================== */
-
-    function updatePagination() {
-
-        const box =
-            document.getElementById(
-                "pagination"
-            );
-
-        box.innerHTML = "";
-
-        const totalPages =
-            Math.ceil(
-                filteredStock.length /
-                pageSize
-            );
-
-        if (totalPages <= 1) {
-            return;
         }
 
 
-        const previous =
-            document.createElement("button");
+        function formatDate(value) {
 
-        previous.className =
-            "page-btn";
-
-        previous.innerHTML =
-            `<i class="fa-solid fa-chevron-left"></i>`;
-
-        previous.disabled =
-            currentPage === 1;
-
-        previous.onclick = () => {
-
-            if (currentPage > 1) {
-
-                currentPage--;
-
-                render();
+            if (!value) {
+                return '-';
             }
-        };
 
-        box.appendChild(previous);
+            try {
 
+                const date = new Date(value);
 
-        for (
-            let i = 1;
-            i <= totalPages;
-            i++
-        ) {
-
-            if (
-                totalPages > 7 &&
-                i > 3 &&
-                i < totalPages - 2 &&
-                Math.abs(i - currentPage) > 1
-            ) {
-                if (
-                    i === 4 ||
-                    i === totalPages - 3
-                ) {
-
-                    const dots =
-                        document.createElement(
-                            "button"
-                        );
-
-                    dots.className =
-                        "page-btn";
-
-                    dots.textContent =
-                        "...";
-
-                    dots.disabled = true;
-
-                    box.appendChild(dots);
+                if (Number.isNaN(date.getTime())) {
+                    return String(value);
                 }
 
-                continue;
+                return date.toLocaleDateString('fr-FR');
+
+            } catch (error) {
+
+                return String(value);
+
             }
 
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-            button.className =
-                "page-btn";
-
-            if (
-                i === currentPage
-            ) {
-                button.classList.add(
-                    "active"
-                );
-            }
-
-            button.textContent =
-                i;
-
-            button.onclick = () => {
-
-                currentPage = i;
-
-                render();
-            };
-
-            box.appendChild(button);
         }
 
 
-        const next =
-            document.createElement("button");
+        function getStatusClass(status) {
 
-        next.className =
-            "page-btn";
+            switch (String(status || '').toUpperCase()) {
 
-        next.innerHTML =
-            `<i class="fa-solid fa-chevron-right"></i>`;
+                case 'DISPONIBLE':
+                    return 'status-disponible';
 
-        next.disabled =
-            currentPage === totalPages;
+                case 'BLOQUE':
+                    return 'status-bloque';
 
-        next.onclick = () => {
+                case 'EPUISE':
+                    return 'status-epuise';
 
-            if (
-                currentPage <
-                totalPages
-            ) {
+                case 'PERIME':
+                    return 'status-perime';
 
-                currentPage++;
+                default:
+                    return 'status-epuise';
 
-                render();
             }
-        };
 
-        box.appendChild(next);
-    }
+        }
 
 
-    /* =====================================================
-       LOAD DATA
-    ====================================================== */
+        function statusHtml(status) {
 
-    async function loadStock() {
+            const value = String(status || '').toUpperCase();
 
-        loading.style.display =
-            "block";
+            let icon = 'fa-circle';
 
-        tableContainer.style.display =
-            "none";
+            if (value === 'DISPONIBLE') {
+                icon = 'fa-circle-check';
+            }
 
-        empty.style.display =
-            "none";
+            if (value === 'BLOQUE') {
+                icon = 'fa-lock';
+            }
+
+            if (value === 'EPUISE') {
+                icon = 'fa-circle-minus';
+            }
+
+            if (value === 'PERIME') {
+                icon = 'fa-triangle-exclamation';
+            }
+
+            return `
+                <span class="status-badge ${getStatusClass(value)}">
+                    <i class="fas ${icon}"></i>
+                    ${safeText(value || '-')}
+                </span>
+            `;
+
+        }
 
 
-        try {
+        /* =========================================================
+           CLOCK
+        ========================================================= */
 
-            if (
-                typeof supabase === "undefined"
-            ) {
+        function initLiveClock() {
 
-                /*
-                 * Pour l'instant aucune
-                 * donnée fictive n'est créée.
-                 */
+            if (clockInterval) {
+                clearInterval(clockInterval);
+            }
 
-                allStock = [];
+            const updateClock = () => {
 
-            } else {
+                const now = new Date();
+
+                const dateElement = $('currentDate');
+
+                const timeElement = $('currentTime');
+
+                if (dateElement) {
+
+                    dateElement.innerText =
+                        now.toLocaleDateString(
+                            'fr-FR',
+                            {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            }
+                        );
+
+                }
+
+                if (timeElement) {
+
+                    timeElement.innerText =
+                        now.toLocaleTimeString(
+                            'fr-FR',
+                            {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            }
+                        );
+
+                }
+
+            };
+
+            updateClock();
+
+            clockInterval = setInterval(
+                updateClock,
+                1000
+            );
+
+        }
+
+
+        /* =========================================================
+           LOAD MAGASINS
+        ========================================================= */
+
+        async function loadMagasinsDropdowns() {
+
+            const select = $('filterMagasin');
+
+            if (!select) {
+                return;
+            }
+
+            try {
 
                 const {
                     data,
                     error
-                } =
-                    await supabase
-                        .from(
-                            "stock_emplacements"
-                        )
-                        .select("*")
-                        .order(
-                            "id",
-                            {
-                                ascending: false
-                            }
-                        );
-
-
-                if (error) {
-                    throw error;
-                }
-
-
-                allStock =
-                    data || [];
-            }
-
-
-            filteredStock =
-                [...allStock];
-
-
-            loadFilterValues();
-
-            updateKPI();
-
-            render();
-
-
-        } catch (error) {
-
-            console.error(
-                "Erreur stock_emplacements:",
-                error
-            );
-
-            allStock = [];
-
-            filteredStock = [];
-
-            updateKPI();
-
-            render();
-
-            toast(
-                "Erreur lors du chargement du stock.",
-                "error"
-            );
-
-        } finally {
-
-            loading.style.display =
-                "none";
-        }
-    }
-
-
-    /* =====================================================
-       FILTER VALUES
-    ====================================================== */
-
-    function loadFilterValues() {
-
-        const magasinSelect =
-            document.getElementById(
-                "filterMagasin"
-            );
-
-        const emplacementSelect =
-            document.getElementById(
-                "filterEmplacement"
-            );
-
-
-        const magasins =
-            [
-                ...new Set(
-                    allStock
-                        .map(
-                            x =>
-                                x.magasin_code
-                        )
-                        .filter(Boolean)
-                )
-            ]
-            .sort();
-
-
-        const emplacements =
-            [
-                ...new Set(
-                    allStock
-                        .map(
-                            x =>
-                                x.emplacement_code
-                        )
-                        .filter(Boolean)
-                )
-            ]
-            .sort();
-
-
-        magasinSelect.innerHTML =
-            `<option value="">
-                Tous les magasins
-            </option>`;
-
-
-        emplacementSelect.innerHTML =
-            `<option value="">
-                Tous les emplacements
-            </option>`;
-
-
-        magasins.forEach(value => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                value;
-
-            option.textContent =
-                value;
-
-            magasinSelect.appendChild(
-                option
-            );
-        });
-
-
-        emplacements.forEach(value => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                value;
-
-            option.textContent =
-                value;
-
-            emplacementSelect.appendChild(
-                option
-            );
-        });
-    }
-
-
-    /* =====================================================
-       ACTIONS
-    ====================================================== */
-
-    function viewStock(id) {
-
-        const item =
-            allStock.find(
-                x =>
-                    Number(x.id) ===
-                    Number(id)
-            );
-
-        if (!item) return;
-
-        alert(
-            `Magasin : ${item.magasin_code}\n` +
-            `Emplacement : ${item.emplacement_code}\n` +
-            `Article : ${item.article}\n` +
-            `Désignation : ${item.designation || ""}\n` +
-            `Lot : ${item.lot}\n` +
-            `Quantité : ${item.quantite_kg} KG\n` +
-            `Pièces : ${item.pieces}\n` +
-            `Fabrication : ${dateFR(item.date_fabrication)}\n` +
-            `DLC : ${dateFR(item.dlc)}\n` +
-            `Statut : ${item.statut}`
-        );
-    }
-
-
-    function editStock(id) {
-
-        toast(
-            `Modification de l'enregistrement ${id}.`
-        );
-    }
-
-
-    async function deleteStock(id) {
-
-        const item =
-            allStock.find(
-                x =>
-                    Number(x.id) ===
-                    Number(id)
-            );
-
-        if (!item) return;
-
-
-        const confirmDelete =
-            confirm(
-                `Supprimer le stock du lot ${item.lot} ?`
-            );
-
-
-        if (!confirmDelete) {
-            return;
-        }
-
-
-        if (
-            typeof supabase === "undefined"
-        ) {
-
-            toast(
-                "Supabase n'est pas chargé.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        try {
-
-            const {
-                error
-            } =
-                await supabase
-                    .from(
-                        "stock_emplacements"
+                } = await supabase
+                    .from('magasins')
+                    .select(
+                        'code_magasin, libelle_magasin'
                     )
-                    .delete()
                     .eq(
-                        "id",
-                        id
+                        'statut',
+                        'ACTIF'
+                    )
+                    .order(
+                        'code_magasin',
+                        {
+                            ascending: true
+                        }
                     );
 
 
-            if (error) {
-                throw error;
+                if (error) {
+
+                    console.error(
+                        '[Stock Emplacements] Erreur magasins:',
+                        error
+                    );
+
+                    return;
+
+                }
+
+
+                let html = `
+                    <option value="">
+                        -- Tous les Magasins --
+                    </option>
+                `;
+
+
+                (data || []).forEach(
+                    magasin => {
+
+                        html += `
+                            <option value="${safeText(magasin.code_magasin)}">
+                                ${safeText(magasin.code_magasin)}
+                                -
+                                ${safeText(magasin.libelle_magasin || '')}
+                            </option>
+                        `;
+
+                    }
+                );
+
+
+                select.innerHTML = html;
+
+            } catch (error) {
+
+                console.error(
+                    '[Stock Emplacements] Exception magasins:',
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =========================================================
+           RESET STATS
+        ========================================================= */
+
+        function resetStats() {
+
+            if ($('statTotalLignes')) {
+                $('statTotalLignes').innerText = '0';
+            }
+
+            if ($('statTotalQuantite')) {
+                $('statTotalQuantite').innerText = '0.00 KG';
+            }
+
+            if ($('statArticlesUniques')) {
+                $('statArticlesUniques').innerText = '0';
+            }
+
+            if ($('statEmplacements')) {
+                $('statEmplacements').innerText = '0';
+            }
+
+            if ($('statLots')) {
+                $('statLots').innerText = '0';
+            }
+
+        }
+
+
+        /* =========================================================
+           RENDER EMPTY
+        ========================================================= */
+
+        function renderEmpty(message = 'Aucun stock trouvé.') {
+
+            const tbody = $('stockTableBody');
+
+            if (!tbody) {
+                return;
+            }
+
+            tbody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="10"
+                        class="text-center py-12 text-slate-500"
+                    >
+                        <i class="fas fa-folder-open mr-2"></i>
+                        ${safeText(message)}
+                    </td>
+                </tr>
+            `;
+
+            resetStats();
+
+            allExportData = [];
+
+            if ($('resultInfo')) {
+                $('resultInfo').innerText = '0 résultat';
+            }
+
+        }
+
+
+        /* =========================================================
+           LOAD STOCK
+        ========================================================= */
+
+        window.loadStock = async function () {
+
+            if (loadingRequest) {
+                return;
+            }
+
+            const tbody = $('stockTableBody');
+
+            if (!tbody) {
+                console.warn(
+                    '[Stock Emplacements] stockTableBody introuvable.'
+                );
+                return;
             }
 
 
-            toast(
-                "Stock supprimé avec succès."
+            const selectedMag =
+                $('filterMagasin')?.value?.trim() || '';
+
+            const searchArt =
+                $('searchArticle')?.value?.trim().toUpperCase() || '';
+
+            const searchLot =
+                $('searchLot')?.value?.trim().toUpperCase() || '';
+
+            const searchEmp =
+                $('searchEmp')?.value?.trim().toUpperCase() || '';
+
+            const selectedStatus =
+                $('filterStatut')?.value?.trim().toUpperCase() || '';
+
+
+            loadingRequest = true;
+
+
+            tbody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="10"
+                        class="text-center py-12 text-slate-400"
+                    >
+                        <i
+                            class="fas fa-spinner fa-spin mr-2 text-emerald-500 text-base"
+                        ></i>
+                        Chargement du stock...
+                    </td>
+                </tr>
+            `;
+
+
+            try {
+
+                /*
+                 * IMPORTANT
+                 *
+                 * Les noms correspondent exactement
+                 * à la table stock_emplacements :
+                 *
+                 * magasin_code
+                 * emplacement_code
+                 * article
+                 * designation
+                 * lot
+                 * quantite_kg
+                 * pieces
+                 * date_fabrication
+                 * dlc
+                 * statut
+                 */
+
+                let query = supabase
+                    .from('stock_emplacements')
+                    .select(`
+                        id,
+                        magasin_code,
+                        emplacement_code,
+                        article,
+                        designation,
+                        lot,
+                        quantite_kg,
+                        pieces,
+                        date_fabrication,
+                        dlc,
+                        statut,
+                        created_at,
+                        updated_at
+                    `)
+                    .order(
+                        'created_at',
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+                /* MAGASIN */
+
+                if (selectedMag) {
+
+                    query = query.eq(
+                        'magasin_code',
+                        selectedMag
+                    );
+
+                }
+
+
+                /* LOT */
+
+                if (searchLot) {
+
+                    query = query.ilike(
+                        'lot',
+                        `%${searchLot}%`
+                    );
+
+                }
+
+
+                /* EMPLACEMENT */
+
+                if (searchEmp) {
+
+                    query = query.ilike(
+                        'emplacement_code',
+                        `%${searchEmp}%`
+                    );
+
+                }
+
+
+                /* STATUT */
+
+                if (selectedStatus) {
+
+                    query = query.eq(
+                        'statut',
+                        selectedStatus
+                    );
+
+                }
+
+
+                const {
+                    data,
+                    error
+                } = await query;
+
+
+                if (error) {
+
+                    console.error(
+                        '[Stock Emplacements] Erreur Supabase:',
+                        error
+                    );
+
+
+                    tbody.innerHTML = `
+                        <tr>
+                            <td
+                                colspan="10"
+                                class="text-center py-12 text-red-400"
+                            >
+
+                                <i class="fas fa-triangle-exclamation mr-2"></i>
+
+                                Erreur de chargement du stock.
+
+                                <div class="text-[10px] text-red-300 mt-2">
+                                    ${safeText(error.message || '')}
+                                </div>
+
+                            </td>
+                        </tr>
+                    `;
+
+                    resetStats();
+
+                    allExportData = [];
+
+                    return;
+
+                }
+
+
+                /*
+                 * Recherche Article / Désignation
+                 *
+                 * On fait ce filtre côté JS pour éviter
+                 * les problèmes avec les caractères spéciaux
+                 * dans .or() de Supabase.
+                 */
+
+                let filteredData = data || [];
+
+
+                if (searchArt) {
+
+                    filteredData =
+                        filteredData.filter(
+                            item => {
+
+                                const article =
+                                    String(
+                                        item.article || ''
+                                    ).toUpperCase();
+
+                                const designation =
+                                    String(
+                                        item.designation || ''
+                                    ).toUpperCase();
+
+                                return (
+                                    article.includes(searchArt) ||
+                                    designation.includes(searchArt)
+                                );
+
+                            }
+                        );
+
+                }
+
+
+                if (
+                    !filteredData ||
+                    filteredData.length === 0
+                ) {
+
+                    renderEmpty();
+
+                    if ($('lastUpdate')) {
+                        $('lastUpdate').innerText =
+                            `Actualisé : ${new Date().toLocaleTimeString('fr-FR')}`;
+                    }
+
+                    return;
+
+                }
+
+
+                allExportData =
+                    [...filteredData];
+
+
+                /* =================================================
+                   CALCULS
+                ================================================= */
+
+                let totalQty = 0;
+
+                let totalPieces = 0;
+
+                const uniqueArticles =
+                    new Set();
+
+                const uniqueEmplacements =
+                    new Set();
+
+                const uniqueLots =
+                    new Set();
+
+
+                filteredData.forEach(
+                    item => {
+
+                        const qty =
+                            Number(
+                                item.quantite_kg
+                            ) || 0;
+
+                        const pieces =
+                            Number(
+                                item.pieces
+                            ) || 0;
+
+
+                        totalQty += qty;
+
+                        totalPieces += pieces;
+
+
+                        if (item.article) {
+
+                            uniqueArticles.add(
+                                String(item.article)
+                            );
+
+                        }
+
+
+                        if (item.emplacement_code) {
+
+                            uniqueEmplacements.add(
+                                String(item.emplacement_code)
+                            );
+
+                        }
+
+
+                        if (item.lot) {
+
+                            uniqueLots.add(
+                                String(item.lot)
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                /* =================================================
+                   TABLE
+                ================================================= */
+
+                let html = '';
+
+
+                filteredData.forEach(
+                    item => {
+
+                        const qty =
+                            Number(
+                                item.quantite_kg
+                            ) || 0;
+
+                        const pieces =
+                            Number(
+                                item.pieces
+                            ) || 0;
+
+
+                        html += `
+
+                            <tr
+                                class="hover:bg-slate-800/35 transition"
+                            >
+
+                                <!-- MAGASIN -->
+
+                                <td
+                                    class="py-4 px-4 font-bold text-emerald-400 font-mono whitespace-nowrap"
+                                >
+
+                                    ${safeText(
+                                        item.magasin_code || ''
+                                    )}
+
+                                </td>
+
+
+                                <!-- EMPLACEMENT -->
+
+                                <td
+                                    class="py-4 px-4 font-semibold text-slate-100 font-mono whitespace-nowrap"
+                                >
+
+                                    <i
+                                        class="fas fa-map-pin mr-1 text-sky-400 opacity-70"
+                                    ></i>
+
+                                    ${safeText(
+                                        item.emplacement_code || ''
+                                    )}
+
+                                </td>
+
+
+                                <!-- ARTICLE -->
+
+                                <td
+                                    class="py-4 px-4 font-bold font-mono text-blue-400 whitespace-nowrap"
+                                >
+
+                                    ${safeText(
+                                        item.article || ''
+                                    )}
+
+                                </td>
+
+
+                                <!-- DESIGNATION -->
+
+                                <td
+                                    class="py-4 px-4 text-slate-200 font-medium min-w-[220px]"
+                                >
+
+                                    ${safeText(
+                                        item.designation || ''
+                                    )}
+
+                                </td>
+
+
+                                <!-- LOT -->
+
+                                <td
+                                    class="py-4 px-4 font-mono text-slate-300 whitespace-nowrap"
+                                >
+
+                                    ${safeText(
+                                        item.lot || ''
+                                    )}
+
+                                </td>
+
+
+                                <!-- FABRICATION -->
+
+                                <td
+                                    class="py-4 px-4 font-mono text-slate-400 whitespace-nowrap"
+                                >
+
+                                    ${safeText(
+                                        formatDate(
+                                            item.date_fabrication
+                                        )
+                                    )}
+
+                                </td>
+
+
+                                <!-- DLC -->
+
+                                <td
+                                    class="py-4 px-4 font-mono text-slate-400 whitespace-nowrap"
+                                >
+
+                                    ${safeText(
+                                        formatDate(
+                                            item.dlc
+                                        )
+                                    )}
+
+                                </td>
+
+
+                                <!-- KG -->
+
+                                <td
+                                    class="py-4 px-4 text-right font-mono font-bold text-emerald-400 whitespace-nowrap"
+                                >
+
+                                    ${formatNumber(qty, 2)}
+
+                                    <span
+                                        class="text-[9px] text-slate-500 ml-1"
+                                    >
+                                        KG
+                                    </span>
+
+                                </td>
+
+
+                                <!-- PIECES -->
+
+                                <td
+                                    class="py-4 px-4 text-right font-mono font-bold text-slate-200 whitespace-nowrap"
+                                >
+
+                                    ${formatNumber(pieces, 0)}
+
+                                </td>
+
+
+                                <!-- STATUT -->
+
+                                <td
+                                    class="py-4 px-4 text-center"
+                                >
+
+                                    ${statusHtml(
+                                        item.statut
+                                    )}
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                );
+
+
+                tbody.innerHTML = html;
+
+
+                /* =================================================
+                   KPI
+                ================================================= */
+
+                if ($('statTotalLignes')) {
+
+                    $('statTotalLignes').innerText =
+                        filteredData.length.toLocaleString(
+                            'fr-FR'
+                        );
+
+                }
+
+
+                if ($('statTotalQuantite')) {
+
+                    $('statTotalQuantite').innerText =
+                        `${formatNumber(totalQty, 2)} KG`;
+
+                }
+
+
+                if ($('statArticlesUniques')) {
+
+                    $('statArticlesUniques').innerText =
+                        uniqueArticles.size.toLocaleString(
+                            'fr-FR'
+                        );
+
+                }
+
+
+                if ($('statEmplacements')) {
+
+                    $('statEmplacements').innerText =
+                        uniqueEmplacements.size.toLocaleString(
+                            'fr-FR'
+                        );
+
+                }
+
+
+                if ($('statLots')) {
+
+                    $('statLots').innerText =
+                        uniqueLots.size.toLocaleString(
+                            'fr-FR'
+                        );
+
+                }
+
+
+                if ($('resultInfo')) {
+
+                    $('resultInfo').innerText =
+                        `${filteredData.length.toLocaleString('fr-FR')} ligne(s)`;
+
+                }
+
+
+                if ($('lastUpdate')) {
+
+                    $('lastUpdate').innerText =
+                        `Actualisé : ${new Date().toLocaleTimeString('fr-FR')}`;
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    '[Stock Emplacements] Exception:',
+                    error
+                );
+
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="10"
+                            class="text-center py-12 text-red-400"
+                        >
+
+                            <i class="fas fa-triangle-exclamation mr-2"></i>
+
+                            Une erreur technique est survenue.
+
+                            <div class="text-[10px] text-red-300 mt-2">
+                                ${safeText(error.message || '')}
+                            </div>
+
+                        </td>
+                    </tr>
+                `;
+
+
+                resetStats();
+
+                allExportData = [];
+
+
+            } finally {
+
+                loadingRequest = false;
+
+            }
+
+        };
+
+
+        /* =========================================================
+           RESET FILTERS
+        ========================================================= */
+
+        window.resetFilters = function () {
+
+            const magasin = $('filterMagasin');
+
+            const article = $('searchArticle');
+
+            const lot = $('searchLot');
+
+            const emp = $('searchEmp');
+
+            const statut = $('filterStatut');
+
+
+            if (magasin) {
+                magasin.value = '';
+            }
+
+            if (article) {
+                article.value = '';
+            }
+
+            if (lot) {
+                lot.value = '';
+            }
+
+            if (emp) {
+                emp.value = '';
+            }
+
+            if (statut) {
+                statut.value = '';
+            }
+
+
+            loadStock();
+
+        };
+
+
+        /* =========================================================
+           EXPORT EXCEL
+        ========================================================= */
+
+        window.exportStockToExcel = function () {
+
+            if (
+                !allExportData ||
+                allExportData.length === 0
+            ) {
+
+                alert(
+                    'Aucune donnée à exporter.'
+                );
+
+                return;
+
+            }
+
+
+            const exportData =
+                allExportData.map(
+                    item => ({
+
+                        "Magasin":
+                            item.magasin_code || '',
+
+                        "Emplacement":
+                            item.emplacement_code || '',
+
+                        "Article":
+                            item.article || '',
+
+                        "Désignation":
+                            item.designation || '',
+
+                        "Lot":
+                            item.lot || '',
+
+                        "Date Fabrication":
+                            item.date_fabrication || '',
+
+                        "DLC":
+                            item.dlc || '',
+
+                        "Quantité KG":
+                            Number(
+                                item.quantite_kg || 0
+                            ),
+
+                        "Pièces":
+                            Number(
+                                item.pieces || 0
+                            ),
+
+                        "Statut":
+                            item.statut || ''
+
+                    })
+                );
+
+
+            if (
+                typeof XLSX === 'undefined'
+            ) {
+
+                alert(
+                    'La bibliothèque Excel n’est pas disponible.'
+                );
+
+                return;
+
+            }
+
+
+            const worksheet =
+                XLSX.utils.json_to_sheet(
+                    exportData
+                );
+
+
+            const workbook =
+                XLSX.utils.book_new();
+
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                'Stock Emplacements'
             );
+
+
+            XLSX.writeFile(
+                workbook,
+                `Stock_Emplacements_${new Date().toISOString().slice(0, 10)}.xlsx`
+            );
+
+        };
+
+
+        /* =========================================================
+           EXPORT PDF
+        ========================================================= */
+
+        window.exportStockToPDF = function () {
+
+            if (
+                !allExportData ||
+                allExportData.length === 0
+            ) {
+
+                alert(
+                    'Aucune donnée à exporter.'
+                );
+
+                return;
+
+            }
+
+
+            if (
+                !window.jspdf ||
+                !window.jspdf.jsPDF
+            ) {
+
+                alert(
+                    'La bibliothèque PDF n’est pas disponible.'
+                );
+
+                return;
+
+            }
+
+
+            const {
+                jsPDF
+            } = window.jspdf;
+
+
+            const doc =
+                new jsPDF(
+                    'l',
+                    'mm',
+                    'a4'
+                );
+
+
+            doc.setFontSize(16);
+
+            doc.setTextColor(
+                15,
+                23,
+                42
+            );
+
+
+            doc.text(
+                'SoufStock Enterprise - Stock par Emplacement',
+                14,
+                15
+            );
+
+
+            doc.setFontSize(9);
+
+            doc.setTextColor(
+                100,
+                116,
+                139
+            );
+
+
+            doc.text(
+                `Date d'export : ${new Date().toLocaleDateString('fr-FR')}`,
+                14,
+                22
+            );
+
+
+            const columns = [
+
+                'Magasin',
+
+                'Emplacement',
+
+                'Article',
+
+                'Désignation',
+
+                'Lot',
+
+                'Fabrication',
+
+                'DLC',
+
+                'KG',
+
+                'Pièces',
+
+                'Statut'
+
+            ];
+
+
+            const rows = [];
+
+
+            allExportData.forEach(
+                item => {
+
+                    rows.push([
+
+                        item.magasin_code || '',
+
+                        item.emplacement_code || '',
+
+                        item.article || '',
+
+                        item.designation || '',
+
+                        item.lot || '',
+
+                        formatDate(
+                            item.date_fabrication
+                        ),
+
+                        formatDate(
+                            item.dlc
+                        ),
+
+                        formatNumber(
+                            item.quantite_kg,
+                            2
+                        ),
+
+                        formatNumber(
+                            item.pieces,
+                            0
+                        ),
+
+                        item.statut || ''
+
+                    ]);
+
+                }
+            );
+
+
+            if (
+                typeof doc.autoTable !== 'function'
+            ) {
+
+                alert(
+                    'Le module AutoTable PDF n’est pas disponible.'
+                );
+
+                return;
+
+            }
+
+
+            doc.autoTable({
+
+                head: [
+                    columns
+                ],
+
+                body: rows,
+
+                startY: 28,
+
+                theme: 'grid',
+
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2
+                },
+
+                headStyles: {
+                    fillColor: [
+                        15,
+                        23,
+                        42
+                    ],
+                    textColor: [
+                        255,
+                        255,
+                        255
+                    ]
+                },
+
+                alternateRowStyles: {
+                    fillColor: [
+                        248,
+                        250,
+                        252
+                    ]
+                }
+
+            });
+
+
+            doc.save(
+                `Stock_Emplacements_${new Date().toISOString().slice(0, 10)}.pdf`
+            );
+
+        };
+
+
+        /* =========================================================
+           INITIALISATION
+           IMPORTANT POUR DASHBOARD DYNAMIQUE
+        ========================================================= */
+
+        async function initStockEmplacementsPage() {
+
+            console.log(
+                '[Stock Emplacements] Initialisation...'
+            );
+
+
+            /*
+             * ما نستعملوش DOMContentLoaded هنا.
+             *
+             * الصفحة كتقدر تتحمل داخل dashboard
+             * بشكل dynamique.
+             */
+
+            initLiveClock();
+
+
+            await loadMagasinsDropdowns();
 
 
             await loadStock();
 
-        } catch (error) {
 
-            console.error(error);
-
-            toast(
-                "Erreur lors de la suppression.",
-                "error"
+            console.log(
+                '[Stock Emplacements] Page prête.'
             );
+
         }
-    }
 
 
-    /* =====================================================
-       EVENTS
-    ====================================================== */
+        /* =========================================================
+           START
+        ========================================================= */
 
-    document
-        .getElementById("btnRefresh")
-        .addEventListener(
-            "click",
-            loadStock
-        );
+        /*
+         * إذا الصفحة تحطات مباشرة فـDOM،
+         * نخدمو مباشرة.
+         *
+         * وإذا Dashboard كيدخلها dynamique،
+         * script نفسه غادي يتنفذ من بعد insertion.
+         */
 
-
-    document
-        .getElementById("btnSearch")
-        .addEventListener(
-            "click",
-            applyFilters
-        );
+        initStockEmplacementsPage();
 
 
-    document
-        .getElementById("btnReset")
-        .addEventListener(
-            "click",
-            () => {
-
-                document.getElementById(
-                    "filterMagasin"
-                ).value = "";
-
-                document.getElementById(
-                    "filterEmplacement"
-                ).value = "";
-
-                document.getElementById(
-                    "filterArticle"
-                ).value = "";
-
-                document.getElementById(
-                    "filterLot"
-                ).value = "";
-
-                document.getElementById(
-                    "filterStatut"
-                ).value = "";
-
-                document.getElementById(
-                    "search"
-                ).value = "";
-
-                applyFilters();
-            }
-        );
-
-
-    document
-        .getElementById("pageSize")
-        .addEventListener(
-            "change",
-            event => {
-
-                pageSize =
-                    Number(
-                        event.target.value
-                    );
-
-                currentPage = 1;
-
-                render();
-            }
-        );
-
-
-    document
-        .getElementById("filterMagasin")
-        .addEventListener(
-            "change",
-            applyFilters
-        );
-
-
-    document
-        .getElementById("filterEmplacement")
-        .addEventListener(
-            "change",
-            applyFilters
-        );
-
-
-    document
-        .getElementById("filterStatut")
-        .addEventListener(
-            "change",
-            applyFilters
-        );
-
-
-    document
-        .getElementById("filterArticle")
-        .addEventListener(
-            "input",
-            applyFilters
-        );
-
-
-    document
-        .getElementById("filterLot")
-        .addEventListener(
-            "input",
-            applyFilters
-        );
-
-
-    document
-        .getElementById("search")
-        .addEventListener(
-            "input",
-            applyFilters
-        );
-
-
-    document
-        .getElementById("btnAdd")
-        .addEventListener(
-            "click",
-            () => {
-
-                toast(
-                    "Le formulaire Ajouter sera intégré dans la prochaine étape."
-                );
-            }
-        );
-
-
-    document
-        .getElementById("btnExcel")
-        .addEventListener(
-            "click",
-            () => {
-
-                toast(
-                    "Export Excel sera intégré dans la prochaine étape."
-                );
-            }
-        );
-
-
-    document
-        .getElementById("btnPdf")
-        .addEventListener(
-            "click",
-            () => {
-
-                toast(
-                    "Export PDF sera intégré dans la prochaine étape."
-                );
-            }
-        );
-
-
-    /* =====================================================
-       INIT
-    ====================================================== */
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        loadStock
-    );
-
-</script>
+    </script>
 
 </body>
+
 </html>
